@@ -49,7 +49,7 @@ int CException::getLine() const
 
 string CException::getFullMessage() const
 {
-	std::stringstream ss;
+	stringstream ss;
 	ss << _message
 	   << ". File: '" << realpath(_file.c_str(), 0)
 	   << ". Line: " << _line;
