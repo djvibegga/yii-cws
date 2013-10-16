@@ -12,12 +12,15 @@ class CComponent;
 class CEvent;
 
 #include <string>
+#include <vector>
 #include "interfaces.h"
 
 class CComponent;
 class CEvent;
 
 using namespace std;
+
+typedef vector<string> TEventNameList;
 
 class CBehavior: public IBehavior, public IEventHandler
 {
@@ -32,6 +35,7 @@ public:
 	bool getEnabled();
 	void setEnabled(bool value);
 	virtual void handleEvent(const string &name, CEvent &event);
+	virtual TEventNameList events() = 0;
 };
 
 

@@ -9,7 +9,7 @@
 #define APPLICATION_H_
 
 #include "base/CModule.h"
-#include "fcgi_stdio.h"
+#include "base/CException.h"
 #include <string>
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
@@ -17,23 +17,28 @@
 using namespace std;
 using namespace pugi;
 
+class CEvent;
+
 class CApplication: public CModule
 {
 private:
 	string _configPath;
-	xml_node _xmlConfig;
-	FCGX_Request _request;
+	xml_document * _xmlConfig;
+	static CApplication * _instance;
 
 public:
 	CApplication(const string &configPath);
 	virtual ~CApplication();
-	virtual void run();
-	void echo(const string & content);
+	virtual void init() throw(CException);
+	virtual void run() throw(CException);
+	void onBeginRequest(CEvent & event);
+	void onEndRequest(CEvent & event);
+	xml_node getConfigRoot();
+	static CApplication * getInstance();
 
 protected:
-	void mainLoop();
-	virtual void init();
-	virtual void processRequest(const FCGX_Request &request) = 0;
+	virtual void handleRequest();
+	virtual void processRequest() = 0;
 };
 
 #endif /* APPLICATION_H_ */

@@ -3,7 +3,7 @@
 #include "interfaces.h"
 
 CComponent::CComponent()
-: _e(TEventHandlerList())
+: _e(TEventHandlersMap())
 {
 }
 
@@ -11,20 +11,38 @@ CComponent::~CComponent()
 {
 }
 
-void CComponent::attachEventHandler(IEventHandler *handler)
+void CComponent::attachEventHandler(const string & event, IEventHandler *handler)
 {
-	_e.insert(_e.begin(), handler);
+	TEventHandlerList list;
+	if (_e.find(event) == _e.end()) {
+		list = TEventHandlerList();
+	} else {
+		list = _e[event];
+	}
+	list.insert(list.begin(), handler);
+	_e[event] = list;
+}
+
+bool CComponent::hasEventHandler(const string & event)
+{
+	return _e.find(event) != _e.end();
 }
 
 void CComponent::raiseEvent(const string &name, CEvent &event)
 {
-	for (TEventHandlerList::iterator iter = _e.begin(); iter != _e.end(); ++iter) {
-		(*iter)->handleEvent(name, event);
+	for (TEventHandlersMap::iterator iter = _e.begin(); iter != _e.end(); ++iter) {
+		TEventHandlerList handlers = iter->second;
+		for (TEventHandlerList::iterator handler = handlers.begin(); handler != handlers.end(); ++handler) {
+			(*handler)->handleEvent(name, event);
+		}
 	}
 }
 
 void CComponent::attachBehavior(CBehavior * behavior)
 {
-	this->attachEventHandler(behavior);
+	TEventNameList events = behavior->events();
+	for (TEventNameList::iterator i = events.begin(); i != events.end(); ++i) {
+		attachEventHandler(*i, behavior);
+	}
 	behavior->attach(this);
 }

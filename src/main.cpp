@@ -13,6 +13,8 @@
 #include "base/CEvent.h"
 #include "base/CModule.h"
 #include "base/CException.h"
+#include "base/CHttpException.h"
+#include "base/YiiBase.h"
 #include "MyApplication.h"
 
 using namespace std;
@@ -42,81 +44,52 @@ void runServer()
 
 class TestHandler: public CBehavior
 {
-private:
-	string _message;
 public:
-	void attach(CComponent * const component)
+
+	TEventNameList events()
 	{
-		_message = "hoho";
+		TEventNameList ret;
+		ret.insert(ret.begin(), "onEndRequest");
+		return ret;
 	}
 
-	virtual void handleEvent(const string &name, CEvent &event)
+	void handleEvent(const string &name, CEvent &event)
 	{
-		if (name == "onBeforeSave") {
-			this->beforeSave(event);
+		if (name == "onEndRequest") {
+			afterRequest(event);
 		}
 	}
 
-	void beforeSave(CEvent &event)
+	void afterRequest(CEvent & event)
 	{
-		event.handled = true;
-		cout << _message << endl;
+		(dynamic_cast<CWebApplication*>(YiiBase::app()))->echo("<h2>I am a behavior</h2>");
 	}
-};
-
-class FacebookManager: public CComponent
-{
-private:
-	string _message;
-
-public:
-	void init()
-	{
-		_message = "testing";
-	}
-
-	string getMessage() const
-	{
-		return _message;
-	}
-
-public:
-	virtual ~FacebookManager() {}
 };
 
 int main(int argc, char* const argv[])
 {
-	FacebookManager manager;
-	manager.init();
-	TestHandler obj;
-	manager.attachBehavior(&obj);
-
-	CEvent evt(0);
-	manager.raiseEvent("onBeforeSave", evt);
-
-	CModule module("facebook");
-	module.init();
-	module.setComponent("manager", &manager);
-
-	FacebookManager * component = dynamic_cast<FacebookManager*>(module.getComponent("manager"));
-	cout << component->getMessage() << endl;
-
-	ofstream log;
+	/*ofstream log;
 	log.open("server.log", ios_base::out);
 	if (!log.good()) {
 		log << "can\'t open log file." << endl;
 		log.close();
 		exit(1);
+	}*/
+	//log.close();
+
+	try {
+		string configPath = getcwd(0, 0);
+		configPath += "/main.xml";
+		cout << "Config file path: " << configPath << endl;
+
+		MyApplication app(configPath);
+		app.init();
+		TestHandler obj;
+		app.attachBehavior(&obj);
+		app.run();
+	} catch (const CException & e) {
+		cout << e.getFullMessage() << endl;
 	}
-
-	string configPath = getcwd(0, 0);
-	configPath += "/main.xml";
-	cout << "Config file path: " << configPath << endl;
-
-	MyApplication app(configPath);
-	app.run();
-
-	log.close();
 
     return 0;
 }

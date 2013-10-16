@@ -8,15 +8,15 @@
 #ifndef MYAPPLICATION_H_
 #define MYAPPLICATION_H_
 
-#include "base/CApplication.h"
+#include "web/CWebApplication.h"
 
-class MyApplication: public CApplication
+class MyApplication: public CWebApplication
 {
 public:
 	MyApplication(const string &configPath);
 
 protected:
-	void processRequest(const FCGX_Request &request);
+	virtual void processRequest() throw(CException);
 };
 
 #endif /* MYAPPLICATION_H_ */

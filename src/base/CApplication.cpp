@@ -7,77 +7,76 @@
 
 #include "base/CApplication.h"
 #include "base/CException.h"
+#include "base/CEvent.h"
 #include <sstream>
+#include <iostream>
 #include <stdlib.h>
 
 using namespace std;
 
+CApplication * CApplication::_instance = 0;
+
 CApplication::CApplication(const string &configPath)
 : CModule(""),
-  _request()
+  _xmlConfig(0)
 {
 	_configPath = configPath;
+	_xmlConfig = new xml_document();
 }
 
 CApplication::~CApplication()
 {
+	delete _xmlConfig;
 }
 
-void CApplication::run()
+void CApplication::init() throw(CException)
 {
-	try {
-		init();
-		mainLoop();
-	} catch (const CException & e) {
-		//log e;
-	}
-}
-
-void CApplication::init()
-{
-	xml_document config;
-	xml_parse_result result = config.load_file(_configPath.c_str());
+	_instance = this;
+	xml_parse_result result = _xmlConfig->load_file(_configPath.c_str());
 	if (result.status != status_ok) {
 		stringstream ss;
 		ss << "Can\'t parse application config: '" << _configPath << "'.";
 		throw CException(ss.str());
 	}
-	_xmlConfig = config.root();
 }
 
-void CApplication::mainLoop()
+void CApplication::run() throw(CException)
 {
-	string port = ":";
-	port.append(_xmlConfig.child("server").attribute("port").value());
-	//cout << "Server started on port: " << port << endl;
-	int listenQueueBacklog = _xmlConfig.child("server")
-		.child("threadsCount")
-		.attribute("value").as_int();
+	throw CException(
+		"You should override CApplication::run() method",
+		0, __FILE__, __LINE__
+	);
+}
 
-	if (FCGX_Init()) {
-		throw CException("Can\'t initialize FCGX.");
-	} else {
-		//log << "Initialized FCGX." << endl;
+void CApplication::handleRequest()
+{
+	if (hasEventHandler("onBeginRequest")) {
+		CEvent event(this);
+		onBeginRequest(event);
 	}
-
-	int  listen_socket = FCGX_OpenSocket(port.c_str(), listenQueueBacklog);
-	if (listen_socket < 0) {
-		throw CException("Can\'t open socket.");
-	} else {
-		//log << "Socket opened successfully." << endl;
-	}
-
-	if (FCGX_InitRequest(&this->_request, listen_socket, 0)) {
-		throw CException("Can\'t initialize FCGX Request.");
-	}
-
-	while (FCGX_Accept_r(&this->_request) == 0) {
-		processRequest(this->_request);
-		FCGX_Finish_r(&this->_request);
+	processRequest();
+	if (hasEventHandler("onEndRequest")) {
+		CEvent event(this);
+		onEndRequest(event);
 	}
 }
 
-void CApplication::echo(const string & content)
+void CApplication::onBeginRequest(CEvent & event)
 {
-	FCGX_FPrintF(_request.out, content.c_str());
+	raiseEvent("onBeginRequest", event);
+}
+
+void CApplication::onEndRequest(CEvent & event)
+{
+	raiseEvent("onEndRequest", event);
+}
+
+xml_node CApplication::getConfigRoot()
+{
+	return _xmlConfig->root();
+}
+
+CApplication * CApplication::getInstance()
+{
+	return _instance;
 }

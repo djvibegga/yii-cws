@@ -9,12 +9,12 @@ using namespace std;
 class CEvent: public CComponent
 {
 public:
-	void * sender;
+	const CComponent * sender;
 	bool handled;
 	map<string, void*> params;
 
-	CEvent(void * sender);
-	CEvent(void * sender, const map<string, void*> &params);
+	CEvent(CComponent * const sender);
+	CEvent(CComponent * const sender, const map<string, void*> &params);
 };
 
 #endif

@@ -10,18 +10,20 @@ using namespace std;
 #include "base/CBehavior.h"
 
 typedef vector<IEventHandler*> TEventHandlerList;
+typedef map<string, TEventHandlerList> TEventHandlersMap;
 
 class CComponent
 {
 private:
-	TEventHandlerList _e;
+	TEventHandlersMap _e;
 
 public:
 	CComponent();
 	virtual ~CComponent();
-	void attachEventHandler(IEventHandler *handler);
+	void attachEventHandler(const string & event, IEventHandler *handler);
 	virtual void raiseEvent(const string &name, CEvent &event);
 	void attachBehavior(CBehavior * behavior);
+	bool hasEventHandler(const string & event);
 };
 
 #endif

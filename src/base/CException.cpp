@@ -12,7 +12,7 @@
 using namespace std;
 
 CException::CException(const string &message)
-: _file(""),
+: _file("undefined"),
   _line(-1)
 {
 	_message = message;
@@ -50,8 +50,9 @@ int CException::getLine() const
 string CException::getFullMessage() const
 {
 	stringstream ss;
-	ss << _message
-	   << ". File: '" << realpath(_file.c_str(), 0)
+	ss << "Exception has been thown: "
+	   << _message
+	   << ". File: " << (_file == "undefined" ? _file.c_str() : realpath(_file.c_str(), 0))
 	   << ". Line: " << _line;
 	return ss.str();
 }
