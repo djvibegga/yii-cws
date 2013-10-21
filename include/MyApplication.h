@@ -13,10 +13,11 @@
 class MyApplication: public CWebApplication
 {
 public:
-	MyApplication(const string &configPath);
+	MyApplication(const string &configPath, int argc, char * const argv[]);
+	virtual ~MyApplication();
 
 protected:
-	virtual void processRequest() throw(CException);
+	void registerComponents();
 };
 
 #endif /* MYAPPLICATION_H_ */

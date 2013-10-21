@@ -68,6 +68,7 @@ public:
 
 int main(int argc, char* const argv[])
 {
+	cout << argv[0] << endl;
 	/*ofstream log;
 	log.open("server.log", ios_base::out);
 	if (!log.good()) {
@@ -82,7 +83,7 @@ int main(int argc, char* const argv[])
 		configPath += "/main.xml";
 		cout << "Config file path: " << configPath << endl;
 
-		MyApplication app(configPath);
+		MyApplication app(configPath, argc, argv);
 		app.init();
 		TestHandler obj;
 		app.attachBehavior(&obj);

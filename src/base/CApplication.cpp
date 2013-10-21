@@ -16,17 +16,25 @@ using namespace std;
 
 CApplication * CApplication::_instance = 0;
 
-CApplication::CApplication(const string &configPath)
+CApplication::CApplication(const string &configPath, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0)
 {
 	_configPath = configPath;
 	_xmlConfig = new xml_document();
+	for (int i = 0; i < argc; ++i) {
+		_arguments.push_back(argv[i]);
+	}
 }
 
 CApplication::~CApplication()
 {
 	delete _xmlConfig;
+}
+
+TArgumentsList CApplication::getArguments() const
+{
+	return _arguments;
 }
 
 void CApplication::init() throw(CException)
@@ -38,32 +46,39 @@ void CApplication::init() throw(CException)
 		ss << "Can\'t parse application config: '" << _configPath << "'.";
 		throw CException(ss.str());
 	}
+	CModule::init();
 }
 
 void CApplication::run() throw(CException)
 {
-	throw CException(
-		"You should override CApplication::run() method",
-		0, __FILE__, __LINE__
-	);
 }
 
 void CApplication::handleRequest()
 {
+	beginRequest();
+	processRequest();
+	endRequest();
+}
+
+void CApplication::beginRequest()
+{
 	if (hasEventHandler("onBeginRequest")) {
 		CEvent event(this);
 		onBeginRequest(event);
-	}
-	processRequest();
-	if (hasEventHandler("onEndRequest")) {
-		CEvent event(this);
-		onEndRequest(event);
 	}
 }
 
 void CApplication::onBeginRequest(CEvent & event)
 {
 	raiseEvent("onBeginRequest", event);
+}
+
+void CApplication::endRequest()
+{
+	if (hasEventHandler("onEndRequest")) {
+		CEvent event(this);
+		onEndRequest(event);
+	}
 }
 
 void CApplication::onEndRequest(CEvent & event)

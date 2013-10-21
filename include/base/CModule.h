@@ -9,16 +9,20 @@
 #define CMODULE_H_
 
 #include "base/CComponent.h"
+#include "interfaces.h"
+#include <memory>
 
 typedef map<string, CComponent*> TComponentsMap;
+typedef map<string, IModule*> TModulesMap;
 typedef map<string, void*> TParametersMap;
 
-class CModule: public CComponent
+class CModule: public CComponent, public IModule
 {
 private:
 	CModule * _parent;
 	string _id;
 	TComponentsMap _components;
+	TModulesMap _modules;
 
 public:
 	TParametersMap params;
@@ -31,7 +35,12 @@ public:
 	virtual string getId() const;
 	void setComponent(const string &name, CComponent * component);
 	CComponent * getComponent(const string &name) const;
-	CModule * getParent() const;
+	IModule * getModule(const string &name) const;
+	IModule * getParent() const;
+
+protected:
+	virtual void registerComponents();
+	virtual void unregisterComponents();
 };
 
 

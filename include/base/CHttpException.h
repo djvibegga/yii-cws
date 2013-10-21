@@ -16,7 +16,8 @@ private:
 	int _statusCode;
 
 public:
-	CHttpException(int status, const string &message, int code);
+	CHttpException(int status, const string &message, int code = 0);
+	int getStatus() const;
 };
 
 #endif /* CHTTPEXCEPTION_H_ */

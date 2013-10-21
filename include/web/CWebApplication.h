@@ -9,20 +9,58 @@
 #define CWEBAPPLICATION_H_
 
 #include "fcgi_stdio.h"
+#include "interfaces.h"
 #include "base/CException.h"
 #include "base/CApplication.h"
+#include "web/CHttpRequest.h"
+#include "web/CWebModule.h"
+#include "web/CUrlManager.h"
+#include <web/CController.h>
+
+struct SControllerToRun
+{
+	string actionId;
+	CController * controller;
+};
 
 class CWebApplication: public CApplication
 {
+	friend class CHttpRequest;
+
+private:
+	TControllerMap _controllerMap;
+
 public:
-	CWebApplication(const string &configPath);
+	TRouteStruct catchAllRequest;
+	string defaultControllerRoute;
+
+	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	~CWebApplication();
 	virtual void run() throw(CException);
-	void echo(const string & content);
+	void echo(const string & content) const;
+	CHttpRequest * getRequest() const;
+	CUrlManager * getUrlManager() const;
+
+	const CWebApplication & operator<< (const string &right) const;
+
+	virtual bool hasController(const string & name) const;
+	virtual CController * getController(const string & name) const;
+	virtual void setController(const string & name, CController * instance);
+	virtual CModule * getParent() const;
 
 protected:
 	FCGX_Request request;
 	void mainLoop() throw(CException);
+	virtual void handleRequest();
+	virtual void beginRequest();
+	virtual void processRequest();
+	virtual void endRequest();
+	virtual void registerComponents();
+
+	virtual void runController(const string &route);
+	virtual SControllerToRun resolveController(string route, const IModule * owner);
+
+	virtual void renderException(const CException & e) const;
 };
 
 #endif /* CWEBAPPLICATION_H_ */

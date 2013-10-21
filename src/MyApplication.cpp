@@ -7,14 +7,33 @@
 
 #include "MyApplication.h"
 #include "base/YiiBase.h"
+#include <web/CController.h>
+#include "SiteController.h"
+#include "ProductController.h"
+#include <web/CUrlManager.h>
 
-MyApplication::MyApplication(const string &configPath)
-: CWebApplication(configPath)
+MyApplication::MyApplication(const string &configPath, int argc, char * const argv[])
+: CWebApplication(configPath, argc, argv)
 {
 
 }
 
-void MyApplication::processRequest() throw(CException)
+MyApplication::~MyApplication()
 {
-	echo("Content-type: text/html\r\n\r\n<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n");
+
+}
+
+void MyApplication::registerComponents()
+{
+	CUrlManager * urlManager = new CUrlManager();
+	urlManager->init();
+	setComponent("urlManager", urlManager);
+
+	CController * siteController = new SiteController();
+	siteController->init();
+	setController("site", siteController);
+
+	CController * productController = new ProductController();
+	productController->init();
+	setController("product", productController);
 }

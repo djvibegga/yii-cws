@@ -21,6 +21,7 @@ public:
 	CApplicationComponent(const string &id, const CModule * module);
 	const CModule * getModule() const;
 	string getId() const;
+	virtual void init() = 0;
 };
 
 #endif /* CAPPLICATIONCOMPONENT_H_ */
