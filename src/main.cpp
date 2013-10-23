@@ -42,30 +42,6 @@ void runServer()
 //	string content = "";
 }
 
-class TestHandler: public CBehavior
-{
-public:
-
-	TEventNameList events()
-	{
-		TEventNameList ret;
-		ret.insert(ret.begin(), "onEndRequest");
-		return ret;
-	}
-
-	void handleEvent(const string &name, CEvent &event)
-	{
-		if (name == "onEndRequest") {
-			afterRequest(event);
-		}
-	}
-
-	void afterRequest(CEvent & event)
-	{
-		(dynamic_cast<CWebApplication*>(YiiBase::app()))->echo("<h2>I am a behavior</h2>");
-	}
-};
-
 int main(int argc, char* const argv[])
 {
 	cout << argv[0] << endl;
@@ -85,8 +61,6 @@ int main(int argc, char* const argv[])
 
 		MyApplication app(configPath, argc, argv);
 		app.init();
-		TestHandler obj;
-		app.attachBehavior(&obj);
 		app.run();
 	} catch (const CException & e) {
 		cout << e.getFullMessage() << endl;

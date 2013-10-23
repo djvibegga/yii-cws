@@ -27,8 +27,14 @@ void SiteController::actionIndex(CHttpRequest * const request, CWebApplication *
 
 	CUrlManager * urlManager = app->getUrlManager();
 	TRouteStruct route;
-	route.path = "site/admin";
-	route.params["login"] = "admin";
-	route.params["password"] = "admin";
+	route.path = "site/index";
+	route.params["id"] = "100500";
+	route.params["name"] = "maks";
+	route.params["hui"] = "pizda";
 	*app << "Admin panel URL: " << urlManager->createUrl(route) << "<br/>";
+
+	TRequestParams params = request->getParams();
+	for (TRequestParams::iterator iter = params.begin(); iter != params.end(); ++iter) {
+		*app << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
+	}
 }

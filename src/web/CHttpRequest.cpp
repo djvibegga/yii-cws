@@ -8,16 +8,20 @@
 #include "web/CHttpRequest.h"
 #include "web/CWebApplication.h"
 #include "base/YiiBase.h"
+#include "base/CStringUtils.h"
 #include "fcgi_stdio.h"
 
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <boost/regex.hpp>
 
 using namespace std;
 
 CHttpRequest::CHttpRequest()
-: CApplicationComponent("request", 0)
+: CApplicationComponent("request", 0),
+  _port(0),
+  _securePort(0)
 {
 
 }
@@ -40,6 +44,12 @@ string CHttpRequest::getParam(const string &name)
 void CHttpRequest::setParam(const string &name, const string &value)
 {
 	_params[name] = value;
+}
+
+bool CHttpRequest::hasEnvVar(const char * name) const
+{
+	CWebApplication * app = dynamic_cast<CWebApplication*>(YiiBase::app());
+	return FCGX_GetParam(name, app->request.envp) != 0;
 }
 
 string CHttpRequest::getEnvVar(const char * name) const
@@ -155,4 +165,158 @@ bool CHttpRequest::getIsFlashRequest()
 		}
 	}
 	return false;
+}
+
+string CHttpRequest::getRequestUri()
+{
+	if (_requestUri.empty()) {
+		if (hasEnvVar("HTTP_X_REWRITE_URL")) {// IIS
+			_requestUri = getEnvVar("HTTP_X_REWRITE_URL");
+		} else if (hasEnvVar("REQUEST_URI")) {
+			_requestUri = getEnvVar("REQUEST_URI");
+			string host = getEnvVar("HTTP_HOST");
+			if (!host.empty()) {
+				if (_requestUri.find(host) != ::string::npos) {
+					boost::regex pattern("^\\w+://[^/]+");
+					_requestUri = boost::regex_replace(_requestUri, pattern, "");
+				}
+			} else {
+				boost::regex pattern("^(http|https)://[^/]+");
+				_requestUri = boost::regex_replace(_requestUri, pattern, "");
+			}
+		} else if (hasEnvVar("ORIG_PATH_INFO")) { // IIS 5.0 CGI
+			_requestUri = getEnvVar("ORIG_PATH_INFO");
+			if (hasEnvVar("QUERY_STRING") && !getEnvVar("QUERY_STRING").empty()) {
+				_requestUri += "?" + getEnvVar("QUERY_STRING");
+			}
+		} else {
+			throw CException("CHttpRequest is unable to determine the request URI.");
+		}
+	}
+	return _requestUri;
+}
+
+string CHttpRequest::decodePathInfo(const string &pathInfo) const
+{
+	return CStringUtils::urlDecode(pathInfo);
+}
+
+
+string CHttpRequest::getScriptUrl()
+{
+	if (_scriptUrl.empty()) {
+		CWebApplication * app = dynamic_cast<CWebApplication *>(YiiBase::app());
+		_scriptUrl = app->getUrlManager()->getScriptUrl();
+	}
+	return _scriptUrl;
+}
+
+string CHttpRequest::getBaseUrl(bool absolute)
+{
+	if (_baseUrl.empty()) {
+		_baseUrl = CStringUtils::rtrim(CStringUtils::dirName(getScriptUrl()), "\\/");
+	}
+	return absolute ? getHostInfo() + _baseUrl : _baseUrl;
+}
+
+bool CHttpRequest::getIsSecureConnection() const
+{
+	if (hasEnvVar("HTTPS")) {
+		if (hasEnvVar("X-Forwarded-Proto")) {
+			string schema = getEnvVar("X-Forwarded-Proto");
+			::transform(schema.begin(), schema.end(), schema.begin(), ::tolower);
+			return schema == "https";
+		} else {
+			string schema = getEnvVar("HTTPS");
+			::transform(schema.begin(), schema.end(), schema.begin(), ::tolower);
+			return schema != "off";
+		}
+	} else {
+		return false;
+	}
+}
+
+int CHttpRequest::getSecurePort()
+{
+	if (!_securePort) {
+		if (getIsSecureConnection() && hasEnvVar("SERVER_PORT")) {
+			_securePort = atoi(getEnvVar("SERVER_PORT").c_str());
+		} else {
+			_securePort = 443;
+		}
+	}
+	return _securePort;
+}
+
+int CHttpRequest::getPort()
+{
+	if (!_port) {
+		if (!getIsSecureConnection() && hasEnvVar("SERVER_PORT")) {
+			_port = atoi(getEnvVar("SERVER_PORT").c_str());
+		} else {
+			_port = 80;
+		}
+	}
+	return _port;
+}
+
+string CHttpRequest::getHostInfo(const string & schema)
+{
+	bool isSecure = getIsSecureConnection();
+	if (_hostInfo.empty()) {
+		string protocol = isSecure ? "https" : "http";
+		if (hasEnvVar("HTTP_HOST")) {
+			_hostInfo = protocol + "://" + getEnvVar("HTTP_HOST");
+		} else {
+			_hostInfo = protocol + "://" + getEnvVar("SERVER_NAME");
+			int port = isSecure ? getSecurePort() : getPort();
+			if ((port != 80 && !isSecure) || (port != 443 && isSecure)) {
+				_hostInfo += ":" + port;
+			}
+		}
+	}
+	if (!schema.empty()) {
+		if ((isSecure && schema == "https") || (!isSecure && schema == "http")) {
+			return _hostInfo;
+		}
+		int port = schema == "https" ? getSecurePort() : getPort();
+		string portExp;
+		if ((port != 80 && schema == "http") || (port != 443 && schema == "https")) {
+			portExp = ":" + port;
+		}
+		unsigned int schemaPos = _hostInfo.find(":");
+		unsigned int portPos = _hostInfo.find_last_of(":");
+		if (schemaPos == portPos) {
+			return schema + _hostInfo.substr(schemaPos + 1);
+		} else {
+			return schema + _hostInfo.substr(schemaPos + 1, portPos - schemaPos - 1) + portExp;
+		}
+	} else {
+		return _hostInfo;
+	}
+}
+
+string CHttpRequest::getPathInfo()
+{
+	if (_pathInfo.empty()) {
+		string pathInfo = getRequestUri();
+		unsigned int pos = pathInfo.find("?");
+		if (pos != ::string::npos) {
+			pathInfo = pathInfo.substr(0, pos);
+		}
+		pathInfo = decodePathInfo(pathInfo);
+		string scriptUrl = getScriptUrl();
+		string baseUrl = getBaseUrl();
+		if (pathInfo.find(scriptUrl) == 0) {
+			pathInfo = pathInfo.substr(scriptUrl.length());
+		} else if (baseUrl.empty() || pathInfo.find(baseUrl) == 0) {
+			pathInfo = pathInfo.substr(baseUrl.length());
+		} else {
+			throw CException(
+				"CHttpRequest is unable to determine the path info of the request."
+			);
+		}
+		_pathInfo = CStringUtils::trim(pathInfo, "/");
+	}
+	return _pathInfo;
 }

@@ -121,7 +121,7 @@ void CWebApplication::processRequest()
 			request->setParam(iter->first, iter->second);
 		}
 	} else {
-		string route = "site/index";//getUrlManager()->parseUrl(getRequest());
+		string route = getUrlManager()->parseUrl(getRequest());
 		//trimScriptName(request->getEnvVar("REQUEST_URI"))
 		runController(route);
 	}

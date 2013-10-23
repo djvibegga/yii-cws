@@ -20,6 +20,13 @@ private:
 	TRequestParams _params;
 	string _method;
 	string _body;
+	string _pathInfo;
+	string _requestUri;
+	string _scriptUrl;
+	string _baseUrl;
+	string _hostInfo;
+	int _port;
+	int _securePort;
 
 public:
 	CHttpRequest();
@@ -30,6 +37,7 @@ public:
 	bool hasParam(const string &name) const;
 	void setParam(const string &name, const string &value);
 	virtual TRequestParams getParams();
+	bool hasEnvVar(const char * name) const;
 	string getEnvVar(const char * name) const;
 	string getEnvVar(const string &name) const;
 	string getRequestBody();
@@ -38,9 +46,18 @@ public:
 	bool getIsGetRequest();
 	virtual bool getIsAjaxRequest();
 	virtual bool getIsFlashRequest();
+	virtual string getPathInfo();
+	virtual string getRequestUri();
+	string getScriptUrl();
+	string getBaseUrl(bool absolute = false);
+	string getHostInfo(const string & schema = "");
+	bool getIsSecureConnection() const;
+	int getSecurePort();
+	int getPort();
 
 protected:
 	TRequestParams parseQueryString(string query) throw (CHttpException);
+	virtual string decodePathInfo(const string &pathInfo) const;
 	TRequestParams parseMultipartFormData(string data) throw (CHttpException);
 };
 
