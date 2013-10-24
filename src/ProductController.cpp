@@ -7,10 +7,12 @@
 
 #include "ProductController.h"
 #include <web/CWebApplication.h>
+#include <base/Jvibetto.h>
 
 using namespace std;
 
-ProductController::ProductController()
+ProductController::ProductController(CModule * parent)
+: CController("product", parent)
 {
 }
 
@@ -25,6 +27,8 @@ void ProductController::init()
 
 void ProductController::actionTest(CHttpRequest * const request, CWebApplication * const app)
 {
+	Jvibetto::log("test message");
+
 	app->echo("Content-type: text/html\r\n\r\n<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n");
 	TRequestParams params = request->getParams();
 	*app << "I am product controller. Action test." << "<br/>";

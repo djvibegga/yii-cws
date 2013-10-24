@@ -17,9 +17,6 @@ using namespace std;
 
 class CUrlManager;
 
-enum UrlManagerFormat { FORMAT_GET, FORMAT_PATH };
-
-
 class CBaseUrlRule: public CComponent
 {
 public:
@@ -79,7 +76,9 @@ private:
 	string _scriptUrl;
 
 public:
-	UrlManagerFormat urlFormat;
+	static const string FORMAT_GET;
+	static const string FORMAT_PATH;
+	string urlFormat;
 	string urlSuffix;
 	bool showScriptName;
 	bool appendParams;
@@ -88,7 +87,7 @@ public:
 	bool useStrictParsing;
 	bool caseSensitive;
 
-	CUrlManager(const CModule * module = 0);
+	CUrlManager(CModule * module = 0);
 	virtual ~CUrlManager();
 	virtual void init();
 	virtual void addRule(CBaseUrlRule * rule);
@@ -101,6 +100,7 @@ public:
 	string getScriptName() const;
 	string getScriptUrl();
 	virtual string removeUrlSuffix(const string & pathInfo, const string & urlSuffix) const;
+	virtual void applyConfig(const xml_node & config);
 
 protected:
 	virtual void initRules();

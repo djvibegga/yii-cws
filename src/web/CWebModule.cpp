@@ -12,7 +12,7 @@ CWebModule::CWebModule(const string &id)
 {
 }
 
-CWebModule::CWebModule(const string &id, CWebModule * parent)
+CWebModule::CWebModule(const string &id, CModule * parent)
 : CModule(id, parent)
 {
 }

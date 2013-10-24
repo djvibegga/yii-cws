@@ -1,5 +1,5 @@
 /*
- * YiiBase.h
+ * Jvibetto.h
  *
  *  Created on: Oct 16, 2013
  *      Author: djvibegga
@@ -10,10 +10,15 @@
 
 #include "base/CApplication.h"
 
-class YiiBase
+class Jvibetto
 {
 public:
 	static CApplication * app();
+	static CLogger & getLogger();
+	static void log(
+		const string & message,
+		const string & level = "info",
+		const string & category = "application");
 };
 
 #endif /* YIIBASE_H_ */

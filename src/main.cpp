@@ -14,7 +14,7 @@
 #include "base/CModule.h"
 #include "base/CException.h"
 #include "base/CHttpException.h"
-#include "base/YiiBase.h"
+#include "base/Jvibetto.h"
 #include "MyApplication.h"
 
 using namespace std;
@@ -44,27 +44,16 @@ void runServer()
 
 int main(int argc, char* const argv[])
 {
-	cout << argv[0] << endl;
-	/*ofstream log;
-	log.open("server.log", ios_base::out);
-	if (!log.good()) {
-		log << "can\'t open log file." << endl;
-		log.close();
-		exit(1);
-	}*/
-	//log.close();
-
+	string configPath = getcwd(0, 0);
+	configPath += "/main.xml";
+	cout << "Config file path: " << configPath << endl;
 	try {
-		string configPath = getcwd(0, 0);
-		configPath += "/main.xml";
-		cout << "Config file path: " << configPath << endl;
-
 		MyApplication app(configPath, argc, argv);
 		app.init();
 		app.run();
 	} catch (const CException & e) {
 		cout << e.getFullMessage() << endl;
+		return 1;
 	}
-
     return 0;
 }

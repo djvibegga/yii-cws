@@ -27,7 +27,7 @@ private:
 	TActionsMap _actions;
 
 public:
-	CController(const CModule * module = 0);
+	CController(const string & id, CModule * module = 0);
 	virtual ~CController();
 	virtual void init();
 	void registerAction(const string &name, TAction action);

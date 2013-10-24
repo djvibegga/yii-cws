@@ -107,6 +107,7 @@ const CWebApplication & CWebApplication::operator<< (const string &right) const
 
 void CWebApplication::beginRequest()
 {
+	CApplication::beginRequest();
 	CHttpRequest * request = new CHttpRequest();
 	request->init();
 	setComponent("request", request);
@@ -122,7 +123,6 @@ void CWebApplication::processRequest()
 		}
 	} else {
 		string route = getUrlManager()->parseUrl(getRequest());
-		//trimScriptName(request->getEnvVar("REQUEST_URI"))
 		runController(route);
 	}
 }
@@ -130,6 +130,7 @@ void CWebApplication::processRequest()
 void CWebApplication::endRequest()
 {
 	delete getComponent("request");
+	CApplication::endRequest();
 }
 
 CHttpRequest * CWebApplication::getRequest() const

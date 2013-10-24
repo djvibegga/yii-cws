@@ -11,7 +11,7 @@ CComponent::~CComponent()
 {
 }
 
-void CComponent::attachEventHandler(const string & event, IEventHandler *handler)
+CComponent & CComponent::attachEventHandler(const string & event, IEventHandler *handler)
 {
 	TEventHandlerList list;
 	if (_e.find(event) == _e.end()) {
@@ -21,6 +21,7 @@ void CComponent::attachEventHandler(const string & event, IEventHandler *handler
 	}
 	list.insert(list.begin(), handler);
 	_e[event] = list;
+	return *this;
 }
 
 bool CComponent::hasEventHandler(const string & event)

@@ -13,7 +13,7 @@
 class ProductController: public CController
 {
 public:
-	ProductController();
+	ProductController(CModule * parent);
 	virtual ~ProductController();
 	void init();
 	void actionTest(CHttpRequest * const request, CWebApplication * const app);

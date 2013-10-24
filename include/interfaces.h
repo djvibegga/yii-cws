@@ -10,6 +10,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -20,9 +21,12 @@ class CModule;
 
 typedef map<string, CController*> TControllerMap;
 typedef map<string, string> TRequestParams;
+typedef vector<string> TNamesPath;
 
 struct TRouteStruct
 {
+	TRouteStruct() {}
+	TRouteStruct(const string & path) { this->path = path; }
 	string path;
 	TRequestParams params;
 };
@@ -54,6 +58,8 @@ class IConfigureable
 public:
 	virtual ~IConfigureable() {}
 	virtual void applyConfig(const xml_node & config) = 0;
+	virtual TNamesPath resolveNamePath() const = 0;
+	virtual string getId() const = 0;
 };
 
 class IModule
@@ -61,8 +67,11 @@ class IModule
 public:
 	virtual ~IModule() {}
 	virtual bool hasController(const string & name) const = 0;
+	virtual string getId() const = 0;
+	virtual void setId(const string &id) = 0;
 	virtual CController * getController(const string & name) const = 0;
 	virtual void setController(const string & name, CController * instance) = 0;
+	virtual void setModule(const string & name, IModule * subModule) = 0;
 	virtual IModule * getParent() const = 0;
 	virtual IModule * getModule(const string &name) const = 0;
 };

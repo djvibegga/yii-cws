@@ -18,7 +18,7 @@ private:
 
 public:
 	CWebModule(const string &id);
-	CWebModule(const string &id, CWebModule * parent);
+	CWebModule(const string &id, CModule * parent);
 	virtual ~CWebModule();
 
 	virtual bool hasController(const string & name) const;

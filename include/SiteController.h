@@ -15,7 +15,7 @@
 class SiteController: public CController
 {
 public:
-	SiteController();
+	SiteController(CModule * parent);
 	virtual ~SiteController();
 	void init();
 	void actionIndex(CHttpRequest * const request, CWebApplication * const app);

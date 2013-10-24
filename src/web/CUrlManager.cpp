@@ -8,7 +8,7 @@
 #include "web/CUrlManager.h"
 #include "web/CWebApplication.h"
 #include "base/CStringUtils.h"
-#include "base/YiiBase.h"
+#include "base/Jvibetto.h"
 #include "config.h"
 
 #include <boost/regex.hpp>
@@ -163,7 +163,7 @@ string CUrlRule::createUrl(
 	string url = CStringUtils::strtr(templateStr, tr);
 
 	if (hasHostInfo) {
-		string hostInfo = dynamic_cast<CWebApplication*>(YiiBase::app())->getRequest()->getHostInfo();
+		string hostInfo = dynamic_cast<CWebApplication*>(Jvibetto::app())->getRequest()->getHostInfo();
 		if (url.find(hostInfo) == 0) {
 			url = url.substr(hostInfo.length());
 		}
@@ -248,9 +248,11 @@ string CUrlRule::parseUrl(
 	return "";
 }
 
+const string CUrlManager::FORMAT_GET = "get";
+const string CUrlManager::FORMAT_PATH = "path";
 
-CUrlManager::CUrlManager(const CModule * module)
-: CApplicationComponent("", module),
+CUrlManager::CUrlManager(CModule * module)
+: CApplicationComponent("urlManager", module),
   _baseUrl(""),
   urlFormat(FORMAT_GET),
   showScriptName(true),
@@ -271,8 +273,16 @@ CUrlManager::~CUrlManager()
 
 void CUrlManager::init()
 {
+	CApplicationComponent::init();
 	_scriptName = resolveScriptName();
 	initRules();
+}
+
+void CUrlManager::applyConfig(const xml_node & config)
+{
+	if (!config.child("urlFormat").empty()) {
+		urlFormat = config.child("urlFormat").attribute("value").value();
+	}
 }
 
 void CUrlManager::addRule(CBaseUrlRule * rule)
@@ -361,7 +371,7 @@ string CUrlManager::getScriptName() const
 
 string CUrlManager::resolveScriptName()
 {
-	string ret = YiiBase::app()->getArguments()[0];
+	string ret = Jvibetto::app()->getArguments()[0];
 	unsigned int pos = ret.find_last_of("/");
 	return pos == ::string::npos ? "" : ret.substr(pos + 1);
 }
@@ -369,14 +379,14 @@ string CUrlManager::resolveScriptName()
 string CUrlManager::getScriptUrl()
 {
 	if (_scriptUrl.empty()) {
-		CWebApplication * app = dynamic_cast<CWebApplication *>(YiiBase::app());
+		CWebApplication * app = dynamic_cast<CWebApplication *>(Jvibetto::app());
 		string documentRoot = app->getRequest()->getEnvVar("DOCUMENT_ROOT");
-		string ret = realpath(app->getArguments()[0].c_str(), 0);
-		unsigned int pos = ret.find(documentRoot);
+		string executable(app->getExecutablePath().c_str());
+		unsigned int pos = executable.find(documentRoot);
 		if (pos == ::string::npos) {
 			throw CHttpException(400, "Bad Request or wrong web server configuration");
 		} else {
-			return _scriptUrl = ret.substr(documentRoot.length());
+			return _scriptUrl = executable.substr(documentRoot.length());
 		}
 	}
 	return _scriptUrl;
@@ -430,7 +440,7 @@ void CUrlManager::parsePathInfo(const string & pathInfo) const
 	vector<string> segs = CStringUtils::explode("/", pathInfo + "/");
 	int n = segs.size();
 	string key;
-	CHttpRequest * request = dynamic_cast<CWebApplication*>(YiiBase::app())->getRequest();
+	CHttpRequest * request = dynamic_cast<CWebApplication*>(Jvibetto::app())->getRequest();
 	for (int i = 0; i < n - 1; i += 2) {
 		key = segs[i];
 		if (key.empty()) {

@@ -20,10 +20,11 @@ private:
 public:
 	CComponent();
 	virtual ~CComponent();
-	void attachEventHandler(const string & event, IEventHandler *handler);
+	CComponent & attachEventHandler(const string & event, IEventHandler *handler);
 	virtual void raiseEvent(const string &name, CEvent &event);
 	void attachBehavior(CBehavior * behavior);
 	bool hasEventHandler(const string & event);
+
 };
 
 #endif

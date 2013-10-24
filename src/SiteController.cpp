@@ -6,8 +6,11 @@
  */
 
 #include "SiteController.h"
+#include <base/Jvibetto.h>
+#include <boost/assign.hpp>
 
-SiteController::SiteController()
+SiteController::SiteController(CModule * parent)
+: CController("site", parent)
 {
 }
 
@@ -26,15 +29,14 @@ void SiteController::actionIndex(CHttpRequest * const request, CWebApplication *
 	*app << "I am site controller. Action index.";
 
 	CUrlManager * urlManager = app->getUrlManager();
-	TRouteStruct route;
-	route.path = "site/index";
-	route.params["id"] = "100500";
-	route.params["name"] = "maks";
-	route.params["hui"] = "pizda";
+	TRouteStruct route("site/index");
+	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
 	*app << "Admin panel URL: " << urlManager->createUrl(route) << "<br/>";
 
 	TRequestParams params = request->getParams();
 	for (TRequestParams::iterator iter = params.begin(); iter != params.end(); ++iter) {
 		*app << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
 	}
+
+	Jvibetto::log("site controller call", CLogger::LEVEL_ERROR);
 }

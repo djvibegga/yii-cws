@@ -7,7 +7,7 @@
 
 #include "web/CHttpRequest.h"
 #include "web/CWebApplication.h"
-#include "base/YiiBase.h"
+#include "base/Jvibetto.h"
 #include "base/CStringUtils.h"
 #include "fcgi_stdio.h"
 
@@ -48,13 +48,13 @@ void CHttpRequest::setParam(const string &name, const string &value)
 
 bool CHttpRequest::hasEnvVar(const char * name) const
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(YiiBase::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	return FCGX_GetParam(name, app->request.envp) != 0;
 }
 
 string CHttpRequest::getEnvVar(const char * name) const
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(YiiBase::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	return FCGX_GetParam(name, app->request.envp);
 }
 
@@ -112,7 +112,7 @@ string CHttpRequest::getRequestBody()
 		if (method == "GET" || method == "HEAD") {
 			return "";
 		}
-		CWebApplication * app = dynamic_cast<CWebApplication*>(YiiBase::app());
+		CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 		string contentLength = getEnvVar("CONTENT_LENGTH");
 		int len = 0;
 		sscanf(contentLength.c_str(), "%d", &len);
@@ -205,7 +205,7 @@ string CHttpRequest::decodePathInfo(const string &pathInfo) const
 string CHttpRequest::getScriptUrl()
 {
 	if (_scriptUrl.empty()) {
-		CWebApplication * app = dynamic_cast<CWebApplication *>(YiiBase::app());
+		CWebApplication * app = dynamic_cast<CWebApplication *>(Jvibetto::app());
 		_scriptUrl = app->getUrlManager()->getScriptUrl();
 	}
 	return _scriptUrl;

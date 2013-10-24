@@ -8,23 +8,25 @@
 #include "base/CException.h"
 #include <sstream>
 #include <stdlib.h>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 
 using namespace std;
 
 CException::CException(const string &message)
-: _file("undefined"),
+: _message(message),
+  _code(1),
+  _file("undefined"),
   _line(-1)
 {
-	_message = message;
-	_code = 0;
 }
 
 CException::CException(const string &message, int code, const string &file, int line)
+: _message(message),
+  _code(code),
+  _file(file),
+  _line(line)
 {
-	_message = message;
-	_code = code,
-	_file = file;
-	_line = line;
 }
 
 string CException::getMessage() const
@@ -52,7 +54,9 @@ string CException::getFullMessage() const
 	stringstream ss;
 	ss << "Exception has been thown: "
 	   << _message
-	   << ". File: " << (_file == "undefined" ? _file.c_str() : realpath(_file.c_str(), 0))
+	   << ". File: " << (_file == "undefined"
+			? _file.c_str()
+			: boost::filesystem::absolute(boost::filesystem::path(_file.c_str())).normalize().c_str())
 	   << ". Line: " << _line;
 	return ss.str();
 }

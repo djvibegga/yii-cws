@@ -9,10 +9,12 @@
 #include <web/CWebApplication.h>
 #include <base/CException.h>
 
-CController::CController(const CModule * module)
-: CApplicationComponent("", module)
+CController::CController(const string & id, CModule * module)
+: CApplicationComponent(module)
 {
-
+	if (module != 0) {
+		module->setController(id, this);
+	}
 }
 
 CController::~CController()

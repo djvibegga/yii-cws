@@ -55,11 +55,13 @@ MYSQL * CDbConnection::getConnection()
 
 void CDbConnection::applyConfig(const xml_node & config)
 {
-	xml_node node = config
-			.child("server")
-			.child("components")
-			.child("db");
-	username = node.attribute("username").value();
-	password = node.attribute("password").value();
-	connectionString = node.attribute("cdn").value();
+	if (!config.child("cdn").empty()) {
+		connectionString = config.child("cdn").attribute("value").value();
+	}
+	if (!config.child("username").empty()) {
+		username = config.child("username").attribute("value").value();
+	}
+	if (!config.child("password").empty()) {
+		password = config.child("password").attribute("value").value();
+	}
 }

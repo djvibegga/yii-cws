@@ -1,10 +1,13 @@
 <server name="testc" host="127.0.0.1" port="9015">
-    <threadsCount value="200"/>
+    <threadsCount value="1000"/>
     <components>
-        <db
-            cdn="mysql:host=127.0.0.1;dbname=ecology"
-            username="root"
-            password=""
-        />
+        <db>
+            <cdn value="mysql:host=127.0.0.1;dbname=ecology"/>
+            <username value="root"/>
+            <password value="root"/>
+        </db>
+        <urlManager>
+            <urlFormat value="path"/>
+        </urlManager>
     </components>
 </server>

@@ -6,11 +6,14 @@
  */
 
 #include "base/CModule.h"
+#include "base/CApplication.h"
+#include "base/CApplicationComponent.h"
+#include "base/Jvibetto.h"
 
 using namespace std;
 
 CModule::CModule(const string &id)
-: _components(map<string, CComponent*>()),
+: _components(map<string, CApplicationComponent*>()),
   params(map<string, void*>())
 {
 	_id = id;
@@ -18,11 +21,14 @@ CModule::CModule(const string &id)
 }
 
 CModule::CModule(const string &id, CModule * parent)
-: _components(map<string, CComponent*>()),
+: _components(map<string, CApplicationComponent*>()),
   params(map<string, void*>())
 {
 	_id = id;
 	_parent = parent;
+	if (parent != 0) {
+		parent->setModule(id, this);
+	}
 }
 
 CModule::~CModule()
@@ -32,6 +38,8 @@ CModule::~CModule()
 
 void CModule::init()
 {
+	xml_node config = Jvibetto::app()->getConfigByNamePath(resolveNamePath());
+	applyConfig(config);
 	registerComponents();
 }
 
@@ -45,12 +53,20 @@ string CModule::getId() const
 	return _id;
 }
 
-void CModule::setComponent(const string &name, CComponent * component)
+void CModule::setComponent(const string &name, CApplicationComponent * component)
 {
 	_components[name] = component;
 }
 
-CComponent * CModule::getComponent(const string &name) const
+void CModule::setComponent(CApplicationComponent * component)
+{
+	if (component->getId().empty()) {
+		throw CException("Unknown component ID", 1, __FILE__, __LINE__);
+	}
+	setComponent(component->getId(), component);
+}
+
+CApplicationComponent * CModule::getComponent(const string &name) const
 {
 	TComponentsMap::const_iterator found = _components.find(name);
 	if (found == _components.end()) {
@@ -65,6 +81,16 @@ IModule * CModule::getParent() const
 	return _parent;
 }
 
+void CModule::setModule(const string & name, IModule * subModule)
+{
+	_modules[name] = subModule;
+}
+
+void CModule::setModule(IModule * subModule)
+{
+	setModule(subModule->getId(), subModule);
+}
+
 IModule * CModule::getModule(const string &name) const
 {
 	TModulesMap::const_iterator iter = _modules.find(name);
@@ -77,7 +103,6 @@ IModule * CModule::getModule(const string &name) const
 
 void CModule::registerComponents()
 {
-
 }
 
 void CModule::unregisterComponents()
@@ -85,4 +110,23 @@ void CModule::unregisterComponents()
 	for (TComponentsMap::iterator iter = _components.begin(); iter != _components.end(); ++iter) {
 		delete iter->second;
 	}
+}
+
+TNamesPath CModule::resolveNamePath() const
+{
+	const IModule * current = this;
+	CApplication * app = Jvibetto::app();
+	TNamesPath ret;
+	while (current != app) {
+		ret.push_back(current->getId());
+		if (current->getParent() == app) {
+			ret.push_back("modules");
+		}
+		current = current->getParent();
+	}
+	return ret;
+}
+
+void CModule::applyConfig(const xml_node & config)
+{
 }
