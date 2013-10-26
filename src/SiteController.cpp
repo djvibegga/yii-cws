@@ -8,6 +8,8 @@
 #include "SiteController.h"
 #include <base/Jvibetto.h>
 #include <boost/assign.hpp>
+#include <base/Jvibetto.h>
+#include <db/CDbCommand.h>
 
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
@@ -20,22 +22,28 @@ SiteController::~SiteController()
 
 void SiteController::init()
 {
-	registerAction("index", reinterpret_cast<TAction>(&SiteController::actionIndex));
+	registerAction("index", ACTION(&SiteController::actionIndex));
 }
 
-void SiteController::actionIndex(CHttpRequest * const request, CWebApplication * const app)
+void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
 {
-	app->echo("Content-type: text/html\r\n\r\n<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n");
-	*app << "I am site controller. Action index.";
+	*response << "I am site controller. Action index.";
 
+	CDbConnection * connection = dynamic_cast<CDbConnection*>(Jvibetto::app()->getComponent("db"));
+	CDbCommand cmd(connection, "update user set password = md5('admin') where id = :id");
+	cmd.bindParam(":1", 1);
+	cmd.execute();
+
+
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	CUrlManager * urlManager = app->getUrlManager();
 	TRouteStruct route("site/index");
 	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
-	*app << "Admin panel URL: " << urlManager->createUrl(route) << "<br/>";
+	*response << "Admin panel URL: " << urlManager->createUrl(route) << "<br/>";
 
 	TRequestParams params = request->getParams();
 	for (TRequestParams::iterator iter = params.begin(); iter != params.end(); ++iter) {
-		*app << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
+		*response << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
 	}
 
 	Jvibetto::log("site controller call", CLogger::LEVEL_ERROR);

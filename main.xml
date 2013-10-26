@@ -4,7 +4,7 @@
         <db>
             <cdn value="mysql:host=127.0.0.1;dbname=ecology"/>
             <username value="root"/>
-            <password value="root"/>
+            <password value=""/>
         </db>
         <urlManager>
             <urlFormat value="path"/>

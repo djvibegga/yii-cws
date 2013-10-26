@@ -13,6 +13,7 @@
 #include "base/CException.h"
 #include "base/CApplication.h"
 #include "web/CHttpRequest.h"
+#include "web/CHttpResponse.h"
 #include "web/CWebModule.h"
 #include "web/CUrlManager.h"
 #include <web/CController.h>
@@ -26,6 +27,7 @@ struct SControllerToRun
 class CWebApplication: public CApplication
 {
 	friend class CHttpRequest;
+	friend class CHttpResponse;
 
 private:
 	TControllerMap _controllerMap;
@@ -37,11 +39,9 @@ public:
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	~CWebApplication();
 	virtual void run() throw(CException);
-	void echo(const string & content) const;
 	CHttpRequest * getRequest() const;
+	CHttpResponse * getResponse() const;
 	CUrlManager * getUrlManager() const;
-
-	const CWebApplication & operator<< (const string &right) const;
 
 	virtual bool hasController(const string & name) const;
 	virtual CController * getController(const string & name) const;

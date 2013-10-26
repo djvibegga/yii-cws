@@ -1,17 +1,25 @@
+#include "db/CDbCommand.h"
+#include "db/schema/CDbCommandBuilder.h"
 #include "db/CDbConnection.h"
-
 #include <boost/regex.hpp>
 
-CDbConnection::CDbConnection()
-:
+CDbConnection::CDbConnection(const CModule * module)
+: CApplicationComponent(module),
   _connection(0),
+  _isActive(false),
+  _commandBuilder(0),
   connectionString(""),
   username(""),
-  password("")
+  password(""),
+  enableParamLogging(false)
 {
 }
 
-CDbConnection::CDbConnection(string dsn, string username, string password)
+CDbConnection::CDbConnection(const CModule * module, string dsn, string username, string password)
+: CApplicationComponent(module),
+  _isActive(false),
+  _commandBuilder(0),
+  enableParamLogging(false)
 {
 	this->_connection = 0;
 	connectionString = dsn;
@@ -35,20 +43,25 @@ bool CDbConnection::open() throw(CException)
 		host = match[2];
 		dbname = match[3];
 	}
-    return mysql_real_connect(
-    	_connection,
-    	host.c_str(),
-    	username.c_str(), password.c_str(), dbname.c_str(),
-    	0, NULL, 0
-    );
+	if (mysql_real_connect(
+		_connection,
+		host.c_str(),
+		username.c_str(), password.c_str(), dbname.c_str(),
+		0, NULL, 0
+	)) {
+		_isActive = true;
+		return true;
+	}
+    return false;
 }
 
 void CDbConnection::close()
 {
 	mysql_close(_connection);
+	_isActive = false;
 }
 
-MYSQL * CDbConnection::getConnection()
+MYSQL * CDbConnection::getConnection() const
 {
 	return _connection;
 }
@@ -64,4 +77,25 @@ void CDbConnection::applyConfig(const xml_node & config)
 	if (!config.child("password").empty()) {
 		password = config.child("password").attribute("value").value();
 	}
+}
+
+void CDbConnection::setActive(bool value)
+{
+	_isActive = value;
+}
+
+bool CDbConnection::setActive() const
+{
+	return _isActive;
+}
+
+CDbCommand CDbConnection::createCommand(const string & query)
+{
+	setActive(true);
+	return CDbCommand(this, query);
+}
+
+CDbCommandBuilder * CDbConnection::getCommandBuilder()
+{
+	return _commandBuilder;
 }

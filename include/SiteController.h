@@ -18,7 +18,7 @@ public:
 	SiteController(CModule * parent);
 	virtual ~SiteController();
 	void init();
-	void actionIndex(CHttpRequest * const request, CWebApplication * const app);
+	void actionIndex(CHttpRequest * const request, CHttpResponse * response);
 };
 
 #endif /* SITECONTROLLER_H_ */

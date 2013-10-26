@@ -24,3 +24,8 @@ void Jvibetto::log(
 {
 	getLogger().log(message, level, category);
 }
+
+void Jvibetto::trace(const string & message, const string & category)
+{
+	log(message, CLogger::LEVEL_TRACE, category);
+}

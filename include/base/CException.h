@@ -22,7 +22,7 @@ private:
 
 public:
 	CException(const string &message);
-	CException(const string &message, int code, const string &file, int line);
+	CException(const string &message, int code, const string &file = "undefined", int line = -1);
 	string getMessage() const;
 	int getCode() const;
 	string getFile() const;

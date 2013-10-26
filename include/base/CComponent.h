@@ -9,10 +9,16 @@ using namespace std;
 #include "interfaces.h"
 #include "base/CBehavior.h"
 
-typedef vector<IEventHandler*> TEventHandlerList;
+struct SEventHandler
+{
+	IEventHandler * object;
+	TEventHandler method;
+};
+
+typedef vector<SEventHandler> TEventHandlerList;
 typedef map<string, TEventHandlerList> TEventHandlersMap;
 
-class CComponent
+class CComponent: public IEventHandler
 {
 private:
 	TEventHandlersMap _e;
@@ -20,7 +26,8 @@ private:
 public:
 	CComponent();
 	virtual ~CComponent();
-	CComponent & attachEventHandler(const string & event, IEventHandler *handler);
+	CComponent & attachEventHandler(const string & event, IEventHandler * object, TEventHandler method);
+	CComponent & attachEventHandler(const string & event, const SEventHandler & callee);
 	virtual void raiseEvent(const string &name, CEvent &event);
 	void attachBehavior(CBehavior * behavior);
 	bool hasEventHandler(const string & event);

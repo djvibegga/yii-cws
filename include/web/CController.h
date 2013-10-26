@@ -9,8 +9,9 @@
 #define CCONTROLLER_H_
 
 #include "base/CApplicationComponent.h"
-#include <base/CHttpException.h>
+#include "base/CHttpException.h"
 #include "web/CHttpRequest.h"
+#include "web/CHttpResponse.h"
 #include <string>
 #include <map>
 
@@ -18,8 +19,9 @@ using namespace std;
 
 class CWebApplication;
 
-typedef void(CController::*TAction)(CHttpRequest * const, CWebApplication * const);
+typedef void(CController::*TAction)(CHttpRequest * const, CHttpResponse * );
 typedef map<string, TAction> TActionsMap;
+#define ACTION(pointer) CALLEE(TAction, pointer)
 
 class CController: public CApplicationComponent
 {
@@ -31,7 +33,7 @@ public:
 	virtual ~CController();
 	virtual void init();
 	void registerAction(const string &name, TAction action);
-	virtual void run(const string &actionId, CHttpRequest * const request, CWebApplication * const app) throw (CHttpException);
+	virtual void run(const string &actionId, CHttpRequest * const request, CHttpResponse * response) throw (CHttpException);
 };
 
 #endif /* CCONTROLLER_H_ */

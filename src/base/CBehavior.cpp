@@ -36,8 +36,3 @@ void CBehavior::setEnabled(bool value)
 {
 	_enabled = value;
 }
-
-void CBehavior::handleEvent(const string &name, CEvent &event)
-{
-
-}

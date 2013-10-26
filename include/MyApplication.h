@@ -15,6 +15,7 @@ class MyApplication: public CWebApplication
 public:
 	MyApplication(const string &configPath, int argc, char * const argv[]);
 	virtual ~MyApplication();
+	void logStdout(CEvent & event);
 
 protected:
 	void registerComponents();

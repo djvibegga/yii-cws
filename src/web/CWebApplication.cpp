@@ -40,11 +40,11 @@ void CWebApplication::run() throw(CException)
 
 void CWebApplication::renderException(const CException & e) const
 {
-	echo("Content-type: text/html\r\n\r\n<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n");
+	CHttpResponse * response = getResponse();
 	if (APP_DEBUG) {
-		echo(e.getFullMessage());
+		response->echo(e.getFullMessage());
 	} else {
-		echo(e.getMessage());
+		response->echo(e.getMessage());
 	}
 }
 
@@ -94,23 +94,15 @@ void CWebApplication::handleRequest()
 	}
 }
 
-void CWebApplication::echo(const string & content) const
-{
-	FCGX_FPrintF(request.out, content.c_str());
-}
-
-const CWebApplication & CWebApplication::operator<< (const string &right) const
-{
-	echo(right);
-	return *this;
-}
-
 void CWebApplication::beginRequest()
 {
 	CApplication::beginRequest();
 	CHttpRequest * request = new CHttpRequest();
+	CHttpResponse * response = new CHttpResponse(this);
 	request->init();
+	response->init();
 	setComponent("request", request);
+	setComponent("response", response);
 }
 
 void CWebApplication::processRequest()
@@ -130,12 +122,18 @@ void CWebApplication::processRequest()
 void CWebApplication::endRequest()
 {
 	delete getComponent("request");
+	delete getComponent("response");
 	CApplication::endRequest();
 }
 
 CHttpRequest * CWebApplication::getRequest() const
 {
 	return dynamic_cast<CHttpRequest*>(getComponent("request"));
+}
+
+CHttpResponse * CWebApplication::getResponse() const
+{
+	return dynamic_cast<CHttpResponse*>(getComponent("response"));
 }
 
 CUrlManager * CWebApplication::getUrlManager() const
@@ -172,7 +170,7 @@ void CWebApplication::runController(const string &route)
 		CController * controller = ca.controller;
 		CController * oldController = dynamic_cast<CController*>(getComponent("controller"));
 		setComponent("controller", controller);
-		controller->run(ca.actionId, getRequest(), this);
+		controller->run(ca.actionId, getRequest(), this->getResponse());
 		setComponent("controller", oldController);
 	}
 }

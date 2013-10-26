@@ -28,6 +28,7 @@ class CEvent;
 class CApplication: public CModule
 {
 private:
+	static bool _failHandlerCalled;
 	string _configPath;
 	string _id;
 	xml_document * _xmlConfig;
@@ -66,7 +67,11 @@ protected:
 	virtual void beginRequest();
 	virtual void handleRequest();
 	virtual void endRequest();
+	virtual void onProgramError();
 	virtual void processRequest() = 0;
+
+private:
+	static void _programFailCallback(int signum);
 };
 
 #endif /* APPLICATION_H_ */

@@ -29,22 +29,15 @@ CLogRouter::~CLogRouter()
 void CLogRouter::init()
 {
 	CApplicationComponent::init();
-	Jvibetto::getLogger().attachEventHandler("onFlush", this);
-	Jvibetto::app()->attachEventHandler("onEndRequest", this);
+	Jvibetto::getLogger()
+		.attachEventHandler("onFlush", this, reinterpret_cast<TEventHandler>(&CLogRouter::collectLogs));
+	Jvibetto::app()
+		->attachEventHandler("onEndRequest", this, reinterpret_cast<TEventHandler>(&CLogRouter::processLogs));
 }
 
 void CLogRouter::addRoute(CLogRoute * route)
 {
 	_routes.push_back(route);
-}
-
-void CLogRouter::handleEvent(const string &name, CEvent &event)
-{
-	if (name == "onFlush") {
-		collectLogs(event);
-	} else if (name == "onEndRequest") {
-		processLogs(event);
-	}
 }
 
 void CLogRouter::collectLogs(CEvent & event)

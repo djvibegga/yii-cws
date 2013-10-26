@@ -20,7 +20,7 @@ class CEvent;
 
 using namespace std;
 
-typedef vector<string> TEventNameList;
+typedef map<string, TEventHandler> TEventsMap;
 
 class CBehavior: public IBehavior, public IEventHandler
 {
@@ -34,8 +34,7 @@ public:
 	virtual void detach(CComponent * const component);
 	bool getEnabled();
 	void setEnabled(bool value);
-	virtual void handleEvent(const string &name, CEvent &event);
-	virtual TEventNameList events() = 0;
+	virtual TEventsMap events() = 0;
 };
 
 

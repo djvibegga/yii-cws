@@ -13,16 +13,19 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <stdlib.h>
+#include <signal.h>
 
 using namespace std;
 
 CApplication * CApplication::_instance = 0;
+bool CApplication::_failHandlerCalled = false;
 
 CApplication::CApplication(const string &configPath, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0),
   _log(0)
 {
+	signal(SIGSEGV, CApplication::_programFailCallback);
 	_configPath = configPath;
 	_xmlConfig = new xml_document();
 	for (int i = 0; i < argc; ++i) {
@@ -70,6 +73,7 @@ boost::filesystem::path CApplication::getBasePath() const
 void CApplication::init() throw(CException)
 {
 	_instance = this;
+	attachEventHandler("onFatalError", this, EVENT_HANDLER(&CApplication::onProgramError));
 	_log = new CLogRouter(this);
 	_log->init();
 	xml_parse_result result = _xmlConfig->load_file(_configPath.c_str());
@@ -168,7 +172,24 @@ CLogRouter * CApplication::getLog()
 	return _log;
 }
 
+void CApplication::onProgramError()
+{
+	getLogger().flush(true);
+}
+
 CApplication * CApplication::getInstance()
 {
 	return _instance;
+}
+
+void CApplication::_programFailCallback(int signum)
+{
+	if (!_failHandlerCalled) {
+		_failHandlerCalled = true;
+		CApplication * app = getInstance();
+		CEvent event(app);
+		app->raiseEvent("onFatalError", event);
+	}
+	signal(signum, SIG_DFL);
+	exit(3);
 }

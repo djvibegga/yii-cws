@@ -46,6 +46,11 @@ void CLogger::log(const string & message, const string & level, const string & c
 	element.time = ptime(from_time_t(time(0)));
 	_logs.push_back(element);
 	++_logCount;
+	if (hasEventHandler("onLog")) {
+		CEvent event(this, boost::assign::map_list_of("logItem", (void*)&element));
+		onLog(event);
+	}
+
 	if (autoFlush > 0 && _logCount >= autoFlush && !_processing) {
 		_processing = true;
 		flush(autoDump);
@@ -103,6 +108,11 @@ void CLogger::clearLogs()
 {
 	_logs.clear();
 	_logCount = 0;
+}
+
+void CLogger::onLog(CEvent & event)
+{
+	raiseEvent("onLog", event);
 }
 
 void CLogger::onFlush(CEvent & event)

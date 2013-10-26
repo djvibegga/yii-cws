@@ -17,31 +17,6 @@
 #include "base/Jvibetto.h"
 #include "MyApplication.h"
 
-using namespace std;
-
-
-void runServer()
-{
-//	CDbConnection db;
-//	db.applyConfig(config.root());
-//	try {
-//		if (!db.open()) {
-//			log << "Can\'t establish mysql connection.";
-//			log.close();
-//			exit(1);
-//		}
-//	} catch (const CException &e) {
-//		cout << e.getFullMessage() << endl;
-//		return;
-//	}
-//
-//	MYSQL * conn = db.getConnection();
-//	MYSQL_RES *res;
-//	MYSQL_ROW row;
-//
-//	string content = "";
-}
-
 int main(int argc, char* const argv[])
 {
 	string configPath = getcwd(0, 0);

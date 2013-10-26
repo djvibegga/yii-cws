@@ -23,6 +23,8 @@ typedef map<string, CController*> TControllerMap;
 typedef map<string, string> TRequestParams;
 typedef vector<string> TNamesPath;
 
+#define CALLEE(calltype, pointer) reinterpret_cast<calltype>(pointer)
+
 struct TRouteStruct
 {
 	TRouteStruct() {}
@@ -35,8 +37,10 @@ class IEventHandler
 {
 public:
 	virtual ~IEventHandler() {}
-	virtual void handleEvent(const string &name, CEvent &event) = 0;
 };
+
+typedef void(IEventHandler::* TEventHandler)(CEvent & event);
+#define EVENT_HANDLER(pointer) CALLEE(TEventHandler, pointer)
 
 class IBehavior
 {

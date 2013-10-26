@@ -27,6 +27,19 @@ typedef vector<string> TLogCategoryList;
 
 class CLogger: public CComponent
 {
+private:
+	TLogElementList _logs;
+	unsigned int _logCount;
+	TLogLevelList _levels;
+	TLogCategoryList _categories;
+	TLogCategoryList _except;
+	//private $_timings;
+	bool _processing;
+
+	static TLogCategoryList _lowerList(const vector<string> & list);
+	bool _filterByLevel(const SLogElement & element) const;
+	bool _filterByCategory(const SLogElement & element) const;
+
 public:
 	static const string LEVEL_TRACE;
 	static const string LEVEL_WARNING;
@@ -43,21 +56,9 @@ public:
 	TLogElementList getLogs(const TLogLevelList & levels, const TLogCategoryList & categories);
 	TLogElementList getLogs(const TLogLevelList & levels, const TLogCategoryList & categories, const TLogCategoryList & except);
 	void clearLogs();
-
-private:
-	TLogElementList _logs;
-	unsigned int _logCount;
-	TLogLevelList _levels;
-	TLogCategoryList _categories;
-	TLogCategoryList _except;
-	//private $_timings;
-	bool _processing;
-
-	static TLogCategoryList _lowerList(const vector<string> & list);
-	bool _filterByLevel(const SLogElement & element) const;
-	bool _filterByCategory(const SLogElement & element) const;
 	void flush(bool dumpLogs = false);
 	void onFlush(CEvent & event);
+	void onLog(CEvent & event);
 };
 
 #endif /* CLOGGER_H_ */

@@ -10,6 +10,7 @@
 
 #include "base/CComponent.h"
 #include "logging/CLogger.h"
+#include "base/CException.h"
 
 class CLogRoute: public CComponent
 {
@@ -23,7 +24,7 @@ public:
 
 	CLogRoute();
 	virtual ~CLogRoute();
-	virtual void init() = 0;
+	virtual void init() throw (CException) = 0;
 	void setLevels(const string & levels);
 	void setCategories(const string & categories);
 	void setExcept(const string & except);

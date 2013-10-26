@@ -13,7 +13,7 @@
 
 typedef vector<CLogRoute*> TLogRouteList;
 
-class CLogRouter: public CApplicationComponent, public IEventHandler
+class CLogRouter: public CApplicationComponent
 {
 private:
 	TLogRouteList _routes;
@@ -24,7 +24,6 @@ public:
 	virtual ~CLogRouter();
 	virtual void init();
 	void addRoute(CLogRoute * route);
-	virtual void handleEvent(const string &name, CEvent &event);
 	void collectLogs(CEvent & event);
 	void processLogs(CEvent & event);
 };

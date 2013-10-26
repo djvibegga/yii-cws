@@ -16,7 +16,7 @@ public:
 	ProductController(CModule * parent);
 	virtual ~ProductController();
 	void init();
-	void actionTest(CHttpRequest * const request, CWebApplication * const app);
+	void actionTest(CHttpRequest * const request, CHttpResponse * response);
 };
 
 #endif /* PRODUCTCONTROLLER_H_ */

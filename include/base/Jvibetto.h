@@ -17,8 +17,9 @@ public:
 	static CLogger & getLogger();
 	static void log(
 		const string & message,
-		const string & level = "info",
+		const string & level = CLogger::LEVEL_INFO,
 		const string & category = "application");
+	static void trace(const string & message, const string & category = "application");
 };
 
 #endif /* YIIBASE_H_ */
