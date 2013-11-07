@@ -16,20 +16,21 @@
 
 using namespace std;
 
-typedef void* TDbColumnValue;
-typedef map<string, TDbColumnValue> TDbRow;
-
 class CDbDataReader: public CComponent
 {
 private:
-	MYSQL_STMT * _statement;
 	bool _closed;
-	TDbRow _row;
 	int _index;
+	SACommand * _saCommand;
 
 public:
-	CDbDataReader(const CDbCommand & command);
+	CDbDataReader(SACommand * command);
 	~CDbDataReader();
+	bool nextResult();
+	SAField & readColumn(int columnNum);
+	SAField & readColumn(const string & columnName);
+	TDbRow readRow();
+	int getRowCount() const;
 };
 
 #endif /* CDBDATAREADER_H_ */

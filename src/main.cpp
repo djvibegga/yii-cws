@@ -9,12 +9,11 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include "db/CDbConnection.h"
-#include "base/CEvent.h"
-#include "base/CModule.h"
-#include "base/CException.h"
-#include "base/CHttpException.h"
-#include "base/Jvibetto.h"
+#include <base/CEvent.h>
+#include <base/CModule.h>
+#include <base/CException.h>
+#include <base/Jvibetto.h>
+
 #include "MyApplication.h"
 
 int main(int argc, char* const argv[])

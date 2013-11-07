@@ -5,23 +5,21 @@
 
 CDbConnection::CDbConnection(const CModule * module)
 : CApplicationComponent(module),
-  _connection(0),
+  _saConnection(0),
   _isActive(false),
   _commandBuilder(0),
   connectionString(""),
   username(""),
-  password(""),
-  enableParamLogging(false)
+  password("")
 {
 }
 
 CDbConnection::CDbConnection(const CModule * module, string dsn, string username, string password)
 : CApplicationComponent(module),
+  _saConnection(0),
   _isActive(false),
-  _commandBuilder(0),
-  enableParamLogging(false)
+  _commandBuilder(0)
 {
-	this->_connection = 0;
 	connectionString = dsn;
 	this->username = username;
 	this->password = password;
@@ -29,11 +27,11 @@ CDbConnection::CDbConnection(const CModule * module, string dsn, string username
 
 bool CDbConnection::open() throw(CException)
 {
-	_connection = mysql_init(NULL);
-	boost::regex pattern("(\\w+):host=([\\d\\.]+);dbname=(\\w+)");
+	boost::regex pattern("(\\w+):host=([\\d\\.]+);port=(\\d+);dbname=(\\w+)");
 	boost::smatch match;
 
-	string driver, host, dbname = "";
+	_saConnection = new SAConnection();
+	string driver, host, port, dbname = "";
 	if (!boost::regex_match(connectionString, match, pattern)) {
 		string message = "Invalid connection string passed. ";
 		message.append(connectionString);
@@ -41,29 +39,29 @@ bool CDbConnection::open() throw(CException)
 	} else {
 		driver = match[1];
 		host = match[2];
-		dbname = match[3];
+		port = match[3];
+		dbname = match[4];
 	}
-	if (mysql_real_connect(
-		_connection,
-		host.c_str(),
-		username.c_str(), password.c_str(), dbname.c_str(),
-		0, NULL, 0
-	)) {
-		_isActive = true;
-		return true;
+	try {
+		_saConnection->Connect((host + ":" + port + "@" + dbname).c_str(), username.c_str(), password.c_str(), SA_MySQL_Client);
+	} catch (SAException & e) {
+		return false;
 	}
-    return false;
+	_isActive = true;
+	return true;
 }
 
 void CDbConnection::close()
 {
-	mysql_close(_connection);
+	_saConnection->Disconnect();
+	delete _saConnection;
+	_saConnection = 0;
 	_isActive = false;
 }
 
-MYSQL * CDbConnection::getConnection() const
+SAConnection * CDbConnection::getConnection() const
 {
-	return _connection;
+	return _saConnection;
 }
 
 void CDbConnection::applyConfig(const xml_node & config)

@@ -4,7 +4,7 @@
 using namespace std;
 
 #include <string>
-#include <mysql/mysql.h>
+#include <sqlapi/SQLAPI.h>
 #include <base/CApplicationComponent.h>
 #include "base/CException.h"
 
@@ -14,7 +14,7 @@ class CDbCommandBuilder;
 class CDbConnection: public CApplicationComponent
 {
 private:
-	MYSQL * _connection;
+	SAConnection * _saConnection;
 	bool _isActive;
 	CDbCommandBuilder * _commandBuilder;
 
@@ -22,13 +22,12 @@ public:
 	string connectionString;
 	string username;
 	string password;
-	bool enableParamLogging;
 
 	CDbConnection(const CModule * module);
 	CDbConnection(const CModule * module, string dsn, string username, string password);
 	bool open() throw(CException);
 	void close();
-	MYSQL * getConnection() const;
+	SAConnection * getConnection() const;
 	void setActive(bool value);
 	bool setActive() const;
 	virtual void applyConfig(const xml_node & config);

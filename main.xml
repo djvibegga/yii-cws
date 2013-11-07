@@ -2,7 +2,7 @@
     <threadsCount value="1000"/>
     <components>
         <db>
-            <cdn value="mysql:host=127.0.0.1;dbname=ecology"/>
+            <cdn value="mysql:host=127.0.0.1;port=3306;dbname=ecology"/>
             <username value="root"/>
             <password value=""/>
         </db>

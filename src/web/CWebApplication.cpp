@@ -41,11 +41,11 @@ void CWebApplication::run() throw(CException)
 void CWebApplication::renderException(const CException & e) const
 {
 	CHttpResponse * response = getResponse();
-	if (APP_DEBUG) {
-		response->echo(e.getFullMessage());
-	} else {
-		response->echo(e.getMessage());
-	}
+#ifdef JV_DEBUG
+	response->echo(e.getFullMessage());
+#else
+	response->echo(e.getMessage());
+#endif
 }
 
 void CWebApplication::mainLoop() throw(CException)

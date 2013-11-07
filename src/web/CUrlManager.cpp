@@ -77,18 +77,18 @@ CUrlRule::CUrlRule(const string & routeExp, const string & patternExp)
 		routePattern = "^" + CStringUtils::strtr(route, tr2) + "$";
 	}
 
-	if (APP_DEBUG) {
-		try {
-			boost::smatch matches;
-			boost::regex_match(string("test"), matches, boost::regex(pattern));
-		} catch (const boost::regex_error & e) {
-			throw CException(
-				"The URL pattern '"
-				+ pattern + "' for route '"
-				+ route + "' is not a valid regular expression."
-			);
-		}
+#ifdef JV_DEBUG
+	try {
+		boost::smatch matches;
+		boost::regex_match(string("test"), matches, boost::regex(pattern));
+	} catch (const boost::regex_error & e) {
+		throw CException(
+			"The URL pattern '"
+			+ pattern + "' for route '"
+			+ route + "' is not a valid regular expression."
+		);
 	}
+#endif
 }
 
 CUrlRule::~CUrlRule()

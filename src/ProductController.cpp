@@ -8,6 +8,8 @@
 #include "ProductController.h"
 #include <web/CWebApplication.h>
 #include <base/Jvibetto.h>
+#include <db/CDbCommand.h>
+#include <db/CDbDataReader.h>
 
 using namespace std;
 
@@ -35,4 +37,24 @@ void ProductController::actionTest(CHttpRequest * const request, CHttpResponse *
 	for (TRequestParams::iterator iter = params.begin(); iter != params.end(); ++iter) {
 		*response << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
 	}
+
+	CDbConnection * connection = dynamic_cast<CDbConnection*>(Jvibetto::app()->getComponent("db"));
+	CDbCommand cmd(connection, "select id, email from user where id >= :id");
+
+	unsigned long id = 1;
+	cmd.bindParam("id", id);
+
+	stringstream ss;
+
+	CDbDataReader reader = cmd.queryAll();
+	TDbRow row;
+	int i = 0;
+	while (reader.nextResult()) {
+		row = reader.readRow();
+		ss << "Row " << i << " fetched: ID => " << row["id"]->asULong() << "<br/>";
+		ss << "Row " << i << " fetched: email => " << row["email"]->asString().GetMultiByteChars() << "<br/>";
+		++i;
+	}
+
+	*response << ss.str();
 }

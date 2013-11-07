@@ -10,66 +10,77 @@
 #include "db/CDbDataReader.h"
 #include "base/Jvibetto.h"
 #include <mysql/mysql.h>
-
-CDbCommandParameter::CDbCommandParameter(ECommandParameter type, TDbParameter value)
-{
-	this->type = type;
-	this->value = value;
-}
+#include "config.h"
 
 CDbCommandParameter::CDbCommandParameter()
 {
 }
 
-string CDbCommandParameter::dump() const
+CDbCommandParameter::CDbCommandParameter(const string & name, ESQLType type, TDbValue value)
+: name(name),
+  type(type),
+  value(value)
 {
-	switch (type) {
-	case PARAM_STRING:
-		return string((const char*)value);
-	}
-	throw CException("Invalid data type. Can\'t dump db command parameter.");
 }
 
-MYSQL_BIND * CDbCommandParameter::constructBind() const
+string CDbCommandParameter::dump() const
 {
-	MYSQL_BIND * param = new MYSQL_BIND;
-	memset(param, 0, sizeof(param));
-	//memset (result, 0, sizeof (result));
+	stringstream ss;
 	switch (type) {
-	case PARAM_STRING:
-		param->buffer_type = MYSQL_TYPE_VARCHAR;
-	case PARAM_INT:
-		param->buffer_type = MYSQL_TYPE_LONG;
-	case PARAM_FLOAT:
-		param->buffer_type = MYSQL_TYPE_FLOAT;
-	case PARAM_DOUBLE:
-		param->buffer_type = MYSQL_TYPE_DOUBLE;
+	case SQL_STRING:
+		ss << (const char*)value;
+		break;
+	case SQL_DOUBLE:
+		ss << *((double*)value);
+		break;
+	case SQL_INT:
+		ss << *((long*)value);
+		break;
+	case SQL_UNSIGNED_INT:
+			ss << *((unsigned long*)value);
+		break;
+	default:
+		throw CException("Invalid data type. Can\'t dump db command parameter.");
 	}
-	param->buffer      = value;
-	param->is_unsigned = 0;
-	param->is_null     = 0;
-	param->length      = 0;
-	return param;
+	return ss.str();
+}
+
+void CDbCommandParameter::bind(SACommand * command) const
+{
+	switch (type) {
+	case SQL_STRING:
+		command->Param(name.c_str()).setAsString() = (const char*)value;
+		break;
+	case SQL_INT:
+		command->Param(name.c_str()).setAsLong() = *((long*)value);
+		break;
+	case SQL_UNSIGNED_INT:
+		command->Param(name.c_str()).setAsULong() = *((unsigned long*)value);
+		break;
+	case SQL_DOUBLE:
+		command->Param(name.c_str()).setAsDouble() = *((double*)value);
+		break;
+	}
 }
 
 CDbCommand::CDbCommand(const CDbConnection * const connection, const string & query)
 : _connection(connection),
   _text(query),
-  _statement(0)
+  _saCommand(0)
 {
 }
 
 CDbCommand::CDbCommand(const CDbConnection * const connection)
 : _connection(connection),
   _text(""),
-  _statement(0)
+  _saCommand(0)
 {
 }
 
 CDbCommand::~CDbCommand()
 {
-	for (vector<MYSQL_BIND*>::iterator iter = _binds.begin(); iter != _binds.end(); ++iter) {
-		delete *iter;
+	if (_saCommand != 0) {
+		delete _saCommand;
 	}
 }
 
@@ -83,11 +94,6 @@ string CDbCommand::getText() const
 	return _text;
 }
 
-MYSQL_STMT * CDbCommand::getStatement() const
-{
-	return _statement;
-}
-
 const CDbConnection * CDbCommand::getConnection() const
 {
 	return _connection;
@@ -95,25 +101,25 @@ const CDbConnection * CDbCommand::getConnection() const
 
 CDbCommand & CDbCommand::bindParam(const string & name, const string & value)
 {
-	_params[name] = CDbCommandParameter(PARAM_STRING, (TDbParameter)value.c_str());
+	_params[name] = CDbCommandParameter(name, SQL_STRING, (TDbValue)value.c_str());
 	return *this;
 }
 
-CDbCommand & CDbCommand::bindParam(const string & name, const int value)
+CDbCommand & CDbCommand::bindParam(const string & name, const long value)
 {
-	_params[name] = CDbCommandParameter(PARAM_INT, (TDbParameter)&value);
+	_params[name] = CDbCommandParameter(name, SQL_INT, (TDbValue)&value);
 	return *this;
 }
 
-CDbCommand & CDbCommand::bindParam(const string & name, const float & value)
+CDbCommand & CDbCommand::bindParam(const string & name, const unsigned long value)
 {
-	_params[name] = CDbCommandParameter(PARAM_FLOAT, (TDbParameter)&value);
+	_params[name] = CDbCommandParameter(name, SQL_UNSIGNED_INT, (TDbValue)&value);
 	return *this;
 }
 
 CDbCommand & CDbCommand::bindParam(const string & name, const double & value)
 {
-	_params[name] = CDbCommandParameter(PARAM_DOUBLE, (TDbParameter)&value);
+	_params[name] = CDbCommandParameter(name, SQL_DOUBLE, (TDbValue)&value);
 	return *this;
 }
 
@@ -125,138 +131,125 @@ CDbCommand & CDbCommand::mergeParametersWith(const TCommandParameterMap & other)
 	return *this;
 }
 
-int CDbCommand::execute() throw (CDbException)
+string CDbCommand::_makeParametersDump(const TCommandParameterMap & params)
+{
+#ifdef JV_DB_PARAM_LOGGING
+	string ret;
+	if (!params.empty()) {
+		vector<string> parametersList;
+		for (TCommandParameterMap::const_iterator iter = params.begin(); iter != params.end(); ++iter) {
+			parametersList.push_back(iter->first + "=" + iter->second.dump());
+		}
+		ret = ". Bound with " + CStringUtils::implode(", ", parametersList);
+	}
+	return ret;
+#else
+	return "";
+#endif
+}
+
+long unsigned int CDbCommand::execute() throw (CDbException)
 {
 	return execute(TCommandParameterMap());
 }
 
-int CDbCommand::execute(const TCommandParameterMap & params) throw (CDbException)
+long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw (CDbException)
 {
 	mergeParametersWith(params);
-	string parametersDump;
-	if (_connection->enableParamLogging && !_params.empty()) {
-		vector<string> parametersList;
-		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
-			parametersList.push_back(iter->first + "=" + iter->second.dump());
-		}
-		parametersDump = "Bound with " + CStringUtils::implode(", ", parametersList);
-	}
+	string parametersDump = _makeParametersDump(_params);
 	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
-	try
-	{
-		MYSQL * connection = _connection->getConnection();
-		_statement = mysql_stmt_init(connection);
-		if (_statement == 0) {
-			//throw CDbException()
-		}
-
-		if (mysql_stmt_prepare(_statement, _text.c_str(), _text.length())) {
-			const char * error = mysql_stmt_error(_statement);
-			throw CDbException(string(error), mysql_stmt_errno(_statement));
-		}
-
-		MYSQL_BIND * bind = 0;
+	try {
+		SAConnection * connection = _connection->getConnection();
+		_saCommand = new SACommand(connection);
+		_saCommand->setCommandText(_text.c_str());
 		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
-			bind = iter->second.constructBind();
-			mysql_stmt_bind_param(_statement, bind);
-			_binds.push_back(bind);
+			iter->second.bind(_saCommand);
 		}
+		_saCommand->Execute();
+		connection->Commit();
+		return _saCommand->RowsAffected();
 
-		mysql_stmt_execute(_statement);
+	} catch (const SAException & e) {
 
-		return mysql_stmt_affected_rows(_statement);
-
-	} catch(const CException & e) {
-		/*$errorInfo=$e instanceof PDOException ? $e->errorInfo : null;
-		$message=$e->getMessage();
-		Yii::log(Yii::t('yii','CDbCommand::execute() failed: {error}. The SQL statement executed was: {sql}.',
-			array('{error}'=>$message, '{sql}'=>$this->getText().$par)),CLogger::LEVEL_ERROR,'system.db.CDbCommand');
-
-		if(YII_DEBUG)
-			$message.='. The SQL statement executed was: '.$this->getText().$par;
-
-		throw new CDbException(Yii::t('yii','CDbCommand failed to execute the SQL statement: {error}',
-			array('{error}'=>$message)),(int)$e->getCode(),$errorInfo);*/
+		string message = e.ErrText().GetMultiByteChars();
+		Jvibetto::log(
+			"CDbCommand::execute() failed: " + message
+			+ ". The SQL statement executed was: " + _text + "."
+		);
+#ifdef JV_DEBUG
+		message += ". The SQL statement executed was: " + _text + parametersDump;
+#endif
+		throw CDbException(
+			"CDbCommand failed to execute the SQL statement: " + message,
+			(int)e.ErrNativeCode()
+		);
 	}
 	return 0;
 }
 
-
-CDbDataReader CDbCommand::_queryInternal(const string & method, const TCommandParameterMap & params)
+CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) throw (CDbException)
 {
-	/*$params=array_merge($this->params,$params);
+	mergeParametersWith(params);
+	string parametersDump = _makeParametersDump(_params);
+	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
 
-	if($this->_connection->enableParamLogging && ($pars=array_merge($this->_paramLog,$params))!==array())
-	{
-		$p=array();
-		foreach($pars as $name=>$value)
-			$p[$name]=$name.'='.var_export($value,true);
-		$par='. Bound with '.implode(', ',$p);
-	}
-	else
-		$par='';
-
-	Yii::trace('Querying SQL: '.$this->getText().$par,'system.db.CDbCommand');
-
-	if($this->_connection->queryCachingCount>0 && $method!==''
-			&& $this->_connection->queryCachingDuration>0
-			&& $this->_connection->queryCacheID!==false
-			&& ($cache=Yii::app()->getComponent($this->_connection->queryCacheID))!==null)
-	{
-		$this->_connection->queryCachingCount--;
-		$cacheKey='yii:dbquery'.$this->_connection->connectionString.':'.$this->_connection->username;
-		$cacheKey.=':'.$this->getText().':'.serialize(array_merge($this->_paramLog,$params));
-		if(($result=$cache->get($cacheKey))!==false)
-		{
-			Yii::trace('Query result found in cache','system.db.CDbCommand');
-			return $result[0];
+	try {
+		SAConnection * connection = _connection->getConnection();
+		_saCommand = new SACommand(connection);
+		_saCommand->setCommandText(_text.c_str());
+		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
+			iter->second.bind(_saCommand);
 		}
+		_saCommand->Execute();
+		return CDbDataReader(_saCommand);
+
+	} catch (const SAException & e) {
+
+		string message = e.ErrText().GetMultiByteChars();
+		Jvibetto::log(
+			"CDbCommand::_queryInternal() failed: " + message
+			+ ". The SQL statement executed was: " + _text + "."
+		);
+#ifdef JV_DEBUG
+		message += ". The SQL statement executed was: " + _text + parametersDump;
+#endif
+		throw CDbException(
+			"CDbCommand failed to execute the SQL statement: " + message,
+			(int)e.ErrNativeCode()
+		);
 	}
+}
 
-	try
-	{
-		if($this->_connection->enableProfiling)
-			Yii::beginProfile('system.db.CDbCommand.query('.$this->getText().$par.')','system.db.CDbCommand.query');
+CDbDataReader CDbCommand::queryAll() throw (CDbException)
+{
+	return queryAll(TCommandParameterMap());
+}
 
-		$this->prepare();
-		if($params===array())
-			$this->_statement->execute();
-		else
-			$this->_statement->execute($params);
+CDbDataReader CDbCommand::queryAll(const TCommandParameterMap & params) throw (CDbException)
+{
+	return _queryInternal(params);
+}
 
-		if($method==='')
-			$result=new CDbDataReader($this);
-		else
-		{
-			$mode=(array)$mode;
-			call_user_func_array(array($this->_statement, 'setFetchMode'), $mode);
-			$result=$this->_statement->$method();
-			$this->_statement->closeCursor();
-		}
+TDbRow CDbCommand::queryRow() throw (CDbException)
+{
+	return queryRow(TCommandParameterMap());
+}
 
-		if($this->_connection->enableProfiling)
-			Yii::endProfile('system.db.CDbCommand.query('.$this->getText().$par.')','system.db.CDbCommand.query');
+TDbRow CDbCommand::queryRow(const TCommandParameterMap & params) throw (CDbException)
+{
+	CDbDataReader reader = _queryInternal(params);
+	reader.nextResult();
+	return reader.readRow();
+}
 
-		if(isset($cache,$cacheKey))
-			$cache->set($cacheKey, array($result), $this->_connection->queryCachingDuration, $this->_connection->queryCachingDependency);
+SAField & CDbCommand::queryScalar() throw (CDbException)
+{
+	return queryScalar(TCommandParameterMap());
+}
 
-		return $result;
-	}
-	catch(Exception $e)
-	{
-		if($this->_connection->enableProfiling)
-			Yii::endProfile('system.db.CDbCommand.query('.$this->getText().$par.')','system.db.CDbCommand.query');
-
-		$errorInfo=$e instanceof PDOException ? $e->errorInfo : null;
-		$message=$e->getMessage();
-		Yii::log(Yii::t('yii','CDbCommand::{method}() failed: {error}. The SQL statement executed was: {sql}.',
-			array('{method}'=>$method, '{error}'=>$message, '{sql}'=>$this->getText().$par)),CLogger::LEVEL_ERROR,'system.db.CDbCommand');
-
-		if(YII_DEBUG)
-			$message.='. The SQL statement executed was: '.$this->getText().$par;
-
-		throw new CDbException(Yii::t('yii','CDbCommand failed to execute the SQL statement: {error}',
-			array('{error}'=>$message)),(int)$e->getCode(),$errorInfo);
-	}*/
-	return CDbDataReader(*this);
+SAField & CDbCommand::queryScalar(const TCommandParameterMap & params) throw (CDbException)
+{
+	CDbDataReader reader = _queryInternal(params);
+	reader.nextResult();
+	return reader.readColumn(0);
 }

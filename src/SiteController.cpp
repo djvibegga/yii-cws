@@ -29,12 +29,6 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 {
 	*response << "I am site controller. Action index.";
 
-	CDbConnection * connection = dynamic_cast<CDbConnection*>(Jvibetto::app()->getComponent("db"));
-	CDbCommand cmd(connection, "update user set password = md5('admin') where id = :id");
-	cmd.bindParam(":1", 1);
-	cmd.execute();
-
-
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	CUrlManager * urlManager = app->getUrlManager();
 	TRouteStruct route("site/index");
