@@ -10,8 +10,10 @@
 #include <base/Jvibetto.h>
 #include <db/CDbCommand.h>
 #include <db/CDbDataReader.h>
+#include <base/cpptempl.h>
 
 using namespace std;
+using namespace cpptempl;
 
 ProductController::ProductController(CModule * parent)
 : CController("product", parent)
@@ -44,17 +46,19 @@ void ProductController::actionTest(CHttpRequest * const request, CHttpResponse *
 	unsigned long id = 1;
 	cmd.bindParam("id", id);
 
-	stringstream ss;
-
 	CDbDataReader reader = cmd.queryAll();
 	TDbRow row;
-	int i = 0;
+	cpptempl::data_map viewData;
+	cpptempl::data_map user;
 	while (reader.nextResult()) {
 		row = reader.readRow();
-		ss << "Row " << i << " fetched: ID => " << row["id"]->asULong() << "<br/>";
-		ss << "Row " << i << " fetched: email => " << row["email"]->asString().GetMultiByteChars() << "<br/>";
-		++i;
+		user["id"] = string(row["id"]->asString().GetMultiByteChars());
+		user["email"] = string(row["email"]->asString().GetMultiByteChars());
+		viewData["users"].push_back(user);
 	}
 
-	*response << ss.str();
+	string text = "{% for user in users %}ID: {$user.id}, Email: {$user.email}{% endfor %}";
+	string result = cpptempl::parse(text, viewData);
+
+	*response << result;
 }
