@@ -15,6 +15,15 @@ namespace cpptempl
 	//////////////////////////////////////////////////////////////////////////
 
 	// data_map
+    data_map::data_map() {}
+
+    data_map::data_map(const std::map<std::string, std::string> & from)
+    {
+        for (std::map<std::string, std::string>::const_iterator iter = from.begin(); iter != from.end(); ++iter) {
+            data[std::wstring(iter->first.begin(), iter->first.end())] = data_ptr(std::wstring(iter->second.begin(), iter->second.end()));
+        }
+    }
+
 	data_ptr& data_map::operator [](const std::wstring& key) {
 		return data[key];
 	}

@@ -55,21 +55,6 @@ void CApplication::setId(const string &id)
 	_id = id;
 }
 
-void CApplication::setBasePath(const string & path)
-{
-	setBasePath(boost::filesystem::path(path));
-}
-
-void CApplication::setBasePath(const boost::filesystem::path & path)
-{
-	_basePath = boost::filesystem::absolute(path);
-}
-
-boost::filesystem::path CApplication::getBasePath() const
-{
-	return _basePath;
-}
-
 void CApplication::init() throw(CException)
 {
 	_instance = this;
@@ -84,7 +69,7 @@ void CApplication::init() throw(CException)
 	}
 	boost::filesystem::path executablePath(_arguments[0]);
 	_executablePath = boost::filesystem::absolute(executablePath).normalize();
-	setBasePath(_executablePath.parent_path());
+	setBasePath(resolveBasePath());
 	if (_runtimePath.empty()) {
 		setRuntimePath(string(_executablePath.parent_path().c_str()) + "/runtime");
 	}
@@ -162,9 +147,19 @@ void CApplication::setRuntimePath(const string & path)
 	setRuntimePath(boost::filesystem::path(path));
 }
 
+boost::filesystem::path CApplication::resolveBasePath() const
+{
+    return _executablePath.parent_path();
+}
+
 boost::filesystem::path CApplication::getExecutablePath() const
 {
 	return _executablePath;
+}
+
+IViewRenderer * CApplication::getViewRenderer() const
+{
+    return dynamic_cast<IViewRenderer*>(getComponent("viewRenderer"));
 }
 
 CLogRouter * CApplication::getLog()

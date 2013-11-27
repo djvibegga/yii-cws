@@ -11,6 +11,7 @@
 #include "interfaces.h"
 #include "base/CComponent.h"
 #include <memory>
+#include <boost/filesystem.hpp>
 
 class CApplicationComponent;
 
@@ -25,6 +26,8 @@ private:
 	string _id;
 	TComponentsMap _components;
 	TModulesMap _modules;
+	boost::filesystem::path _viewPath;
+    boost::filesystem::path _basePath;
 
 public:
 	TParametersMap params;
@@ -44,6 +47,14 @@ public:
 	IModule * getParent() const;
 	virtual void applyConfig(const xml_node & config);
 	virtual TNamesPath resolveNamePath() const;
+	virtual boost::filesystem::path resolveViewPath() const;
+	void setViewPath(const string & path);
+	void setViewPath(const boost::filesystem::path & path);
+	boost::filesystem::path getViewPath() const;
+	virtual boost::filesystem::path resolveBasePath() const = 0;
+	void setBasePath(const string & path);
+	void setBasePath(const boost::filesystem::path & path);
+	boost::filesystem::path getBasePath() const;
 
 protected:
 	virtual void registerComponents();

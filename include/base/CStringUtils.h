@@ -32,6 +32,7 @@ public:
 	static string urlEncode(const string & src);
 	static string urlDecode(const string & src);
 	static string dirName(const string & path);
+	static string fileGetContents(const string & path);
 
 	static bool lengthComparator(const string & a, const string & b);
 };

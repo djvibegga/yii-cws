@@ -357,7 +357,7 @@ string CUrlManager::createUrlDefault(TRouteStruct & route, const string & ampers
 string CUrlManager::trimScriptName(const string &path)
 {
 	string scriptName = resolveScriptName();
-	unsigned int pos = path.find("/" + scriptName);
+	std::string::size_type pos = path.find("/" + scriptName);
 	if (pos == ::string::npos) {
 		return path;
 	}
@@ -372,7 +372,7 @@ string CUrlManager::getScriptName() const
 string CUrlManager::resolveScriptName()
 {
 	string ret = Jvibetto::app()->getArguments()[0];
-	unsigned int pos = ret.find_last_of("/");
+	std::string::size_type pos = ret.find_last_of("/");
 	return pos == ::string::npos ? "" : ret.substr(pos + 1);
 }
 
@@ -382,7 +382,7 @@ string CUrlManager::getScriptUrl()
 		CWebApplication * app = dynamic_cast<CWebApplication *>(Jvibetto::app());
 		string documentRoot = app->getRequest()->getEnvVar("DOCUMENT_ROOT");
 		string executable(app->getExecutablePath().c_str());
-		unsigned int pos = executable.find(documentRoot);
+		std::string::size_type pos = executable.find(documentRoot);
 		if (pos == ::string::npos) {
 			throw CHttpException(400, "Bad Request or wrong web server configuration");
 		} else {

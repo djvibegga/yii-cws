@@ -80,4 +80,23 @@ public:
 	virtual IModule * getModule(const string &name) const = 0;
 };
 
+#include <base/cpptempl.h>
+
+class IRenderingContext
+{
+public:
+    virtual ~IRenderingContext() {}
+    virtual string renderInternal(const string & viewFile, cpptempl::data_map * data, bool ret) const = 0;
+};
+
+class IViewRenderer
+{
+public:
+    string fileExtension;
+    IViewRenderer() : fileExtension(".tpl") {}
+    virtual ~IViewRenderer() {}
+    virtual string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map * data, bool ret) = 0;
+};
+
+
 #endif /* INTERFACES_H_ */

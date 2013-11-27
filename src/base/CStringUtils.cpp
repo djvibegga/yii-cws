@@ -8,6 +8,7 @@
 #include "base/CStringUtils.h"
 #include <curl/curl.h>
 #include <algorithm>
+#include <fstream.h>
 
 using namespace std;
 
@@ -59,7 +60,7 @@ string CStringUtils::strtr(const string & needle, const TReplacementMap & replac
 	}
 	sort(order.begin(), order.end(), CStringUtils::lengthComparator);
 	string ret = needle;
-	unsigned int pos = 0;
+	std::string::size_type pos = 0;
 	for (vector<string>::iterator iter = order.begin(); iter != order.end(); ++iter) {
 		pos = ret.find(*iter);
 		while (pos != ::string::npos) {
@@ -81,7 +82,7 @@ string CStringUtils::implode(const string &glue, const vector<string> &pieces)
 
 vector<string> CStringUtils::explode(const string &separator, const string & needle)
 {
-	unsigned int pos = needle.find(separator);
+    std::string::size_type pos = needle.find(separator);
 	vector<string> ret;
 	string buff = needle;
 	while (pos != ::string::npos) {
@@ -124,9 +125,20 @@ string CStringUtils::urlDecode(const string & src)
 
 string CStringUtils::dirName(const string & path)
 {
-	unsigned int pos = path.find_last_of("/");
+    std::string::size_type pos = path.find_last_of("/");
 	if (pos == ::string::npos) {
 		return "";
 	}
 	return path.substr(0, pos);
+}
+
+string CStringUtils::fileGetContents(const string & path)
+{
+    std::ifstream in(path.c_str());
+    in.seekg(0, std::ios::end);
+    size_t size = in.tellg();
+    std::string buffer(size, ' ');
+    in.seekg(0);
+    in.read(&buffer[0], size);
+    return buffer;
 }

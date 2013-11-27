@@ -10,8 +10,9 @@
 #include <web/CController.h>
 #include <logging/CFileLogRoute.h>
 #include <logging/CConsoleLogRoute.h>
-#include <db/CDbCommand.h>
+#include <db/CDbConnection.h>
 #include <base/CEvent.h>
+#include <web/renderers/CBaseViewRenderer.h>
 
 #include "SiteController.h"
 #include "ProductController.h"
@@ -47,6 +48,9 @@ void MyApplication::registerComponents()
 	}
 	setComponent(connection);
 
+	CViewRenderer * viewRenderer = new CBaseViewRenderer(this);
+	viewRenderer->init();
+
 	TestBehavior * behavior = new TestBehavior();
 	attachBehavior(behavior);
 
@@ -55,8 +59,10 @@ void MyApplication::registerComponents()
 	urlManager->addRule(new MyUrlRule());
 	urlManager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
 
-	CController * siteController = new SiteController(this);
+	SiteController * siteController = new SiteController(this);
 	siteController->init();
+
+	siteController->actionIndex(0, 0);
 
 	CWebModule * catalog = new CWebModule("catalog", this);
 	catalog->init();

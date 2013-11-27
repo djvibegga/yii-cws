@@ -284,8 +284,8 @@ string CHttpRequest::getHostInfo(const string & schema)
 		if ((port != 80 && schema == "http") || (port != 443 && schema == "https")) {
 			portExp = ":" + port;
 		}
-		unsigned int schemaPos = _hostInfo.find(":");
-		unsigned int portPos = _hostInfo.find_last_of(":");
+		std::string::size_type schemaPos = _hostInfo.find(":");
+		std::string::size_type portPos = _hostInfo.find_last_of(":");
 		if (schemaPos == portPos) {
 			return schema + _hostInfo.substr(schemaPos + 1);
 		} else {
@@ -300,7 +300,7 @@ string CHttpRequest::getPathInfo()
 {
 	if (_pathInfo.empty()) {
 		string pathInfo = getRequestUri();
-		unsigned int pos = pathInfo.find("?");
+		std::string::size_type pos = pathInfo.find("?");
 		if (pos != ::string::npos) {
 			pathInfo = pathInfo.substr(0, pos);
 		}

@@ -8,8 +8,8 @@
 #ifndef CWEBMODULE_H_
 #define CWEBMODULE_H_
 
-#include "base/CModule.h"
-#include "web/CController.h"
+#include <base/CModule.h>
+#include <web/CController.h>
 
 class CWebModule: public CModule
 {
@@ -24,6 +24,7 @@ public:
 	virtual bool hasController(const string & name) const;
 	virtual CController * getController(const string & name) const;
 	virtual void setController(const string & name, CController * instance);
+	virtual boost::filesystem::path resolveBasePath() const;
 };
 
 #endif /* CWEBMODULE_H_ */

@@ -9,7 +9,6 @@
 #include "base/CStringUtils.h"
 #include "db/CDbDataReader.h"
 #include "base/Jvibetto.h"
-#include <mysql/mysql.h>
 #include "config.h"
 
 CDbCommandParameter::CDbCommandParameter()
@@ -105,13 +104,13 @@ CDbCommand & CDbCommand::bindParam(const string & name, const string & value)
 	return *this;
 }
 
-CDbCommand & CDbCommand::bindParam(const string & name, const long value)
+CDbCommand & CDbCommand::bindParam(const string & name, const long & value)
 {
 	_params[name] = CDbCommandParameter(name, SQL_INT, (TDbValue)&value);
 	return *this;
 }
 
-CDbCommand & CDbCommand::bindParam(const string & name, const unsigned long value)
+CDbCommand & CDbCommand::bindParam(const string & name, const unsigned long &value)
 {
 	_params[name] = CDbCommandParameter(name, SQL_UNSIGNED_INT, (TDbValue)&value);
 	return *this;

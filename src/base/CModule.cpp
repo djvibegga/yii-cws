@@ -38,6 +38,12 @@ CModule::~CModule()
 
 void CModule::init()
 {
+    if (_basePath.empty()) {
+        setBasePath(resolveBasePath());
+    }
+    if (_viewPath.empty()) {
+        setViewPath(resolveViewPath());
+    }
 	xml_node config = Jvibetto::app()->getConfigByNamePath(resolveNamePath());
 	applyConfig(config);
 	registerComponents();
@@ -129,4 +135,39 @@ TNamesPath CModule::resolveNamePath() const
 
 void CModule::applyConfig(const xml_node & config)
 {
+}
+
+boost::filesystem::path CModule::resolveViewPath() const
+{
+    return getBasePath().string() + "/views";
+}
+
+void CModule::setViewPath(const boost::filesystem::path & path)
+{
+    _viewPath = path;
+}
+
+void CModule::setViewPath(const string & path)
+{
+    setViewPath(boost::filesystem::path(path));
+}
+
+boost::filesystem::path CModule::getViewPath() const
+{
+    return _viewPath;
+}
+
+void CModule::setBasePath(const string & path)
+{
+    setBasePath(boost::filesystem::path(path));
+}
+
+void CModule::setBasePath(const boost::filesystem::path & path)
+{
+    _basePath = path;
+}
+
+boost::filesystem::path CModule::getBasePath() const
+{
+    return _basePath;
 }

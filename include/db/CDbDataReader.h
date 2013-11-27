@@ -12,7 +12,6 @@
 #include "db/CDbCommand.h"
 #include <map>
 #include <vector>
-#include <mysql/mysql.h>
 
 using namespace std;
 

@@ -5,7 +5,8 @@
  *      Author: djvibegga
  */
 
-#include "web/CWebModule.h"
+#include <web/CWebModule.h>
+#include <base/Jvibetto.h>
 
 CWebModule::CWebModule(const string &id)
 : CModule(id)
@@ -39,4 +40,10 @@ CController * CWebModule::getController(const string & name) const
 void CWebModule::setController(const string & name, CController * instance)
 {
 	_controllerMap[name] = instance;
+}
+
+boost::filesystem::path CWebModule::resolveBasePath() const
+{
+    string resolved = Jvibetto::app()->getBasePath().string() + "/modules/" + getId();
+    return boost::filesystem::path(resolved);
 }

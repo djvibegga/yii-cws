@@ -35,7 +35,6 @@ private:
 	TArgumentsList _arguments;
 	CLogger _logger;
 	static CApplication * _instance;
-	boost::filesystem::path _basePath;
 	boost::filesystem::path _runtimePath;
 	boost::filesystem::path _executablePath;
 	CLogRouter * _log;
@@ -53,14 +52,13 @@ public:
 	xml_node getConfigByNamePath(const TNamesPath & path) const;
 	TArgumentsList getArguments() const;
 	CLogger & getLogger();
+	IViewRenderer * getViewRenderer() const;
 	void setRuntimePath(const string & path);
 	void setRuntimePath(const boost::filesystem::path & path);
 	boost::filesystem::path getRuntimePath() const;
 	CLogRouter * getLog();
-	void setBasePath(const string & path);
-	void setBasePath(const boost::filesystem::path & path);
 	boost::filesystem::path getExecutablePath() const;
-	boost::filesystem::path getBasePath() const;
+	virtual boost::filesystem::path resolveBasePath() const;
 	static CApplication * getInstance();
 
 protected:
