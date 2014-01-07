@@ -13,6 +13,7 @@
 #include "logging/CLogger.h"
 #include "logging/CLogRouter.h"
 #include <string>
+#include <stack>
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 #include <boost/filesystem.hpp>
@@ -22,6 +23,7 @@ using namespace std;
 using namespace pugi;
 
 typedef vector<string> TArgumentsList;
+typedef stack<IOutputBuffer*> TOutputStack;
 
 class CEvent;
 
@@ -38,6 +40,7 @@ private:
 	boost::filesystem::path _runtimePath;
 	boost::filesystem::path _executablePath;
 	CLogRouter * _log;
+	TOutputStack _outputStack;
 
 public:
 	CApplication(const string &configPath, int argc, char * const argv[]);
@@ -60,6 +63,7 @@ public:
 	boost::filesystem::path getExecutablePath() const;
 	virtual boost::filesystem::path resolveBasePath() const;
 	static CApplication * getInstance();
+	TOutputStack & getOutputStack();
 
 protected:
 	virtual void beginRequest();

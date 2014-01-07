@@ -11,6 +11,7 @@
 #include <base/Jvibetto.h>
 #include <db/CDbCommand.h>
 #include <utils/CMap.h>
+#include "TestWidget.h"
 
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
@@ -49,5 +50,5 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 	    viewData["params"].push_back(cpptempl::data_map(*iter));
 	}
 
-	renderPartial("index", &viewData, true);
+	renderPartial("index", viewData, true);
 }

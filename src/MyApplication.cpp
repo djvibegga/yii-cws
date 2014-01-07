@@ -62,8 +62,6 @@ void MyApplication::registerComponents()
 	SiteController * siteController = new SiteController(this);
 	siteController->init();
 
-	siteController->actionIndex(0, 0);
-
 	CWebModule * catalog = new CWebModule("catalog", this);
 	catalog->init();
 

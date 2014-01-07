@@ -18,10 +18,10 @@ const string CLogger::LEVEL_INFO = "info";
 const string CLogger::LEVEL_PROFILE = "profile";
 
 CLogger::CLogger()
-: autoFlush(10000),
-  autoDump(false),
-  _logCount(0),
-  _processing(false)
+: _logCount(0),
+  _processing(false),
+  autoFlush(10000),
+  autoDump(false)
 {
 }
 

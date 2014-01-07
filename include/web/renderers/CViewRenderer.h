@@ -1,7 +1,7 @@
 /*
  * CViewRenderer.h
  *
- *  Created on: 26 íîßá. 2013 ã.
+ *  Created on: 26 ï¿½ï¿½ï¿½ï¿½. 2013 ï¿½.
  *      Author: djvibegga
  */
 
@@ -19,7 +19,7 @@ public:
     CViewRenderer(CModule * module);
     CViewRenderer(const string &id, CModule * module);
     virtual ~CViewRenderer();
-    string renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map * data, bool ret) throw (CException);
+    string renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map & data, bool ret) throw (CException);
 
 protected:
     virtual bool generateViewFile(const string & sourceFile, const string & viewFile) = 0;

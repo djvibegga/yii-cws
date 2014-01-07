@@ -8,7 +8,7 @@
 #include "base/CStringUtils.h"
 #include <curl/curl.h>
 #include <algorithm>
-#include <fstream.h>
+#include <fstream>
 
 using namespace std;
 

@@ -22,6 +22,11 @@ CHttpResponse::~CHttpResponse()
 
 }
 
+string CHttpResponse::getContent() const
+{
+	return "";
+}
+
 void CHttpResponse::echo(const string & content)
 {
 	if (!_startedOutput) {
@@ -31,7 +36,7 @@ void CHttpResponse::echo(const string & content)
 	FCGX_FPrintF(_app->request.out, content.c_str());
 }
 
-CHttpResponse & CHttpResponse::operator<< (const string &right)
+IOutputBuffer & CHttpResponse::operator<< (const string &right)
 {
 	echo(right);
 	return *this;

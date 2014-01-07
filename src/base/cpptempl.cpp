@@ -413,10 +413,22 @@ namespace cpptempl
 		token_vector tokens ;
 		tokenize(templ_text, tokens) ;
 		token_vector tree ;
-		parse_tree(tokens, tree) ;
+		parse_tree(tokens, tree);
 
 		for (size_t i = 0 ; i < tree.size() ; ++i)
 		{
+			// Recursively calls gettext on each node in the tree.
+			// gettext returns the appropriate text for that node.
+			// for text, itself;
+			// for variable, substitution;
+			// for control statement, recursively gets kids
+			tree[i]->gettext(stream, data) ;
+		}
+	}
+
+	void render(std::wostream &stream, const token_vector & tree, data_map &data)
+	{
+		for (size_t i = 0 ; i < tree.size() ; ++i) {
 			// Recursively calls gettext on each node in the tree.
 			// gettext returns the appropriate text for that node.
 			// for text, itself;

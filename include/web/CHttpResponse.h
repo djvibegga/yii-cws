@@ -12,7 +12,7 @@
 
 class CWebApplication;
 
-class CHttpResponse: public CApplicationComponent
+class CHttpResponse: public CApplicationComponent, public IOutputBuffer
 {
 private:
 	bool _startedOutput;
@@ -21,8 +21,9 @@ private:
 public:
     CHttpResponse(const CWebApplication * app);
     ~CHttpResponse();
-    void echo(const string & content);
-    CHttpResponse & operator<< (const string &right);
+    virtual string getContent() const;
+    virtual void echo(const string & content);
+    virtual IOutputBuffer & operator<< (const string &right);
 };
 
 #endif /* CHTTPRESPONSE_H_ */

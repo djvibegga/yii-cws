@@ -1,7 +1,7 @@
 /*
  * CBaseController.h
  *
- *  Created on: 26 íîßá. 2013 ã.
+ *  Created on: 26 ï¿½ï¿½ï¿½ï¿½. 2013 ï¿½.
  *      Author: djvibegga
  */
 
@@ -23,8 +23,9 @@ private:
 
 public:
     virtual string getViewFile(const string & viewName) const throw (CException) = 0;
-    virtual string renderFile(const string & viewFile, cpptempl::data_map * data = 0, bool ret = false);
-    virtual string renderInternal(const string & viewFile, cpptempl::data_map * data = 0, bool ret = false) const;
+    virtual string renderFile(const string & viewFile, cpptempl::data_map & data, bool ret = false);
+    virtual string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const;
+    virtual string renderInternal(IView & viewInstance, bool ret = false) const;
 };
 
 #endif /* CBASECONTROLLER_H_ */

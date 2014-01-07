@@ -1,7 +1,7 @@
 /*
  * CViewRenderer.cpp
  *
- *  Created on: 26 íîßá. 2013 ã.
+ *  Created on: 26 ï¿½ï¿½ï¿½ï¿½. 2013 ï¿½.
  *      Author: djvibegga
  */
 
@@ -30,7 +30,7 @@ CViewRenderer::~CViewRenderer()
 {
 }
 
-string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map * data, bool ret) throw (CException)
+string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map & data, bool ret) throw (CException)
 {
     boost::filesystem::path sourcePath(sourceFile);
     if (!boost::filesystem::exists(sourcePath)) {

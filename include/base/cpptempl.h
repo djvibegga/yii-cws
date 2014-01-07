@@ -167,6 +167,7 @@ namespace cpptempl
 	class Data
 	{
 	public:
+		virtual ~Data() {}
 		virtual bool empty() = 0 ;
 		virtual wstring getvalue();
 		virtual data_list& getlist();
@@ -233,6 +234,7 @@ namespace cpptempl
 	class Token
 	{
 	public:
+		virtual ~Token() {}
 		virtual TokenType gettype() = 0 ;
 		virtual void gettext(std::wostream &stream, data_map &data) = 0 ;
 		virtual void set_children(token_vector &children);
@@ -307,4 +309,5 @@ namespace cpptempl
 	void parse(std::wostream &stream, wstring templ_text, data_map &data) ;
 	wstring parse(wstring templ_text, data_map &data);
 	std::string parse(std::string templ_text, data_map &data);
+	void render(std::wostream &stream, const token_vector & tree, data_map &data);
 }

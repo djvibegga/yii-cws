@@ -103,6 +103,7 @@ void CWebApplication::beginRequest()
 	response->init();
 	setComponent("request", request);
 	setComponent("response", response);
+	getOutputStack().push(response);
 }
 
 void CWebApplication::processRequest()
@@ -121,6 +122,9 @@ void CWebApplication::processRequest()
 
 void CWebApplication::endRequest()
 {
+	while (!getOutputStack().empty()) {
+		getOutputStack().pop();
+	}
 	delete getComponent("request");
 	delete getComponent("response");
 	CApplication::endRequest();

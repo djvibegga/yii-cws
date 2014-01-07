@@ -177,6 +177,11 @@ CApplication * CApplication::getInstance()
 	return _instance;
 }
 
+TOutputStack & CApplication::getOutputStack()
+{
+	return _outputStack;
+}
+
 void CApplication::_programFailCallback(int signum)
 {
 	if (!_failHandlerCalled) {

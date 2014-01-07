@@ -116,7 +116,7 @@ string CController::resolveViewFile(
     return boost::filesystem::exists(boost::filesystem::path(viewFile)) ? viewFile : "";
 }
 
-string CController::renderPartial(const string & view, cpptempl::data_map * data, bool ret, bool processOutput) throw (CException)
+string CController::renderPartial(const string & view, cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
 {
     string viewFile = getViewFile(view);
     if (!viewFile.empty()) {

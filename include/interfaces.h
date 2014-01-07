@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "base/CException.h"
 
 using namespace std;
 
@@ -82,11 +83,31 @@ public:
 
 #include <base/cpptempl.h>
 
+class IOutputBuffer
+{
+public:
+	virtual ~IOutputBuffer() {};
+	virtual string getContent() const = 0;
+	virtual void echo(const string & content) = 0;
+	virtual IOutputBuffer & operator<< (const string &right) = 0;
+};
+
+class IView
+{
+public:
+	virtual ~IView() {}
+	virtual void setOutputBuffer(IOutputBuffer * buffer) = 0;
+	virtual IOutputBuffer * getOutputBuffer() const = 0;
+	virtual void init() = 0;
+	virtual void run() throw (CException) = 0;
+};
+
 class IRenderingContext
 {
 public:
     virtual ~IRenderingContext() {}
-    virtual string renderInternal(const string & viewFile, cpptempl::data_map * data, bool ret) const = 0;
+    virtual string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const = 0;
+    virtual string renderInternal(IView & viewInstance, bool ret = false) const = 0;
 };
 
 class IViewRenderer
@@ -95,7 +116,7 @@ public:
     string fileExtension;
     IViewRenderer() : fileExtension(".tpl") {}
     virtual ~IViewRenderer() {}
-    virtual string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map * data, bool ret) = 0;
+    virtual string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map & data, bool ret) = 0;
 };
 
 

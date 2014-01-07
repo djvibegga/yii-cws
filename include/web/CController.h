@@ -43,7 +43,7 @@ public:
 	    const boost::filesystem::path & viewPath,
 	    const boost::filesystem::path & basePath,
 	    const boost::filesystem::path & moduleViewPath) const throw (CException);
-	virtual string renderPartial(const string & view, cpptempl::data_map * data = 0, bool ret = false, bool processOutput = false) throw (CException);
+	virtual string renderPartial(const string & view, cpptempl::data_map & data, bool ret = false, bool processOutput = false) throw (CException);
 };
 
 #endif /* CCONTROLLER_H_ */
