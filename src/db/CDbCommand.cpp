@@ -12,6 +12,8 @@
 #include "base/CProfiler.h"
 
 CDbCommandParameter::CDbCommandParameter()
+ : type(SQL_STRING),
+ value(0)
 {
 }
 

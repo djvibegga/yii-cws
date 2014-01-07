@@ -10,14 +10,16 @@
 
 #include "web/CView.h"
 
-typedef map<string, cpptempl::token_vector> TTemplateCacheMap;
+typedef map<string, cpptempl::token_vector> TDynamicTemplateCacheMap;
+typedef map<string, wstring> TStaticTemplateCacheMap;
 
 class CTemplateView: public CView
 {
 private:
 	string _viewFile;
 	cpptempl::data_map & _data;
-	static TTemplateCacheMap _templateCache;
+	static TDynamicTemplateCacheMap _dynamicTemplateCache;
+	static TStaticTemplateCacheMap _staticTemplateCache;
 
 public:
 	CTemplateView(const string & viewFile, cpptempl::data_map & data, const CBaseController * owner = 0);

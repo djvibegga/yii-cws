@@ -34,11 +34,11 @@ MyApplication::~MyApplication()
 void MyApplication::registerComponents()
 {
 	CLogRouter * log = getLog();
-	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
-	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
+	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	/*CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
 	fileRoute->setLevels("info,error,warning,trace");
 	fileRoute->init();
-	log->addRoute(fileRoute);
+	log->addRoute(fileRoute);*/
 
 	CDbConnection * connection = new CDbConnection(this);
 	connection->setId("db");
@@ -56,8 +56,8 @@ void MyApplication::registerComponents()
 
 	CUrlManager * urlManager = new CUrlManager(this);
 	urlManager->init();
-	urlManager->addRule(new MyUrlRule());
-	urlManager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
+	//urlManager->addRule(new MyUrlRule());
+	//urlManager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
 
 	SiteController * siteController = new SiteController(this);
 	siteController->init();

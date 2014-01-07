@@ -10,7 +10,8 @@
 #include "base/CStringUtils.h"
 #include "base/Jvibetto.h"
 
-TTemplateCacheMap CTemplateView::_templateCache;
+TDynamicTemplateCacheMap CTemplateView::_dynamicTemplateCache;
+TStaticTemplateCacheMap CTemplateView::_staticTemplateCache;
 
 CTemplateView::CTemplateView(const string & viewFile, cpptempl::data_map & data, const CBaseController * owner)
 : CView(owner),
@@ -34,16 +35,22 @@ void CTemplateView::init()
 
 void CTemplateView::run() throw (CException)
 {
-	wstring text = cpptempl::utf8_to_wide(CStringUtils::fileGetContents(_viewFile));
-	cpptempl::data_map data = getData();
+	cpptempl::data_map & data = getData();
+	wstring text;
+	TStaticTemplateCacheMap::const_iterator found = _staticTemplateCache.find(_viewFile);
+	if (found == _staticTemplateCache.end()) {
+		_staticTemplateCache[_viewFile] = text = cpptempl::utf8_to_wide(CStringUtils::fileGetContents(_viewFile));
+	} else {
+		text = found->second;
+	}
 	if (!data.empty()) {
 		cpptempl::token_vector tree;
-		TTemplateCacheMap::const_iterator found = _templateCache.find(_viewFile);
-		if (found == _templateCache.end()) {
+		TDynamicTemplateCacheMap::const_iterator found = _dynamicTemplateCache.find(_viewFile);
+		if (found == _dynamicTemplateCache.end()) {
 			cpptempl::token_vector tokens;
 			cpptempl::tokenize(text, tokens);
 			parse_tree(tokens, tree);
-			_templateCache[_viewFile] = tree;
+			_dynamicTemplateCache[_viewFile] = tree;
 		} else {
 			tree = found->second;
 		}
