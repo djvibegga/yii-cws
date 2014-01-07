@@ -13,7 +13,7 @@
 class TestWidget: public CWidget
 {
 public:
-	TestWidget(CBaseController * owner = 0);
+	TestWidget(const CBaseController * owner = 0);
 	virtual ~TestWidget();
 	virtual boost::filesystem::path getLocalViewPath() const;
 	virtual void init();

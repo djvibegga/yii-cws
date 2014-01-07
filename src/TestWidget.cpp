@@ -8,7 +8,7 @@
 #include "TestWidget.h"
 #include <base/Jvibetto.h>
 
-TestWidget::TestWidget(CBaseController * owner)
+TestWidget::TestWidget(const CBaseController * owner)
 : CWidget(owner)
 {
 }

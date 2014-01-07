@@ -9,7 +9,7 @@
 #include "base/CStringUtils.h"
 #include "db/CDbDataReader.h"
 #include "base/Jvibetto.h"
-#include "config.h"
+#include "base/CProfiler.h"
 
 CDbCommandParameter::CDbCommandParameter()
 {
@@ -156,7 +156,9 @@ long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
+#ifdef JV_DEBUG
 	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
+#endif
 	try {
 		SAConnection * connection = _connection->getConnection();
 		_saCommand = new SACommand(connection);
@@ -164,8 +166,10 @@ long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw
 		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
 			iter->second.bind(_saCommand);
 		}
+		PROFILE_BEGIN("Executing SQL: " + _text + parametersDump);
 		_saCommand->Execute();
 		connection->Commit();
+		PROFILE_END();
 		return _saCommand->RowsAffected();
 
 	} catch (const SAException & e) {
@@ -190,7 +194,9 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
+#ifdef JV_DEBUG
 	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
+#endif
 
 	try {
 		SAConnection * connection = _connection->getConnection();
@@ -199,7 +205,9 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
 			iter->second.bind(_saCommand);
 		}
+		PROFILE_BEGIN("Executing SQL: " + _text + parametersDump);
 		_saCommand->Execute();
+		PROFILE_END();
 		return CDbDataReader(_saCommand);
 
 	} catch (const SAException & e) {

@@ -20,7 +20,7 @@ public:
 	string actionPrefix;
 	string skin;
 
-	CWidget(CBaseController * owner = 0);
+	CWidget(const CBaseController * owner = 0);
 	virtual ~CWidget();
 	string getId(bool autoGenerate = true);
 	void setId(const string & id);

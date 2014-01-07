@@ -8,7 +8,7 @@
 
 int CWidget::_counter = 0;
 
-CWidget::CWidget(CBaseController * owner)
+CWidget::CWidget(const CBaseController * owner)
 : CView(owner),
   _id(""),
   skin("default")

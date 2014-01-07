@@ -17,13 +17,13 @@ class CView: public CBaseController, public IOutputBuffer, public IView
 {
 private:
 	static TViewPathMap _viewPaths;
-	CBaseController * _owner;
+	const CBaseController * _owner;
 	IOutputBuffer * _outputBuffer;
 
 public:
-	CView(CBaseController * owner = 0);
+	CView(const CBaseController * owner = 0);
 	virtual ~CView();
-	CBaseController * getOwner() const;
+	const CBaseController * getOwner() const;
 	const CController * getController() const;
 	void setOutputBuffer(IOutputBuffer * buffer);
 	IOutputBuffer * getOutputBuffer() const;

@@ -11,7 +11,7 @@
 
 TViewPathMap CView::_viewPaths;
 
-CView::CView(CBaseController * owner)
+CView::CView(const CBaseController * owner)
 : CBaseController(),
   _owner(owner),
   _outputBuffer(0)
@@ -22,14 +22,14 @@ CView::~CView()
 {
 }
 
-CBaseController * CView::getOwner() const
+const CBaseController * CView::getOwner() const
 {
 	return _owner;
 }
 
 const CController * CView::getController() const
 {
-	CController * casted = dynamic_cast<CController*>(_owner);
+	const CController * casted = reinterpret_cast<const CController*>(_owner);
 	if (casted != 0) {
 		return casted;
 	} else {
