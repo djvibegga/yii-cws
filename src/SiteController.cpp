@@ -16,6 +16,7 @@
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
 {
+	layout = "//layouts/main";
 }
 
 SiteController::~SiteController()
@@ -38,17 +39,5 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 	cpptempl::data_map viewData;
 	viewData["adminURL"] = urlManager->createUrl(route);
 
-	stringstream ss;
-	for (int i = 0; i < 100; ++i) {
-	    ss << "key" << i;
-	    route.params[ss.str()] = "test";
-	    ss.str("");
-	}
-
-	vector<TKeyValueMap> parameters = CMap::fromKeyValueMapToArray(route.params);
-	for (vector<TKeyValueMap>::iterator iter = parameters.begin(); iter != parameters.end(); ++iter) {
-	    viewData["params"].push_back(cpptempl::data_map(*iter));
-	}
-
-	renderPartial("index", viewData, true);
+	render("index", viewData);
 }

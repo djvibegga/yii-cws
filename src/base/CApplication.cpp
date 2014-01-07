@@ -9,6 +9,7 @@
 #include "base/CException.h"
 #include "base/CEvent.h"
 #include "base/CStringUtils.h"
+#include "base/Jvibetto.h"
 #include <sstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
@@ -69,7 +70,11 @@ void CApplication::init() throw(CException)
 	}
 	boost::filesystem::path executablePath(_arguments[0]);
 	_executablePath = boost::filesystem::absolute(executablePath).normalize();
-	setBasePath(resolveBasePath());
+
+	boost::filesystem::path basePath = resolveBasePath();
+	setBasePath(basePath);
+	Jvibetto::setPathOfAlias("application", basePath);
+
 	if (_runtimePath.empty()) {
 		setRuntimePath(string(_executablePath.parent_path().c_str()) + "/runtime");
 	}

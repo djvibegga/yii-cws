@@ -14,13 +14,13 @@
 class CApplicationComponent: public CComponent, public IConfigureable
 {
 private:
-	const CModule * _module;
+	CModule * _module;
 	string _id;
 
 public:
-	CApplicationComponent(const CModule * module);
+	CApplicationComponent(CModule * module);
 	CApplicationComponent(const string &id, CModule * module);
-	const CModule * getModule() const;
+	CModule * getModule() const;
 	virtual void init();
 	virtual void setId(const string & id);
 	virtual string getId() const;

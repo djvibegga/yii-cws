@@ -4,7 +4,7 @@
 #include <boost/regex.hpp>
 #include <base/Jvibetto.h>
 
-CDbConnection::CDbConnection(const CModule * module)
+CDbConnection::CDbConnection(CModule * module)
 : CApplicationComponent(module),
   _saConnection(0),
   _isActive(false),
@@ -15,7 +15,7 @@ CDbConnection::CDbConnection(const CModule * module)
 {
 }
 
-CDbConnection::CDbConnection(const CModule * module, string dsn, string username, string password)
+CDbConnection::CDbConnection(CModule * module, string dsn, string username, string password)
 : CApplicationComponent(module),
   _saConnection(0),
   _isActive(false),

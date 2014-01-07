@@ -32,6 +32,12 @@ void CWebApplication::registerComponents()
 {
 }
 
+void CWebApplication::init() throw(CException)
+{
+	CApplication::init();
+	_layoutPath = resolveLayoutPath();
+}
+
 void CWebApplication::run() throw(CException)
 {
 	CApplication::run();
@@ -163,6 +169,21 @@ void CWebApplication::setController(const string & name, CController * instance)
 CModule * CWebApplication::getParent() const
 {
 	return 0;
+}
+
+boost::filesystem::path CWebApplication::getLayoutPath() const
+{
+	return _layoutPath;
+}
+
+void CWebApplication::setLayoutPath(const boost::filesystem::path & path)
+{
+	_layoutPath = path;
+}
+
+boost::filesystem::path CWebApplication::resolveLayoutPath()
+{
+	return boost::filesystem::path(getViewPath().normalize().string() + "/layouts");
 }
 
 void CWebApplication::runController(const string &route)

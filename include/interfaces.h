@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <boost/filesystem.hpp>
 #include "base/CException.h"
 
 using namespace std;
@@ -117,6 +118,14 @@ public:
     IViewRenderer() : fileExtension(".tpl") {}
     virtual ~IViewRenderer() {}
     virtual string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map & data, bool ret) = 0;
+};
+
+class IHasLayout
+{
+public:
+	virtual ~IHasLayout() {}
+	virtual boost::filesystem::path getLayoutPath() const = 0;
+	virtual void setLayoutPath(const boost::filesystem::path & path) = 0;
 };
 
 

@@ -30,6 +30,8 @@ void TestWidget::init()
 
 void TestWidget::run() throw (CException)
 {
-	cpptempl::data_map viewData;
-	render("list", viewData);
+	*this
+	<< "<p class=\"note\">"
+	<< "ACDC"
+	<< "</p>";
 }

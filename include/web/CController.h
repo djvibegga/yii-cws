@@ -27,7 +27,13 @@ private:
 	TActionsMap _actions;
 	boost::filesystem::path _viewPath;
 
+protected:
+	virtual bool beforeRender(const string & view);
+	void afterRender(const string & view, string &output);
+
 public:
+	string layout;
+
 	CController(const string & id, CModule * module = 0);
 	virtual ~CController();
 	virtual void init();
@@ -44,6 +50,9 @@ public:
 	    const boost::filesystem::path & basePath,
 	    const boost::filesystem::path & moduleViewPath) const throw (CException);
 	virtual string renderPartial(const string & view, cpptempl::data_map & data, bool ret = false, bool processOutput = false) throw (CException);
+	virtual string getLayoutFile(const string & layoutName) throw (CException);
+	virtual string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
+	virtual string processOutput(const string & output);
 };
 
 #endif /* CCONTROLLER_H_ */

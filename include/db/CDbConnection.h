@@ -23,8 +23,8 @@ public:
 	string username;
 	string password;
 
-	CDbConnection(const CModule * module);
-	CDbConnection(const CModule * module, string dsn, string username, string password);
+	CDbConnection(CModule * module);
+	CDbConnection(CModule * module, string dsn, string username, string password);
 	bool open() throw(CException);
 	void close();
 	SAConnection * getConnection() const;

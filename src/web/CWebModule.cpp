@@ -22,6 +22,11 @@ CWebModule::~CWebModule()
 {
 }
 
+void CWebModule::init()
+{
+	_layoutPath = resolveLayoutPath();
+}
+
 bool CWebModule::hasController(const string & name) const
 {
 	return _controllerMap.find(name) != _controllerMap.end();
@@ -46,4 +51,19 @@ boost::filesystem::path CWebModule::resolveBasePath() const
 {
     string resolved = Jvibetto::app()->getBasePath().string() + "/modules/" + getId();
     return boost::filesystem::path(resolved);
+}
+
+boost::filesystem::path CWebModule::resolveLayoutPath()
+{
+	return boost::filesystem::path(getViewPath().normalize().string() + "/layouts");
+}
+
+boost::filesystem::path CWebModule::getLayoutPath() const
+{
+	return _layoutPath;
+}
+
+void CWebModule::setLayoutPath(const boost::filesystem::path & layoutPath)
+{
+	_layoutPath = layoutPath;
 }

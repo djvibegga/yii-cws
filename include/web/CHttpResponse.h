@@ -19,7 +19,7 @@ private:
 	const CWebApplication * _app;
 
 public:
-    CHttpResponse(const CWebApplication * app);
+    CHttpResponse(CWebApplication * app);
     ~CHttpResponse();
     virtual string getContent() const;
     virtual void echo(const string & content);

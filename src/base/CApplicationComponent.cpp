@@ -9,7 +9,7 @@
 #include "base/Jvibetto.h"
 #include <iostream>
 
-CApplicationComponent::CApplicationComponent(const CModule * module)
+CApplicationComponent::CApplicationComponent(CModule * module)
 : CComponent()
 {
 	_module = module;
@@ -25,7 +25,7 @@ CApplicationComponent::CApplicationComponent(const string &id, CModule * module)
 	}
 }
 
-const CModule * CApplicationComponent::getModule() const
+CModule * CApplicationComponent::getModule() const
 {
 	return _module;
 }

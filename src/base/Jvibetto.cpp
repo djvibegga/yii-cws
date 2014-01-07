@@ -46,9 +46,8 @@ boost::filesystem::path Jvibetto::getPathOfAlias(const string & alias)
         string rootAlias = alias.substr(0, pos);
         iter = _aliases.find(rootAlias);
         if (iter != _aliases.end()) {
-            vector<string> parts = CStringUtils::explode(".", alias.substr(pos + 1));
             string subAlias = alias.substr(pos);
-            subAlias.replace(subAlias.begin(), subAlias.end(), ".", "/");
+            std::replace(subAlias.begin(), subAlias.end(), '.', '/');
             return boost::filesystem::path(_aliases[rootAlias].string() + subAlias);
         }
     }

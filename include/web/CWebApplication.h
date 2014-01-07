@@ -24,13 +24,14 @@ struct SControllerToRun
 	CController * controller;
 };
 
-class CWebApplication: public CApplication
+class CWebApplication: public CApplication, public IHasLayout
 {
 	friend class CHttpRequest;
 	friend class CHttpResponse;
 
 private:
 	TControllerMap _controllerMap;
+	boost::filesystem::path _layoutPath;
 
 public:
 	TRouteStruct catchAllRequest;
@@ -38,6 +39,7 @@ public:
 
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	~CWebApplication();
+	virtual void init() throw(CException);
 	virtual void run() throw(CException);
 	CHttpRequest * getRequest() const;
 	CHttpResponse * getResponse() const;
@@ -47,6 +49,8 @@ public:
 	virtual CController * getController(const string & name) const;
 	virtual void setController(const string & name, CController * instance);
 	virtual CModule * getParent() const;
+	virtual boost::filesystem::path getLayoutPath() const;
+	virtual void setLayoutPath(const boost::filesystem::path & path);
 
 protected:
 	FCGX_Request request;
@@ -56,6 +60,7 @@ protected:
 	virtual void processRequest();
 	virtual void endRequest();
 	virtual void registerComponents();
+	virtual boost::filesystem::path resolveLayoutPath();
 
 	virtual void runController(const string &route);
 	virtual SControllerToRun resolveController(string route, const IModule * owner);

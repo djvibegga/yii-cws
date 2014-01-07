@@ -6,6 +6,7 @@
  */
 
 #include <web/CController.h>
+#include <web/CWebModule.h>
 #include <base/CException.h>
 #include <base/Jvibetto.h>
 
@@ -50,7 +51,7 @@ string CController::getViewFile(const string & viewName) const throw (CException
         return $viewFile;*/
     boost::filesystem::path basePath = Jvibetto::app()->getViewPath();
     boost::filesystem::path moduleViewPath = basePath;
-    const CModule * module = getModule();
+    CModule * module = getModule();
     if (module != 0) {
         moduleViewPath = module->getViewPath();
     }
@@ -59,7 +60,7 @@ string CController::getViewFile(const string & viewName) const throw (CException
 
 boost::filesystem::path CController::resolveViewPath() const
 {
-    const CModule * module = getModule();
+    CModule * module = getModule();
     if (module == 0) {
         module = Jvibetto::app();
     }
@@ -123,7 +124,7 @@ string CController::renderPartial(const string & view, cpptempl::data_map & data
         try {
             string output = renderFile(viewFile, data, true);
             if (processOutput) {
-                //output = processOutput(output);
+                output = this->processOutput(output);
             }
             if (ret) {
                 return output;
@@ -138,4 +139,88 @@ string CController::renderPartial(const string & view, cpptempl::data_map & data
         throw CException("Controller cannot find the requested view \"{" + view + "\".");
     }
     return "";
+}
+
+string CController::getLayoutFile(const string & layoutName) throw (CException)
+{
+	if (layoutName.empty()) {
+		return "";
+	}
+	/*if (($theme=Yii::app()->getTheme())!==null && ($layoutFile=$theme->getLayoutFile($this,$layoutName))!==false)
+		return $layoutFile;*/
+
+	CModule * module = 0;
+	string layout = layoutName;
+	if (layoutName.empty()) {
+		module = getModule();
+		while (module != 0) {
+			if (dynamic_cast<CWebModule*>(module) == 0) {
+				throw CException("Invalid module instance. Any module of an web application must be a web module.");
+			} else if (!(dynamic_cast<CWebModule*>(module))->layout.empty()) {
+				break;
+			}
+			module = dynamic_cast<CModule*>(module->getParent());
+		}
+		if (module == 0) {
+			module = Jvibetto::app();
+		}
+		layout = dynamic_cast<CWebModule*>(module)->layout;
+	} else if ((module = dynamic_cast<CWebModule*>(getModule())) == 0) {
+		module = Jvibetto::app();
+	}
+	IHasLayout * moduleWithLayout = dynamic_cast<IHasLayout*>(module);
+	return resolveViewFile(
+		layout, moduleWithLayout->getLayoutPath(),
+		Jvibetto::app()->getViewPath(), module->getViewPath()
+	);
+}
+
+string CController::render(const string & view, cpptempl::data_map & data, bool ret) throw (CException)
+{
+	if (beforeRender(view)) {
+		string output = renderPartial(view, data, true);
+		string layoutFile = getLayoutFile(layout);
+		if (!layoutFile.empty()) {
+			cpptempl::data_map viewData;
+			viewData["content"] = output;
+			output = renderFile(layoutFile, viewData, true);
+		}
+		afterRender(view, output);
+		output = processOutput(output);
+
+		if (ret) {
+			return output;
+		} else {
+			Jvibetto::app()->getOutputStack().top()->echo(output);
+		}
+	}
+	return "";
+}
+
+bool CController::beforeRender(const string & view)
+{
+	return true;
+}
+
+void CController::afterRender(const string & view, string &output)
+{
+}
+
+string CController::processOutput(const string & output)
+{
+	/*Yii::app()->getClientScript()->render($output);
+
+	// if using page caching, we should delay dynamic output replacement
+	if($this->_dynamicOutput!==null && $this->isCachingStackEmpty())
+	{
+		$output=$this->processDynamicOutput($output);
+		$this->_dynamicOutput=null;
+	}
+
+	if($this->_pageStates===null)
+		$this->_pageStates=$this->loadPageStates();
+	if(!empty($this->_pageStates))
+		$this->savePageStates($this->_pageStates,$output);*/
+
+	return output;
 }

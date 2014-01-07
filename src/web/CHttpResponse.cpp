@@ -10,7 +10,7 @@
 #include <fcgi_stdio.h>
 
 
-CHttpResponse::CHttpResponse(const CWebApplication * app)
+CHttpResponse::CHttpResponse(CWebApplication * app)
 : CApplicationComponent(app),
   _startedOutput(false),
   _app(app)
