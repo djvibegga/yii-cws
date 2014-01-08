@@ -20,6 +20,7 @@ typedef vector<string> TDbCriteriaScopeList;
 class CDbCriteria
 {
 private:
+	string _addColumnCondition(const string & column, const string & comparison, const string & op);
 
 public:
 
@@ -52,8 +53,20 @@ public:
 	CDbCriteria & addInCondition(const string & column, const vector<string> & values, const string op = "AND");
 	CDbCriteria & addNotInCondition(const string & column, const vector<string> & values, const string op = "AND");
 	CDbCriteria & compare(
-		const string & column, CDbCommandParameter value, const string & comparison = "=",
+		const string & column, string & value, const string & comparison = "",
 		bool partialMatch = false, const string & op = "AND", bool escape = true
+	);
+	CDbCriteria & compare(
+		const string & column, long & value,
+		const string & comparison = "", const string & op = "AND"
+	);
+	CDbCriteria & compare(
+		const string & column, unsigned long & value,
+		const string & comparison = "", const string & op = "AND"
+	);
+	CDbCriteria & compare(
+		const string & column, double & value,
+		const string & comparison = "", const string & op = "AND"
 	);
 	CDbCriteria & addBetweenCondition(const string & column, const long & valueStart, const long & valueEnd, const string & op = "AND");
 };

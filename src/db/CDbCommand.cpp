@@ -13,7 +13,7 @@
 
 CDbCommandParameter::CDbCommandParameter()
  : type(SQL_STRING),
- value(0)
+   value(0)
 {
 }
 
@@ -98,6 +98,12 @@ string CDbCommand::getText() const
 const CDbConnection * CDbCommand::getConnection() const
 {
 	return _connection;
+}
+
+CDbCommand & CDbCommand::bindParam(const string & name, const char * value)
+{
+	_params[name] = CDbCommandParameter(name, SQL_STRING, (TDbValue)value);
+	return *this;
 }
 
 CDbCommand & CDbCommand::bindParam(const string & name, const string & value)

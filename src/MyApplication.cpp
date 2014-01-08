@@ -34,11 +34,11 @@ MyApplication::~MyApplication()
 void MyApplication::registerComponents()
 {
 	CLogRouter * log = getLog();
-	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
-	/*CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
+	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
 	fileRoute->setLevels("info,error,warning,trace");
 	fileRoute->init();
-	log->addRoute(fileRoute);*/
+	log->addRoute(fileRoute);
 
 	CDbConnection * connection = new CDbConnection(this);
 	connection->setId("db");

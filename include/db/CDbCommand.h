@@ -55,6 +55,7 @@ public:
 	void setText(const string & query);
 	string getText() const;
     const CDbConnection * getConnection() const;
+    CDbCommand & bindParam(const string & name, const char * value);
     CDbCommand & bindParam(const string & name, const string & value);
     CDbCommand & bindParam(const string & name, const long & value);
     CDbCommand & bindParam(const string & name, const double & value);

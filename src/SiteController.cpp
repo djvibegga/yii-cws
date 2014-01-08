@@ -38,8 +38,8 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 	//route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
 
 	CDbCriteria criteria;
-	string keyword = "name 1";
-	criteria.addSearchCondition("name", keyword);
+	unsigned long id = 5;
+	criteria.compare("id", id);
 
 	CDbConnection * db = dynamic_cast<CDbConnection*>(app->getComponent("db"));
 	string query = "SELECT COUNT(*) as goalsCount FROM goals WHERE " + criteria.condition;

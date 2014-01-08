@@ -28,6 +28,15 @@ CDbCriteria::~CDbCriteria()
 {
 }
 
+string CDbCriteria::_addColumnCondition(const string & column, const string & comparison, const string & op)
+{
+	stringstream paramName;
+	paramName << PARAM_PREFIX << paramCount;
+	addCondition(column + (comparison.empty() ? "=" : comparison) + ":" + paramName.str(), op);
+	++paramCount;
+	return paramName.str();
+}
+
 CDbCriteria & CDbCriteria::addCondition(const string & condition, const string & op)
 {
 	if (this->condition.empty()) {
@@ -120,27 +129,50 @@ CDbCriteria & CDbCriteria::addNotInCondition(const string & column, const vector
 
 
 CDbCriteria & CDbCriteria::compare(
-	const string & column, CDbCommandParameter value, const string & comparison,
+	const string & column, string & value, const string & comparison,
 	bool partialMatch, const string & op, bool escape
 )
 {
-	if (partialMatch && value.type == SQL_STRING) {
-		if (comparison.empty()) {
-			string keyword = *((string*)value.value);
-			return addSearchCondition(column, keyword, escape, op);
+	if (partialMatch) {
+		if (comparison.empty() || comparison == "") {
+			return addSearchCondition(column, value, escape, op);
 		}
 		if (comparison == "<>") {
-			string keyword = *((string*)value.value);
-			return addSearchCondition(column, keyword, escape, op, "NOT LIKE");
+			return addSearchCondition(column, value, escape, op, "NOT LIKE");
 		}
 	}
 
-	stringstream paramName;
-	paramName << PARAM_PREFIX << paramCount;
-	addCondition(column + comparison + paramName.str(), op);
-	++paramCount;
-	value.name = paramName.str();
-	params[":" + paramName.str()] = value;
+	string paramName = _addColumnCondition(column, comparison, op);
+	params[":" + paramName] = CDbCommandParameter(paramName, SQL_STRING, value.c_str());
+	return *this;
+}
+
+CDbCriteria & CDbCriteria::compare(
+	const string & column, long & value, const string & comparison, const string & op
+)
+{
+	string paramName = _addColumnCondition(column, comparison, op);
+	params[":" + paramName] = CDbCommandParameter(paramName, SQL_INT, &value);
+	return *this;
+}
+
+CDbCriteria & CDbCriteria::compare(
+	const string & column, unsigned long & value,
+	const string & comparison, const string & op
+)
+{
+	string paramName = _addColumnCondition(column, comparison, op);
+	params[":" + paramName] = CDbCommandParameter(paramName, SQL_UNSIGNED_INT, &value);
+	return *this;
+}
+
+CDbCriteria & CDbCriteria::compare(
+	const string & column, double & value,
+	const string & comparison, const string & op
+)
+{
+	string paramName = _addColumnCondition(column, comparison, op);
+	params[":" + paramName] = CDbCommandParameter(paramName, SQL_DOUBLE, &value);
 	return *this;
 }
 
