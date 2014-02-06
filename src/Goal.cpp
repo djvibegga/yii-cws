@@ -7,7 +7,13 @@
 
 #include "Goal.h"
 
+
 IMPLEMENT_AR_CLASS(Goal)
+
+BEGIN_ATTRIBUTE_RESOLVER(Goal)
+	ATTRIBUTE_RESOLVE("id", id, AR_ATTRIBUTE_ULONG)
+	ATTRIBUTE_RESOLVE("name", name, AR_ATTRIBUTE_STRING)
+END_ATTRIBUTE_RESOLVER()
 
 Goal::Goal(const string & scenario, CDbConnection * connection)
 : CActiveRecord(scenario, connection),
@@ -26,21 +32,7 @@ Goal::~Goal()
 {
 }
 
-CActiveRecord * Goal::instantiate(const TDbRow & attributes) const
-{
-	return new Goal("", getDbConnection());
-}
-
 string Goal::tableName() const
 {
 	return "goals";
-}
-
-void Goal::populateProperty(const string & name, const SAField * value)
-{
-	if (name == "id") {
-		id = value->asULong();
-	} else if (name == "name") {
-		this->name = value->asString().GetMultiByteChars();
-	}
 }

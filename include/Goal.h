@@ -13,6 +13,7 @@
 class Goal: public CActiveRecord
 {
 	DECLARE_AR_CLASS(Goal)
+	DECLARE_ATTRIBUTE_RESOLVER()
 
 public:
 	unsigned long id;
@@ -21,9 +22,7 @@ public:
 	Goal(const string & scenario = "", CDbConnection * connection = 0);
 	Goal(const Goal & other);
 	virtual ~Goal();
-	virtual CActiveRecord * instantiate(const TDbRow & attributes) const;
 	virtual string tableName() const;
-	virtual void populateProperty(const string & name, const SAField * value);
 };
 
 #endif /* GOAL_H_ */

@@ -48,13 +48,19 @@ protected:
 	TActiveRecordList query(const CDbCriteria & criteria, bool all = false);
 };
 
+/**
+ * Registering declaration of model(), instantiate methods
+ */
 #define DECLARE_AR_CLASS(className) \
 private:\
 	static boost::shared_ptr<className> _instance;\
 public:\
-	static className * model();
+	static className * model();\
+	virtual CActiveRecord * instantiate(const TDbRow & attributes) const;
 
-
+/**
+ * Registering implementation of model(), instantiate methods
+ */
 #define IMPLEMENT_AR_CLASS(className) \
 boost::shared_ptr<className> className::_instance;\
 className * className::model()\
@@ -65,6 +71,49 @@ className * className::model()\
 		_instance = boost::shared_ptr<className>(instance);\
 	}\
 	return _instance.get();\
+}\
+CActiveRecord * className::instantiate(const TDbRow & attributes) const\
+{\
+	return new className("", getDbConnection());\
 }
+
+/**
+ * Common attributes conversions
+ */
+#define AR_ATTRIBUTE_LONG ->asLong()
+#define AR_ATTRIBUTE_ULONG ->asULong()
+#define AR_ATTRIBUTE_STRING ->asString().GetMultiByteChars()
+#define AR_ATTRIBUTE_DOUBLE ->asDouble().GetMultiByteChars()
+
+/**
+ * Registering declaration of populateProperty method
+ */
+#define DECLARE_ATTRIBUTE_RESOLVER() \
+public:\
+	virtual void populateProperty(const string & name, const SAField * value);\
+
+/**
+ * Registering implementation begin of populateProperty method
+ */
+#define BEGIN_ATTRIBUTE_RESOLVER(className) \
+	void className::populateProperty(const string & name, const SAField * value)\
+	{\
+
+/**
+ * Registering part of populateProperty method implementation which containts
+ * convertion logic of database attribute value to AR property
+ */
+#define ATTRIBUTE_RESOLVE(attributeName, property, conversion) \
+	if (name == attributeName) {\
+		this->property = value conversion;\
+		return;\
+	}
+
+/**
+ * Registering implementation end of populateProperty method
+ */
+#define END_ATTRIBUTE_RESOLVER() \
+	}
+
 
 #endif /* CACTIVERECORD_H_ */
