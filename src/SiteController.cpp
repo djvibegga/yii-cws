@@ -13,6 +13,7 @@
 #include <db/CDbCriteria.h>
 #include <utils/CMap.h>
 #include "TestWidget.h"
+#include "Goal.h"
 
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
@@ -33,29 +34,27 @@ void SiteController::init()
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	//CUrlManager * urlManager = app->getUrlManager();
-	//TRouteStruct route("site/index");
-	//route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
+	CUrlManager * urlManager = app->getUrlManager();
+	TRouteStruct route("site/index");
+	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
 
 	CDbCriteria criteria;
-	unsigned long id = 5;
-	criteria.compare("id", id);
+	unsigned long id = 1;
+	criteria.compare("id", id, ">=");
 
-	CDbConnection * db = dynamic_cast<CDbConnection*>(app->getComponent("db"));
-	string query = "SELECT COUNT(*) as goalsCount FROM goals WHERE " + criteria.condition;
-	CDbCommand cmd(db, query);
-	CDbDataReader reader = cmd.queryAll(criteria.params);
+    TActiveRecordList records = Goal::model()->findAll(criteria);
 
 	cpptempl::data_map viewData;
-	//viewData["adminURL"] = urlManager->createUrl(route);
-
-	reader.nextResult();
-	long goalsCount = reader.readColumn("goalsCount").asULong();
-	viewData["goalsCount"] = goalsCount;
+	viewData["adminURL"] = urlManager->createUrl(route);
 
 	stringstream ss;
-	ss << "Fetched " << goalsCount << " goals from database";
-	Jvibetto::trace(ss.str());
+	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
+		Goal * goal = dynamic_cast<Goal*>(iter->get());
+		cpptempl::data_map item;
+		item["id"] = goal->id;
+		item["name"] = goal->name;
+		viewData["goals"].push_back(item);
+	}
 
 	render("index", viewData);
 }

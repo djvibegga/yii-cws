@@ -60,6 +60,7 @@ public:
     CDbCommand & bindParam(const string & name, const long & value);
     CDbCommand & bindParam(const string & name, const double & value);
     CDbCommand & bindParam(const string & name, const unsigned long & value);
+    CDbCommand & bindParam(const string & name, const CDbCommandParameter & value);
     CDbCommand & mergeParametersWith(const TCommandParameterMap & other);
     long unsigned int execute() throw (CDbException);
     long unsigned int execute(const TCommandParameterMap & params) throw (CDbException);

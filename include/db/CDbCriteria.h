@@ -26,18 +26,18 @@ public:
 
 	const static string PARAM_PREFIX;
 	static int paramCount;
-	string select;
+	vector<string> select;
 	bool distinct;
 	string condition;
 	TCommandParameterMap params;
     int limit;
 	int offset;
 	string order;
-	string $group;
+	string group;
 	string join;
 	string having;
 	TDbCriteriaWithList with;
-	string $alias;
+	string alias;
 	bool together;
 	int index;
 	TDbCriteriaScopeList scopes;

@@ -9,6 +9,7 @@
 #include "base/CException.h"
 #include "base/CEvent.h"
 #include "base/CStringUtils.h"
+#include "base/CProfiler.h"
 #include "base/Jvibetto.h"
 #include <sstream>
 #include <iostream>
@@ -78,6 +79,9 @@ void CApplication::init() throw(CException)
 	if (_runtimePath.empty()) {
 		setRuntimePath(string(_executablePath.parent_path().c_str()) + "/runtime");
 	}
+
+	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
+
 	CModule::init();
 }
 
@@ -185,6 +189,11 @@ CApplication * CApplication::getInstance()
 TOutputStack & CApplication::getOutputStack()
 {
 	return _outputStack;
+}
+
+void CApplication::logProfileItems(CEvent & event)
+{
+	CProfiler::logItems();
 }
 
 void CApplication::_programFailCallback(int signum)

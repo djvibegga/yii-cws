@@ -27,12 +27,14 @@ public:
 	CDbConnection(CModule * module, string dsn, string username, string password);
 	bool open() throw(CException);
 	void close();
+	virtual void init();
 	SAConnection * getConnection() const;
 	void setActive(bool value);
 	bool setActive() const;
 	virtual void applyConfig(const xml_node & config);
 	CDbCommand createCommand(const string & query);
-	CDbCommandBuilder * getCommandBuilder();
+	void setCommandBuilder(CDbCommandBuilder * builder);
+	CDbCommandBuilder * getCommandBuilder() const;
 };
 
 #endif //__C_DB_CONNECTION_H__

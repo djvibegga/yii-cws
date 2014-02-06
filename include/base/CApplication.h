@@ -73,6 +73,7 @@ protected:
 	virtual void processRequest() = 0;
 
 private:
+	void logProfileItems(CEvent & event);
 	static void _programFailCallback(int signum);
 };
 

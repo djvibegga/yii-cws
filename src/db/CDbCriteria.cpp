@@ -14,7 +14,7 @@ const string CDbCriteria::PARAM_PREFIX = "jnp";
 int CDbCriteria::paramCount = 0;
 
 CDbCriteria::CDbCriteria()
-: select("*"),
+: select(vector<string>()),
   distinct(false),
   limit(-1),
   offset(-1),

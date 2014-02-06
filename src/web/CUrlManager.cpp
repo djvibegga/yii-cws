@@ -312,20 +312,24 @@ string CUrlManager::createUrl(TRouteStruct &route, const string & ampersand) con
 		url = rule->createUrl(this, route, ampersand);
 		if (!url.empty()) {
 			if (rule->hasHostInfo) {
-				return url.empty() ? "/" : url;
+				return _baseUrl + (url.empty() ? "/" : url);
 			} else {
 				return _baseUrl + "/" + url;
 			}
 		}
 	}
-	return createUrlDefault(route, ampersand);
+	url = _baseUrl + "/";
+	if (showScriptName) {
+		url += getScriptName();
+	}
+	return url + "/" + CStringUtils::ltrim(createUrlDefault(route, ampersand), "/");
 }
 
 string CUrlManager::createUrlDefault(TRouteStruct & route, const string & ampersand) const
 {
 	string ret;
 	if (urlFormat == FORMAT_PATH) {
-		ret = CStringUtils::rtrim(_baseUrl + "/" + route.path, "/");
+		ret = CStringUtils::rtrim(route.path, "/");
 		if (appendParams) {
 			ret = CStringUtils::rtrim(ret + "/" + createPathInfo(route.params, "/", "/"), "/");
 			return route.path.empty() ? ret : ret + urlSuffix;
@@ -337,10 +341,6 @@ string CUrlManager::createUrlDefault(TRouteStruct & route, const string & ampers
 			return query.empty() ? ret : ret + "?" + query;
 		}
 	} else {
-		ret = _baseUrl + "/";
-		if (showScriptName) {
-			ret += getScriptName();
-		}
 		string query = createPathInfo(route.params, "=", ampersand);
 		if (!route.path.empty()) {
 			ret += "?" + routeVar + '=' + route.path;

@@ -210,9 +210,9 @@ SControllerToRun CWebApplication::resolveController(string route, const IModule 
 	if (route.empty()) {
 		route = defaultControllerRoute;
 	}
-	bool caseSensitive = getUrlManager()->caseSensitive;
+	CUrlManager * urlManager = getUrlManager();
 	string id;
-	int pos = 0;
+	::string::size_type pos = 0;
 
 	while ((pos = route.find("/")) != ::string::npos) {
 		id = route.substr(0, pos);
@@ -222,14 +222,16 @@ SControllerToRun CWebApplication::resolveController(string route, const IModule 
 			return ret;
 		}
 
-		if (!caseSensitive) {
+		if (!urlManager->caseSensitive) {
 			::transform(id.begin(), id.end(), id.begin(), ::tolower);
 		}
 		route = route.substr(pos + 1);
 
 		if (owner->hasController(id)) {
 			ret.controller = owner->getController(id);
-			ret.actionId = route;
+			pos = route.find("/");
+			ret.actionId = pos == ::string::npos ? route : route.substr(0, pos);
+			urlManager->parsePathInfo(route.substr(pos + 1));
 			return ret;
 		} else {
 			return resolveController(route, owner->getModule(id));

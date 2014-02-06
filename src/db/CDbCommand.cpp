@@ -124,6 +124,12 @@ CDbCommand & CDbCommand::bindParam(const string & name, const unsigned long &val
 	return *this;
 }
 
+CDbCommand & CDbCommand::bindParam(const string & name, const CDbCommandParameter & value)
+{
+	_params[name] = value;
+	return *this;
+}
+
 CDbCommand & CDbCommand::bindParam(const string & name, const double & value)
 {
 	_params[name] = CDbCommandParameter(name, SQL_DOUBLE, (TDbValue)&value);

@@ -61,6 +61,14 @@ void CDbConnection::close()
 	_isActive = false;
 }
 
+void CDbConnection::init()
+{
+	CApplicationComponent::init();
+	if (_commandBuilder == 0) {
+		_commandBuilder = new CDbCommandBuilder(this, CDbSchema());
+	}
+}
+
 SAConnection * CDbConnection::getConnection() const
 {
 	return _saConnection;
@@ -95,7 +103,12 @@ CDbCommand CDbConnection::createCommand(const string & query)
 	return CDbCommand(this, query);
 }
 
-CDbCommandBuilder * CDbConnection::getCommandBuilder()
+CDbCommandBuilder * CDbConnection::getCommandBuilder() const
 {
 	return _commandBuilder;
+}
+
+void CDbConnection::setCommandBuilder(CDbCommandBuilder * builder)
+{
+	_commandBuilder = builder;
 }

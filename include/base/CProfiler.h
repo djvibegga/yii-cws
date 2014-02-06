@@ -29,6 +29,7 @@ class CProfiler
 public:
 	static TProfileLogList items;
 	static string formatItem(const TProfileLogItem & item);
+	static void logItems();
 };
 
 #ifdef JV_DEBUG
