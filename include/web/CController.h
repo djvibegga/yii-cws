@@ -29,8 +29,8 @@ private:
 	TViewPtr _layout;
 
 protected:
-	virtual bool beforeRender(const string & view);
-	void afterRender(const string & view, _string &output);
+	virtual bool beforeRender(const IView & viewInstance);
+	void afterRender(const IView & viewInstance, _string &output);
 
 public:
 	CController(const string & id, CModule * module = 0);

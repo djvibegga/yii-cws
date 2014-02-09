@@ -215,7 +215,7 @@ _string CController::render(const string & view, const cpptempl::data_map & data
 
 _string CController::render(IView & viewInstance, bool ret) throw (CException)
 {
-	if (true/*beforeRender(view)*/) {
+	if (beforeRender(viewInstance)) {
 		_string output = renderPartial(viewInstance, true);
 		IView * layout = viewInstance.getLayout().get();
 		if (layout != 0) {
@@ -234,7 +234,7 @@ _string CController::render(IView & viewInstance, bool ret) throw (CException)
 			}
 			output = renderInternal(*layout, true);
 		}
-		//afterRender(view, output);
+		afterRender(viewInstance, output);
 		output = processOutput(output);
 
 		if (ret) {
@@ -246,12 +246,12 @@ _string CController::render(IView & viewInstance, bool ret) throw (CException)
 	return _("");
 }
 
-bool CController::beforeRender(const string & view)
+bool CController::beforeRender(const IView & viewInstance)
 {
 	return true;
 }
 
-void CController::afterRender(const string & view, _string &output)
+void CController::afterRender(const IView & viewInstance, _string &output)
 {
 }
 
