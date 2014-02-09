@@ -42,6 +42,7 @@ cpptempl::data_map & CTemplateView::getData()
 
 void CTemplateView::init()
 {
+	CView::init();
 }
 
 void CTemplateView::run() throw (CException)

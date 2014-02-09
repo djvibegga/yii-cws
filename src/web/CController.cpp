@@ -216,8 +216,8 @@ _string CController::render(const string & view, const cpptempl::data_map & data
 _string CController::render(IView & viewInstance, bool ret) throw (CException)
 {
 	if (true/*beforeRender(view)*/) {
-		_string output = renderPartial( viewInstance, true);
-		IView * layout = getLayout().get();
+		_string output = renderPartial(viewInstance, true);
+		IView * layout = viewInstance.getLayout().get();
 		if (layout != 0) {
 			CTemplateView * templateLayout = dynamic_cast<CTemplateView*>(layout);
 			if (templateLayout != 0) {

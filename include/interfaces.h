@@ -94,12 +94,16 @@ public:
 	virtual IOutputBuffer & operator<< (const _string &right) = 0;
 };
 
+class IView;
+typedef boost::shared_ptr<IView> TViewPtr;
+
 class IView
 {
 public:
 	virtual ~IView() {}
 	virtual void setOutputBuffer(IOutputBuffer * buffer) = 0;
 	virtual IOutputBuffer * getOutputBuffer() const = 0;
+	virtual TViewPtr getLayout() const = 0;
 	virtual void init() = 0;
 	virtual void run() throw (CException) = 0;
 };

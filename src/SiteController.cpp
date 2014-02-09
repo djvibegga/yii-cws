@@ -46,7 +46,7 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 
     TActiveRecordList records = Goal::model()->findAll(criteria);
 
-	//cpptempl::data_map viewData;
+//	cpptempl::data_map viewData;
 	//viewData["adminURL"] = urlManager->createUrl(route);
 
 //	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
@@ -59,7 +59,8 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 
     MyView view(this);
     view.records = records;
+    view.setLayout(getViewFile("//layouts/main"));
     render(view);
 
-	//render("index", viewData);
+//	render("index", viewData);
 }

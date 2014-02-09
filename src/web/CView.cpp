@@ -7,6 +7,7 @@
 
 #include "web/CView.h"
 #include "base/Jvibetto.h"
+#include "web/CTemplateView.h"
 #include <typeinfo>
 
 TViewPathMap CView::_viewPaths;
@@ -105,6 +106,11 @@ IOutputBuffer * CView::getOutputBuffer() const
 	return _outputBuffer;
 }
 
+void CView::init()
+{
+	_layout = resolveLayout();
+}
+
 _string CView::getContent() const
 {
 	return _outputBuffer->getContent();
@@ -119,4 +125,28 @@ IOutputBuffer & CView::operator<< (const _string &right)
 {
 	*_outputBuffer << right;
 	return *this;
+}
+
+void CView::setLayout(const string & layout)
+{
+	_layout = TViewPtr(new CTemplateView(layout, _owner));
+}
+
+void CView::setLayout(TViewPtr layout)
+{
+	_layout = layout;
+}
+
+TViewPtr CView::getLayout() const
+{
+	return _layout;
+}
+
+TViewPtr CView::resolveLayout() const
+{
+	if (_layout.get() == 0) {
+		const CController * controller = getController();
+		return controller == 0 ? _layout : controller->getLayout();
+	}
+	return _layout;
 }

@@ -19,7 +19,6 @@ using namespace std;
 
 typedef void(CController::*TAction)(CHttpRequest * const, CHttpResponse * );
 typedef map<string, TAction> TActionsMap;
-typedef boost::shared_ptr<IView> TViewPtr;
 #define ACTION(pointer) CALLEE(TAction, pointer)
 
 class CController: public CBaseController, public CApplicationComponent
@@ -27,7 +26,7 @@ class CController: public CBaseController, public CApplicationComponent
 private:
 	TActionsMap _actions;
 	boost::filesystem::path _viewPath;
-	boost::shared_ptr<IView> _layout;
+	TViewPtr _layout;
 
 protected:
 	virtual bool beforeRender(const string & view);

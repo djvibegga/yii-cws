@@ -13,6 +13,7 @@
 #include <map>
 #include <boost/regex.hpp>
 #include "defines.h"
+#include "CException.h"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ public:
 	static string urlEncode(const string & src);
 	static string urlDecode(const string & src);
 	static string dirName(const string & path);
-	static string fileGetContents(const string & path);
+	static string fileGetContents(const string & path) throw (CException);
 
 	static bool lengthComparator(const string & a, const string & b);
 };

@@ -132,9 +132,12 @@ string CStringUtils::dirName(const string & path)
 	return path.substr(0, pos);
 }
 
-string CStringUtils::fileGetContents(const string & path)
+string CStringUtils::fileGetContents(const string & path) throw (CException)
 {
     std::ifstream in(path.c_str());
+    if (!in.is_open()) {
+    	throw CException("File \"" + path + "\" has not found.", 0, __FILE__, __LINE__);
+    }
     in.seekg(0, std::ios::end);
     size_t size = in.tellg();
     std::string buffer(size, ' ');

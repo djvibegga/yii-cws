@@ -19,6 +19,7 @@ private:
 	static TViewPathMap _viewPaths;
 	const CBaseController * _owner;
 	IOutputBuffer * _outputBuffer;
+	TViewPtr _layout;
 
 public:
 	CView(const CBaseController * owner = 0);
@@ -27,6 +28,7 @@ public:
 	const CController * getController() const;
 	void setOutputBuffer(IOutputBuffer * buffer);
 	IOutputBuffer * getOutputBuffer() const;
+	virtual void init();
 
 	virtual boost::filesystem::path getLocalViewPath() const;
 	virtual boost::filesystem::path getViewPath(bool checkTheme = false) const;
@@ -35,6 +37,12 @@ public:
 	virtual _string getContent() const;
 	virtual void echo(const _string & content);
 	virtual IOutputBuffer & operator<< (const _string &right);
+	void setLayout(const string & layout);
+	void setLayout(TViewPtr layout);
+	TViewPtr getLayout() const;
+
+protected:
+	virtual TViewPtr resolveLayout() const;
 };
 
 #endif /* CVIEW_H_ */
