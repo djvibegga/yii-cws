@@ -17,14 +17,16 @@ class CTemplateView: public CView
 {
 private:
 	string _viewFile;
-	cpptempl::data_map & _data;
+	cpptempl::data_map _data;
 	static TDynamicTemplateCacheMap _dynamicTemplateCache;
 	static TStaticTemplateCacheMap _staticTemplateCache;
 
 public:
-	CTemplateView(const string & viewFile, cpptempl::data_map & data, const CBaseController * owner = 0);
+	CTemplateView(const string & viewFile, const cpptempl::data_map & data, const CBaseController * owner = 0);
+	CTemplateView(const string & viewFile, const CBaseController * owner = 0);
 	virtual ~CTemplateView();
-	cpptempl::data_map & getData() const;
+	void setData(const cpptempl::data_map & data);
+	cpptempl::data_map & getData();
 	virtual void init();
 	virtual void run() throw (CException);
 };

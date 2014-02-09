@@ -14,11 +14,13 @@
 #include <utils/CMap.h>
 #include "TestWidget.h"
 #include "Goal.h"
+#include "MyView.h"
+#include "MyLayoutView.h"
 
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
 {
-	layout = "//layouts/main";
+	setLayout(TViewPtr(new MyLayoutView(this)));
 }
 
 SiteController::~SiteController()
@@ -33,7 +35,7 @@ void SiteController::init()
 
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	//CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	/*CUrlManager * urlManager = app->getUrlManager();
 	TRouteStruct route("site/index");
 	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");*/
@@ -43,39 +45,21 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 	//criteria.compare("id", id, ">=");
 
     TActiveRecordList records = Goal::model()->findAll(criteria);
-    *response << _("test");
 
-	cpptempl::data_map viewData;
+	//cpptempl::data_map viewData;
 	//viewData["adminURL"] = urlManager->createUrl(route);
 
-	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
-		Goal * goal = dynamic_cast<Goal*>(iter->get());
-		cpptempl::data_map item;
-		item["id"] = goal->id;
-		item["name"] = goal->name;
-		viewData["goals"].push_back(item);
-	}
+//	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
+//		Goal * goal = dynamic_cast<Goal*>(iter->get());
+//		cpptempl::data_map item;
+//		item["id"] = goal->id;
+//		item["name"] = goal->name;
+//		viewData["goals"].push_back(item);
+//	}
 
-	/**response << _("<!DOCTYPE html>"
-		"<html>"
-		"<head>"
-			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"
-		    "<title></title>"
-		"</head>"
-		"<body>"
-		    "<div id=\"content\">"
-				"<table>"
-					"<tr><td>ID</td><td>Name</td></tr>");
-	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
-		Goal * goal = dynamic_cast<Goal*>(iter->get());
-		wstringstream ss;
-		ss << goal->id;
-		*response << _("<tr><td>") << ss.str() << _("</td>")
-				  << _("<td>") << goal->name << _("</td></tr>");
-	}
-	*response << _("<table>"
-		    "</div>"
-		"</body>");*/
+    MyView view(this);
+    view.records = records;
+    render(view);
 
-	render("index", viewData);
+	//render("index", viewData);
 }

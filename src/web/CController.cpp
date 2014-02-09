@@ -5,10 +5,12 @@
  *      Author: djvibegga
  */
 
-#include <web/CController.h>
-#include <web/CWebModule.h>
-#include <base/CException.h>
-#include <base/Jvibetto.h>
+#include "web/CController.h"
+#include "web/CWebModule.h"
+#include "base/CException.h"
+#include "base/Jvibetto.h"
+#include "web/CTemplateView.h"
+#include "web/CLayoutView.h"
 
 CController::CController(const string & id, CModule * module)
 : CBaseController(),
@@ -28,6 +30,22 @@ void CController::init()
 {
     setViewPath(resolveViewPath());
     CApplicationComponent::init();
+}
+
+TViewPtr CController::getLayout() const
+{
+	return _layout;
+}
+
+void CController::setLayout(const string & layout)
+{
+	CTemplateView * instance = new CTemplateView(getLayoutFile(layout), this);
+	_layout = TViewPtr(instance);
+}
+
+void CController::setLayout(TViewPtr layout)
+{
+	_layout = layout;
 }
 
 void CController::registerAction(const string &name, TAction action)
@@ -117,7 +135,7 @@ string CController::resolveViewFile(
     return boost::filesystem::exists(boost::filesystem::path(viewFile)) ? viewFile : "";
 }
 
-_string CController::renderPartial(const string & view, cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
+_string CController::renderPartial(const string & view, const cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
 {
     string viewFile = getViewFile(view);
     if (!viewFile.empty()) {
@@ -139,6 +157,20 @@ _string CController::renderPartial(const string & view, cpptempl::data_map & dat
         throw CException("Controller cannot find the requested view \"{" + view + "\".");
     }
     return _("");
+}
+
+_string CController::renderPartial(IView & viewInstance, bool ret, bool processOutput) throw (CException)
+{
+	_string output = renderInternal(viewInstance, true);
+	if (processOutput) {
+		output = this->processOutput(output);
+	}
+	if (ret) {
+		return output;
+	} else {
+		Jvibetto::app()->getOutputStack().top()->echo(output);
+	}
+	return _("");
 }
 
 string CController::getLayoutFile(const string & layoutName) throw (CException)
@@ -175,17 +207,34 @@ string CController::getLayoutFile(const string & layoutName) throw (CException)
 	);
 }
 
-_string CController::render(const string & view, cpptempl::data_map & data, bool ret) throw (CException)
+_string CController::render(const string & view, const cpptempl::data_map & data, bool ret) throw (CException)
 {
-	if (beforeRender(view)) {
-		_string output = renderPartial(view, data, true);
-		string layoutFile = getLayoutFile(layout);
-		if (!layoutFile.empty()) {
-			cpptempl::data_map viewData;
-			viewData["content"] = output;
-			output = renderFile(layoutFile, viewData, true);
+	CTemplateView viewInstance(getViewFile(view), data, this);
+	return render(viewInstance, ret);
+}
+
+_string CController::render(IView & viewInstance, bool ret) throw (CException)
+{
+	if (true/*beforeRender(view)*/) {
+		_string output = renderPartial( viewInstance, true);
+		IView * layout = getLayout().get();
+		if (layout != 0) {
+			CTemplateView * templateLayout = dynamic_cast<CTemplateView*>(layout);
+			if (templateLayout != 0) {
+				cpptempl::data_map viewData;
+				viewData["content"] = output;
+				templateLayout->setData(viewData);
+			} else {
+				CLayoutView * nativeLayout = dynamic_cast<CLayoutView*>(layout);
+				if (nativeLayout != 0) {
+					nativeLayout->content = output;
+				} else {
+					throw CException("Invalid layout instance was given", 0, __FILE__, __LINE__);
+				}
+			}
+			output = renderInternal(*layout, true);
 		}
-		afterRender(view, output);
+		//afterRender(view, output);
 		output = processOutput(output);
 
 		if (ret) {

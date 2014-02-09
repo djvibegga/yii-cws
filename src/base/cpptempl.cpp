@@ -17,6 +17,25 @@ namespace cpptempl
 	// data_map
     data_map::data_map() {}
 
+    /**
+     * Copy data map from other
+     */
+    data_map::data_map(const data_map & other)
+    {
+    	this->data = other.data;
+    }
+
+    data_map & data_map::operator=(const data_map & right)
+    {
+    	this->data = right.data;
+    	return *this;
+    }
+
+    boost::unordered_map<wstring, data_ptr> & data_map::getData()
+	{
+    	return data;
+	}
+
     data_map::data_map(const std::map<std::string, std::string> & from)
     {
         for (std::map<std::string, std::string>::const_iterator iter = from.begin(); iter != from.end(); ++iter) {

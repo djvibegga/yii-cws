@@ -70,11 +70,14 @@ namespace cpptempl
 	class data_map {
 	public:
 	    data_map();
+	    data_map(const data_map & other);
 	    data_map(const std::map<std::string, std::string> & from);
 		data_ptr& operator [](const std::wstring& key);
 		data_ptr& operator [](const std::string& key);
+		data_map & operator=(const data_map & right);
 		bool empty();
 		bool has(const wstring& key);
+		boost::unordered_map<wstring, data_ptr> & getData();
 	private:
 		boost::unordered_map<wstring, data_ptr> data;
 	};

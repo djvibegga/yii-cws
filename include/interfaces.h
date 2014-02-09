@@ -108,7 +108,7 @@ class IRenderingContext
 {
 public:
     virtual ~IRenderingContext() {}
-    virtual _string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const = 0;
+    virtual _string renderInternal(const string & viewFile, const cpptempl::data_map & data, bool ret = false) const = 0;
     virtual _string renderInternal(IView & viewInstance, bool ret = false) const = 0;
 };
 
@@ -118,7 +118,7 @@ public:
     string fileExtension;
     IViewRenderer() : fileExtension(".tpl") {}
     virtual ~IViewRenderer() {}
-    virtual _string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map & data, bool ret) = 0;
+    virtual _string renderFile(const IRenderingContext * context, const string & file, const cpptempl::data_map & data, bool ret) = 0;
 };
 
 class IHasLayout

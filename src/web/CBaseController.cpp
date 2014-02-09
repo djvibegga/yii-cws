@@ -9,7 +9,7 @@
 #include <string>
 #include "config.h"
 
-_string CBaseController::renderFile(const string & viewFile, cpptempl::data_map & data, bool ret)
+_string CBaseController::renderFile(const string & viewFile, const cpptempl::data_map & data, bool ret)
 {
     unsigned int widgetCount = _widgetStack.size();
     IViewRenderer * renderer = dynamic_cast<IViewRenderer*>(Jvibetto::app()->getComponent("viewRenderer"));
@@ -30,7 +30,7 @@ _string CBaseController::renderFile(const string & viewFile, cpptempl::data_map 
     }
 }
 
-_string CBaseController::renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret) const
+_string CBaseController::renderInternal(const string & viewFile, const cpptempl::data_map & data, bool ret) const
 {
 	PROFILE_BEGIN("Rendering of view file: \"" + viewFile + "\"");
 	CTemplateView view(viewFile, data, this);

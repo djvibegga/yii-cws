@@ -13,10 +13,16 @@
 TDynamicTemplateCacheMap CTemplateView::_dynamicTemplateCache;
 TStaticTemplateCacheMap CTemplateView::_staticTemplateCache;
 
-CTemplateView::CTemplateView(const string & viewFile, cpptempl::data_map & data, const CBaseController * owner)
+CTemplateView::CTemplateView(const string & viewFile, const cpptempl::data_map & data, const CBaseController * owner)
 : CView(owner),
   _viewFile(viewFile),
   _data(data)
+{
+}
+
+CTemplateView::CTemplateView(const string & viewFile, const CBaseController * owner)
+: CView(owner),
+  _viewFile(viewFile)
 {
 }
 
@@ -24,7 +30,12 @@ CTemplateView::~CTemplateView()
 {
 }
 
-cpptempl::data_map & CTemplateView::getData() const
+void CTemplateView::setData(const cpptempl::data_map & data)
+{
+	_data = cpptempl::data_map(data);
+}
+
+cpptempl::data_map & CTemplateView::getData()
 {
 	return _data;
 }

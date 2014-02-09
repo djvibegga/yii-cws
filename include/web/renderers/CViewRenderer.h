@@ -19,7 +19,7 @@ public:
     CViewRenderer(CModule * module);
     CViewRenderer(const string &id, CModule * module);
     virtual ~CViewRenderer();
-    _string renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map & data, bool ret) throw (CException);
+    _string renderFile(const IRenderingContext * context, const string & sourceFile, const cpptempl::data_map & data, bool ret) throw (CException);
 
 protected:
     virtual bool generateViewFile(const string & sourceFile, const string & viewFile) = 0;
