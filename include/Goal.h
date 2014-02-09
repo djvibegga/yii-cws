@@ -13,11 +13,11 @@
 class Goal: public CActiveRecord
 {
 	DECLARE_AR_CLASS(Goal)
+	DECLATE_AR_ATTRIBUTE(AR_ATTRIBUTE_ULONG, id)
+	DECLATE_AR_ATTRIBUTE(AR_ATTRIBUTE_STRING, name)
 	DECLARE_ATTRIBUTE_RESOLVER()
 
 public:
-	unsigned long id;
-	string name;
 
 	Goal(const string & scenario = "", CDbConnection * connection = 0);
 	Goal(const Goal & other);

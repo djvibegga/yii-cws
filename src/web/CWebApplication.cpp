@@ -48,9 +48,14 @@ void CWebApplication::renderException(const CException & e) const
 {
 	CHttpResponse * response = getResponse();
 #ifdef JV_DEBUG
-	response->echo(e.getFullMessage());
+	string message = e.getFullMessage();
 #else
-	response->echo(e.getMessage());
+	string message = e.getMessage();
+#endif
+#ifdef _UNICODE
+	response->echo(cpptempl::utf8_to_wide(message));
+#else
+	response->echo(message);
 #endif
 }
 

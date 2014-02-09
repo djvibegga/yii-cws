@@ -12,6 +12,7 @@
 #include <map>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include "defines.h"
 #include "base/CException.h"
 
 using namespace std;
@@ -88,9 +89,9 @@ class IOutputBuffer
 {
 public:
 	virtual ~IOutputBuffer() {};
-	virtual string getContent() const = 0;
-	virtual void echo(const string & content) = 0;
-	virtual IOutputBuffer & operator<< (const string &right) = 0;
+	virtual _string getContent() const = 0;
+	virtual void echo(const _string & content) = 0;
+	virtual IOutputBuffer & operator<< (const _string &right) = 0;
 };
 
 class IView
@@ -107,8 +108,8 @@ class IRenderingContext
 {
 public:
     virtual ~IRenderingContext() {}
-    virtual string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const = 0;
-    virtual string renderInternal(IView & viewInstance, bool ret = false) const = 0;
+    virtual _string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const = 0;
+    virtual _string renderInternal(IView & viewInstance, bool ret = false) const = 0;
 };
 
 class IViewRenderer
@@ -117,7 +118,7 @@ public:
     string fileExtension;
     IViewRenderer() : fileExtension(".tpl") {}
     virtual ~IViewRenderer() {}
-    virtual string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map & data, bool ret) = 0;
+    virtual _string renderFile(const IRenderingContext * context, const string & file, cpptempl::data_map & data, bool ret) = 0;
 };
 
 class IHasLayout

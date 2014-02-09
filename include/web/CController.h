@@ -29,7 +29,7 @@ private:
 
 protected:
 	virtual bool beforeRender(const string & view);
-	void afterRender(const string & view, string &output);
+	void afterRender(const string & view, _string &output);
 
 public:
 	string layout;
@@ -49,10 +49,10 @@ public:
 	    const boost::filesystem::path & viewPath,
 	    const boost::filesystem::path & basePath,
 	    const boost::filesystem::path & moduleViewPath) const throw (CException);
-	virtual string renderPartial(const string & view, cpptempl::data_map & data, bool ret = false, bool processOutput = false) throw (CException);
+	virtual _string renderPartial(const string & view, cpptempl::data_map & data, bool ret = false, bool processOutput = false) throw (CException);
 	virtual string getLayoutFile(const string & layoutName) throw (CException);
-	virtual string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
-	virtual string processOutput(const string & output);
+	virtual _string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
+	virtual _string processOutput(const _string & output);
 };
 
 #endif /* CCONTROLLER_H_ */

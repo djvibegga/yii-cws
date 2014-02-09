@@ -80,10 +80,14 @@ CActiveRecord * className::instantiate(const TDbRow & attributes) const\
 /**
  * Common attributes conversions
  */
-#define AR_ATTRIBUTE_LONG ->asLong()
-#define AR_ATTRIBUTE_ULONG ->asULong()
-#define AR_ATTRIBUTE_STRING ->asString().GetMultiByteChars()
-#define AR_ATTRIBUTE_DOUBLE ->asDouble().GetMultiByteChars()
+#define AR_CONVERISION_LONG ->asLong()
+#define AR_CONVERISION_ULONG ->asULong()
+#ifdef _UNICODE
+#define AR_CONVERISION_STRING ->asString().GetWideChars()
+#else
+#define AR_CONVERISION_STRING ->asString().GetMultiByteChars()
+#endif
+#define AR_CONVERISION_DOUBLE ->asDouble()
 
 /**
  * Registering declaration of populateProperty method
@@ -115,5 +119,19 @@ public:\
 #define END_ATTRIBUTE_RESOLVER() \
 	}
 
+/**
+ * Registering active record class property
+ */
+#define DECLATE_AR_ATTRIBUTE(type, name) \
+	public:\
+		type name;
+
+/**
+ * Common attributes types
+ */
+#define AR_ATTRIBUTE_LONG long
+#define AR_ATTRIBUTE_ULONG unsigned long
+#define AR_ATTRIBUTE_STRING _string
+#define AR_ATTRIBUTE_DOUBLE double
 
 #endif /* CACTIVERECORD_H_ */

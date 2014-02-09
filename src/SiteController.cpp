@@ -34,20 +34,20 @@ void SiteController::init()
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	CUrlManager * urlManager = app->getUrlManager();
+	/*CUrlManager * urlManager = app->getUrlManager();
 	TRouteStruct route("site/index");
-	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");
+	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");*/
 
 	CDbCriteria criteria;
-	unsigned long id = 1;
-	criteria.compare("id", id, ">=");
+	//unsigned long id = 1;
+	//criteria.compare("id", id, ">=");
 
     TActiveRecordList records = Goal::model()->findAll(criteria);
+    *response << _("test");
 
 	cpptempl::data_map viewData;
-	viewData["adminURL"] = urlManager->createUrl(route);
+	//viewData["adminURL"] = urlManager->createUrl(route);
 
-	stringstream ss;
 	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
 		Goal * goal = dynamic_cast<Goal*>(iter->get());
 		cpptempl::data_map item;
@@ -55,6 +55,27 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 		item["name"] = goal->name;
 		viewData["goals"].push_back(item);
 	}
+
+	/**response << _("<!DOCTYPE html>"
+		"<html>"
+		"<head>"
+			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"
+		    "<title></title>"
+		"</head>"
+		"<body>"
+		    "<div id=\"content\">"
+				"<table>"
+					"<tr><td>ID</td><td>Name</td></tr>");
+	for (TActiveRecordList::const_iterator iter = records.begin(); iter != records.end(); ++iter) {
+		Goal * goal = dynamic_cast<Goal*>(iter->get());
+		wstringstream ss;
+		ss << goal->id;
+		*response << _("<tr><td>") << ss.str() << _("</td>")
+				  << _("<td>") << goal->name << _("</td></tr>");
+	}
+	*response << _("<table>"
+		    "</div>"
+		"</body>");*/
 
 	render("index", viewData);
 }

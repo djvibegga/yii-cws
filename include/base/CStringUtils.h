@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <boost/regex.hpp>
+#include "defines.h"
 
 using namespace std;
 

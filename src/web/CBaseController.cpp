@@ -9,12 +9,12 @@
 #include <string>
 #include "config.h"
 
-string CBaseController::renderFile(const string & viewFile, cpptempl::data_map & data, bool ret)
+_string CBaseController::renderFile(const string & viewFile, cpptempl::data_map & data, bool ret)
 {
     unsigned int widgetCount = _widgetStack.size();
     IViewRenderer * renderer = dynamic_cast<IViewRenderer*>(Jvibetto::app()->getComponent("viewRenderer"));
     boost::filesystem::path viewPath(viewFile);
-    string content = "";
+    _string content = _("");
     if (renderer != 0 && renderer->fileExtension == viewPath.extension().string()) {
         content = renderer->renderFile(this, viewFile, data, ret);
     } else {
@@ -30,16 +30,16 @@ string CBaseController::renderFile(const string & viewFile, cpptempl::data_map &
     }
 }
 
-string CBaseController::renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret) const
+_string CBaseController::renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret) const
 {
 	PROFILE_BEGIN("Rendering of view file: \"" + viewFile + "\"");
 	CTemplateView view(viewFile, data, this);
-	string output = renderInternal(view, ret);
+	_string output = renderInternal(view, ret);
 	PROFILE_END();
 	return output;
 }
 
-string CBaseController::renderInternal(IView & viewInstance, bool ret) const
+_string CBaseController::renderInternal(IView & viewInstance, bool ret) const
 {
 	CApplication * app = Jvibetto::app();
 	if (ret) {
@@ -50,10 +50,10 @@ string CBaseController::renderInternal(IView & viewInstance, bool ret) const
 	viewInstance.init();
 	viewInstance.run();
 	if (ret) {
-		string output = outputBuffer->getContent();
+		_string output = outputBuffer->getContent();
 		app->getOutputStack().pop();
 		delete outputBuffer;
 		return output;
 	}
-	return "";
+	return _("");
 }

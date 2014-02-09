@@ -11,17 +11,17 @@ CMemoryOutputBuffer::~CMemoryOutputBuffer()
 {
 }
 
-string CMemoryOutputBuffer::getContent() const
+_string CMemoryOutputBuffer::getContent() const
 {
 	return _content;
 }
 
-void CMemoryOutputBuffer::echo(const string & content)
+void CMemoryOutputBuffer::echo(const _string & content)
 {
 	_content += content;
 }
 
-IOutputBuffer & CMemoryOutputBuffer::operator<< (const string &right)
+IOutputBuffer & CMemoryOutputBuffer::operator<< (const _string &right)
 {
 	_content += right;
 	return *this;

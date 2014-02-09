@@ -117,12 +117,12 @@ string CController::resolveViewFile(
     return boost::filesystem::exists(boost::filesystem::path(viewFile)) ? viewFile : "";
 }
 
-string CController::renderPartial(const string & view, cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
+_string CController::renderPartial(const string & view, cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
 {
     string viewFile = getViewFile(view);
     if (!viewFile.empty()) {
         try {
-            string output = renderFile(viewFile, data, true);
+            _string output = renderFile(viewFile, data, true);
             if (processOutput) {
                 output = this->processOutput(output);
             }
@@ -138,7 +138,7 @@ string CController::renderPartial(const string & view, cpptempl::data_map & data
     } else {
         throw CException("Controller cannot find the requested view \"{" + view + "\".");
     }
-    return "";
+    return _("");
 }
 
 string CController::getLayoutFile(const string & layoutName) throw (CException)
@@ -175,10 +175,10 @@ string CController::getLayoutFile(const string & layoutName) throw (CException)
 	);
 }
 
-string CController::render(const string & view, cpptempl::data_map & data, bool ret) throw (CException)
+_string CController::render(const string & view, cpptempl::data_map & data, bool ret) throw (CException)
 {
 	if (beforeRender(view)) {
-		string output = renderPartial(view, data, true);
+		_string output = renderPartial(view, data, true);
 		string layoutFile = getLayoutFile(layout);
 		if (!layoutFile.empty()) {
 			cpptempl::data_map viewData;
@@ -194,7 +194,7 @@ string CController::render(const string & view, cpptempl::data_map & data, bool 
 			Jvibetto::app()->getOutputStack().top()->echo(output);
 		}
 	}
-	return "";
+	return _("");
 }
 
 bool CController::beforeRender(const string & view)
@@ -202,11 +202,11 @@ bool CController::beforeRender(const string & view)
 	return true;
 }
 
-void CController::afterRender(const string & view, string &output)
+void CController::afterRender(const string & view, _string &output)
 {
 }
 
-string CController::processOutput(const string & output)
+_string CController::processOutput(const _string & output)
 {
 	/*Yii::app()->getClientScript()->render($output);
 

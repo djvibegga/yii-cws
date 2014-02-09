@@ -30,7 +30,7 @@ CViewRenderer::~CViewRenderer()
 {
 }
 
-string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map & data, bool ret) throw (CException)
+_string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, cpptempl::data_map & data, bool ret) throw (CException)
 {
     boost::filesystem::path sourcePath(sourceFile);
     if (!boost::filesystem::exists(sourcePath)) {

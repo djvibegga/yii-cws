@@ -33,12 +33,9 @@ void ProductController::actionTest(CHttpRequest * const request, CHttpResponse *
 {
 	Jvibetto::log("test message");
 
-	response->echo("<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n");
+	response->echo(_("<TITLE>fastcgi</TITLE>\n<H1>Fastcgi: 10050.</H1>\n"));
 	TRequestParams params = request->getParams();
-	*response << "I am product controller. Action test." << "<br/>";
-	for (TRequestParams::iterator iter = params.begin(); iter != params.end(); ++iter) {
-		*response << "Param. Name: " << iter->first << ". Value: " << iter->second << "<br/>";
-	}
+	*response << _("I am product controller. Action test.") << _("<br/>");
 
 	CDbConnection * connection = dynamic_cast<CDbConnection*>(Jvibetto::app()->getComponent("db"));
 	CDbCommand cmd(connection, "select id, email from user where id >= :id");
@@ -57,8 +54,8 @@ void ProductController::actionTest(CHttpRequest * const request, CHttpResponse *
 		viewData["users"].push_back(user);
 	}
 
-	string text = "{% for user in users %}ID: {$user.id}, Email: {$user.email}{% endfor %}";
-	string result = cpptempl::parse(text, viewData);
+	_string text = _("{% for user in users %}ID: {$user.id}, Email: {$user.email}{% endfor %}");
+	_string result = cpptempl::parse(text, viewData);
 
 	*response << result;
 }

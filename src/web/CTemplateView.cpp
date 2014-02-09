@@ -58,5 +58,11 @@ void CTemplateView::run() throw (CException)
 		cpptempl::render(stream, tree, data);
 		text = stream.str();
 	}
-	Jvibetto::app()->getOutputStack().top()->echo(cpptempl::wide_to_utf8(text).c_str());
+	Jvibetto::app()->getOutputStack().top()->echo(
+#ifdef _UNICODE
+		text
+#else
+	    cpptempl::wide_to_utf8(text)
+#endif
+	);
 }

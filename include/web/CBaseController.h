@@ -23,9 +23,9 @@ private:
 
 public:
     virtual string getViewFile(const string & viewName) const throw (CException) = 0;
-    virtual string renderFile(const string & viewFile, cpptempl::data_map & data, bool ret = false);
-    virtual string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const;
-    virtual string renderInternal(IView & viewInstance, bool ret = false) const;
+    virtual _string renderFile(const string & viewFile, cpptempl::data_map & data, bool ret = false);
+    virtual _string renderInternal(const string & viewFile, cpptempl::data_map & data, bool ret = false) const;
+    virtual _string renderInternal(IView & viewInstance, bool ret = false) const;
 };
 
 #endif /* CBASECONTROLLER_H_ */

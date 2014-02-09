@@ -22,21 +22,28 @@ CHttpResponse::~CHttpResponse()
 
 }
 
-string CHttpResponse::getContent() const
+_string CHttpResponse::getContent() const
 {
-	return "";
+	return _("");
 }
 
-void CHttpResponse::echo(const string & content)
+void CHttpResponse::echo(const _string & content)
 {
 	if (!_startedOutput) {
 		_startedOutput = true;
-		echo("Content-type: text/html\r\n\r\n");
+		echo(_("Content-type: text/html\r\n\r\n"));
 	}
-	FCGX_FPrintF(_app->request.out, content.c_str());
+	FCGX_FPrintF(
+		_app->request.out,
+#ifdef _UNICODE
+		cpptempl::wide_to_utf8(content).c_str()
+#else
+		content.c_str()
+#endif
+	);
 }
 
-IOutputBuffer & CHttpResponse::operator<< (const string &right)
+IOutputBuffer & CHttpResponse::operator<< (const _string &right)
 {
 	echo(right);
 	return *this;

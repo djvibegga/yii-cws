@@ -13,13 +13,13 @@
 class CMemoryOutputBuffer: public CComponent, public IOutputBuffer
 {
 private:
-	string _content;
+	_string _content;
 
 public:
 	virtual ~CMemoryOutputBuffer();
-	virtual string getContent() const;
-	virtual void echo(const string & content);
-	virtual IOutputBuffer & operator<< (const string &right);
+	virtual _string getContent() const;
+	virtual void echo(const _string & content);
+	virtual IOutputBuffer & operator<< (const _string &right);
 };
 
 #endif /* CMEMORYOUTPUTBUFFER_H_ */

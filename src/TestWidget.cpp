@@ -31,7 +31,7 @@ void TestWidget::init()
 void TestWidget::run() throw (CException)
 {
 	*this
-	<< "<p class=\"note\">"
-	<< "ACDC"
-	<< "</p>";
+	<< _("<p class=\"note\">")
+	<< _("ACDC")
+	<< _("</p>");
 }

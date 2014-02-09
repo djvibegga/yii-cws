@@ -31,10 +31,10 @@ public:
 	virtual boost::filesystem::path getLocalViewPath() const;
 	virtual boost::filesystem::path getViewPath(bool checkTheme = false) const;
 	virtual string getViewFile(const string & viewName) const throw (CException);
-	virtual string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
-	virtual string getContent() const;
-	virtual void echo(const string & content);
-	virtual IOutputBuffer & operator<< (const string &right);
+	virtual _string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
+	virtual _string getContent() const;
+	virtual void echo(const _string & content);
+	virtual IOutputBuffer & operator<< (const _string &right);
 };
 
 #endif /* CVIEW_H_ */

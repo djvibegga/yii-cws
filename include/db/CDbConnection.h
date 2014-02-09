@@ -8,6 +8,12 @@ using namespace std;
 #include <base/CApplicationComponent.h>
 #include "base/CException.h"
 
+#ifdef _UNICODE
+#define STRING_FROM_SA_FIELD(sa) sa->asString().getWideChars()
+#else
+#define STRING_FROM_SA_FIELD(sa) sa->asString().GetMultiByteChars()
+#endif
+
 class CDbCommand;
 class CDbCommandBuilder;
 
