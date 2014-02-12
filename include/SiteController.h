@@ -19,6 +19,7 @@ public:
 	virtual ~SiteController();
 	void init();
 	void actionIndex(CHttpRequest * const request, CHttpResponse * response);
+	void actionAssetManager(CHttpRequest * const request, CHttpResponse * response);
 };
 
 #endif /* SITECONTROLLER_H_ */

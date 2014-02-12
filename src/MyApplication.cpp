@@ -17,6 +17,7 @@
 #include "SiteController.h"
 #include "ProductController.h"
 #include <web/CUrlManager.h>
+#include <web/CAssetManager.h>
 #include "MyUrlRule.h"
 #include "TestBehavior.h"
 
@@ -56,6 +57,11 @@ void MyApplication::registerComponents()
 
 	CUrlManager * urlManager = new CUrlManager(this);
 	urlManager->init();
+
+	CAssetManager * am = new CAssetManager(this);
+	am->linkAssets = true;
+	am->init();
+
 	//urlManager->addRule(new MyUrlRule());
 	//urlManager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
 

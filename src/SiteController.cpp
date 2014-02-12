@@ -11,6 +11,7 @@
 #include <base/Jvibetto.h>
 #include <db/CDbDataReader.h>
 #include <db/CDbCriteria.h>
+#include <web/CAssetManager.h>
 #include <utils/CMap.h>
 #include "TestWidget.h"
 #include "Goal.h"
@@ -31,6 +32,7 @@ void SiteController::init()
 {
     CController::init();
 	registerAction("index", ACTION(&SiteController::actionIndex));
+	registerAction("am", ACTION(&SiteController::actionAssetManager));
 }
 
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
@@ -63,4 +65,17 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
     render(view);
 
 //	render("index", viewData);
+}
+
+void SiteController::actionAssetManager(CHttpRequest * const request, CHttpResponse * response)
+{
+	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
+
+	string url = am->publish(
+		boost::filesystem::path("./assets/test.js")
+	);
+
+	*response
+		<< _("url of test asset directory is: ")
+		<< _("<script type=\"text/javascript\" src=\"") << cpptempl::utf8_to_wide(url) << _("\"></script>");
 }
