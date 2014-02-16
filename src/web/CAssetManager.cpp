@@ -103,21 +103,23 @@ string CAssetManager::publish(const boost::filesystem::path & path, bool hashByN
 				if (linkAssets && !isDirDest) {
 					boost::filesystem::create_symlink(src, dstDir);
 				} else if (!isDirDest || forceCopy) {
-//					CFileHelper::copyDirectory($src,$dstDir,array(
-//						'exclude'=>$this->excludeFiles,
-//						'level'=>$level,
-//						'newDirMode'=>$this->newDirMode,
-//						'newFileMode'=>$this->newFileMode,
-//					));
+					CFile::copyDirectory(
+						src,
+						dstDir,
+						TExcludeList(),
+						excludeFiles,
+						newDirMode,
+						newFileMode,
+						level
+					);
 				}
 				return _published[src.string()] = getBaseUrl() + "/" + dir;
 			} else {
 				string fileName = src.filename().string();
 				boost::filesystem::path dstFile(dstDir.string() + "/" + fileName);
 				if (!isDirDest) {
-					if (boost::filesystem::create_directories(dstDir)) {
-						chmod(dstDir.string().c_str(), newDirMode);
-					}
+					boost::filesystem::create_directories(dstDir);
+					chmod(dstDir.string().c_str(), newDirMode);
 				}
 				bool isFileExists = boost::filesystem::exists(dstFile);
 				if (linkAssets && !isFileExists) {

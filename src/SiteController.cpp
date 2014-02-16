@@ -72,6 +72,10 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
 
 	string url = am->publish(
+		boost::filesystem::path("./assets")
+	);
+
+	url = am->publish(
 		boost::filesystem::path("./assets/test.js")
 	);
 

@@ -9,8 +9,8 @@
 #define CASSETMANAGER_H_
 
 #include "base/CApplicationComponent.h"
+#include "utils/CFile.h"
 
-typedef vector<string> TExcludeList;
 typedef map<string, string> TAssetsPathMap;
 
 class CAssetManager: public CApplicationComponent
@@ -24,8 +24,8 @@ public:
 	static const string DEFAULT_BASEPATH;
 	bool linkAssets;
 	TExcludeList excludeFiles;
-	int newFileMode;
-	int newDirMode;
+	unsigned int newFileMode;
+	unsigned int newDirMode;
 	bool forceCopy;
 
 	CAssetManager(CModule * module);

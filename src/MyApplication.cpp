@@ -20,6 +20,7 @@
 #include <web/CAssetManager.h>
 #include "MyUrlRule.h"
 #include "TestBehavior.h"
+#include "utils/CFile.h"
 
 MyApplication::MyApplication(const string &configPath, int argc, char * const argv[])
 : CWebApplication(configPath, argc, argv)
@@ -35,11 +36,11 @@ MyApplication::~MyApplication()
 void MyApplication::registerComponents()
 {
 	CLogRouter * log = getLog();
-	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
-//	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
-//	fileRoute->setLevels("info,error,warning,trace,profile");
-//	fileRoute->init();
-//	log->addRoute(fileRoute);
+	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
+	fileRoute->setLevels("info,error,warning,trace,profile");
+	fileRoute->init();
+	log->addRoute(fileRoute);
 
 	CDbConnection * connection = new CDbConnection(this);
 	connection->setId("db");
@@ -59,7 +60,7 @@ void MyApplication::registerComponents()
 	urlManager->init();
 
 	CAssetManager * am = new CAssetManager(this);
-	am->linkAssets = true;
+	//am->linkAssets = true;
 	am->init();
 
 	//urlManager->addRule(new MyUrlRule());
