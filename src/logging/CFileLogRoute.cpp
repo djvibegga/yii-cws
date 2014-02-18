@@ -63,7 +63,7 @@ void CFileLogRoute::processLogs(TLogElementList & logs)
 	string logFile = string(getLogPath().c_str()) + "/" + getLogFile();
 	/*if (@filesize($logFile)>$this->getMaxFileSize()*1024)
 		$this->rotateFiles();*/
-	FILE * file = fopen(logFile.c_str(), "a");
+	_IO_FILE * file = fopen(logFile.c_str(), "a");
 	if (!file) {
 		throw CException("Can\'t open log file for writing: '" + string(logFile.c_str()) + "'.");
 	}

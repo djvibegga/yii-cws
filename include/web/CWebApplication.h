@@ -30,6 +30,7 @@ class CWebApplication: public CApplication, public IHasLayout
 	friend class CHttpResponse;
 
 private:
+	IWebRequestPool * _requestPool;
 	TControllerMap _controllerMap;
 	boost::filesystem::path _layoutPath;
 
@@ -38,12 +39,16 @@ public:
 	string defaultControllerRoute;
 
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
+	CWebApplication(const xml_document & configDocument, int argc, char * const argv[]);
 	~CWebApplication();
 	virtual void init() throw(CException);
 	virtual void run() throw(CException);
 	CHttpRequest * getRequest() const;
 	CHttpResponse * getResponse() const;
 	CUrlManager * getUrlManager() const;
+
+	void setWebRequestPool(IWebRequestPool * pool);
+	IWebRequestPool * getWebRequestPool() const;
 
 	virtual bool hasController(const string & name) const;
 	virtual CController * getController(const string & name) const;
@@ -53,7 +58,7 @@ public:
 	virtual void setLayoutPath(const boost::filesystem::path & path);
 
 protected:
-	FCGX_Request request;
+	FCGX_Request * request;
 	void mainLoop() throw(CException);
 	virtual void handleRequest();
 	virtual void beginRequest();

@@ -34,7 +34,7 @@ void CHttpResponse::echo(const _string & content)
 		echo(_("Content-type: text/html\r\n\r\n"));
 	}
 	FCGX_FPrintF(
-		_app->request.out,
+		_app->request->out,
 #ifdef _UNICODE
 		cpptempl::wide_to_utf8(content).c_str()
 #else

@@ -13,6 +13,7 @@
 #include <vector>
 #include <boost/filesystem.hpp>
 #include "defines.h"
+#include "fcgi_stdio.h"
 #include "base/CException.h"
 
 using namespace std;
@@ -133,5 +134,11 @@ public:
 	virtual void setLayoutPath(const boost::filesystem::path & path) = 0;
 };
 
+class IWebRequestPool
+{
+public:
+	virtual ~IWebRequestPool() {};
+	virtual FCGX_Request * popRequest() = 0;
+};
 
 #endif /* INTERFACES_H_ */

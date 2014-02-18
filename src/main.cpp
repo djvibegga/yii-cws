@@ -13,8 +13,7 @@
 #include <base/CModule.h>
 #include <base/CException.h>
 #include <base/Jvibetto.h>
-
-#include "MyApplication.h"
+#include "TestWebRequestPool.h"
 
 int main(int argc, char* const argv[])
 {
@@ -22,9 +21,9 @@ int main(int argc, char* const argv[])
 	configPath += "/main.xml";
 	cout << "Config file path: " << configPath << endl;
 	try {
-		MyApplication app(configPath, argc, argv);
-		app.init();
-		app.run();
+		TestWebRequestPool pool(configPath, argc, argv);
+		pool.init();
+		pool.run();
 	} catch (const CException & e) {
 		cout << e.getFullMessage() << endl;
 		return 1;

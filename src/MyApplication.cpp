@@ -26,7 +26,11 @@
 MyApplication::MyApplication(const string &configPath, int argc, char * const argv[])
 : CWebApplication(configPath, argc, argv)
 {
+}
 
+MyApplication::MyApplication(const xml_document & configDocument, int argc, char * const argv[])
+: CWebApplication(configDocument, argc, argv)
+{
 }
 
 MyApplication::~MyApplication()
@@ -37,7 +41,7 @@ MyApplication::~MyApplication()
 void MyApplication::registerComponents()
 {
 	CLogRouter * log = getLog();
-	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
 	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
 	fileRoute->setLevels("info,error,warning,trace,profile");
 	fileRoute->init();

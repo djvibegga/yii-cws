@@ -19,7 +19,16 @@ using namespace boost;
 using namespace std;
 
 CWebApplication::CWebApplication(const string &configPath, int argc, char * const argv[])
-: CApplication(configPath, argc, argv)
+: CApplication(configPath, argc, argv),
+  _requestPool(0),
+  request(0)
+{
+}
+
+CWebApplication::CWebApplication(const xml_document & configDocument, int argc, char * const argv[])
+: CApplication(configDocument, argc, argv),
+  _requestPool(0),
+  request(0)
 {
 }
 
@@ -61,35 +70,18 @@ void CWebApplication::renderException(const CException & e) const
 
 void CWebApplication::mainLoop() throw(CException)
 {
-	string port = ":";
-	const xml_node &configRoot = getConfigRoot();
-	port.append(configRoot.child("server").attribute("port").value());
-	cout << "Server started on port: " << port << endl;
-	int listenQueueBacklog = configRoot.child("server")
-		.child("threadsCount")
-		.attribute("value").as_int();
-	cout << "Server started with listeners: " << listenQueueBacklog << endl;
-
-	if (FCGX_Init()) {
-		throw CException("Can\'t initialize FCGX.");
-	} else {
-		//log << "Initialized FCGX." << endl;
-	}
-
-	int  listen_socket = FCGX_OpenSocket(port.c_str(), listenQueueBacklog);
-	if (listen_socket < 0) {
-		throw CException("Can\'t open socket.");
-	} else {
-		//log << "Socket opened successfully." << endl;
-	}
-
-	if (FCGX_InitRequest(&this->request, listen_socket, 0)) {
-		throw CException("Can\'t initialize FCGX Request.");
-	}
-
-	while (FCGX_Accept_r(&this->request) == 0) {
-		handleRequest();
-		FCGX_Finish_r(&this->request);
+	IWebRequestPool * pool = getWebRequestPool();
+	if (pool) {
+		while (true) {
+			request = pool->popRequest();
+			if (request != 0) {
+				handleRequest();
+				FCGX_Finish_r(request);
+			}
+			delete request;
+			request = 0;
+			usleep(1000);
+		}
 	}
 }
 
@@ -98,7 +90,7 @@ void CWebApplication::handleRequest()
 	try {
 		CApplication::handleRequest();
 	} catch (const CHttpException & e) {
-		FCGX_SetExitStatus(e.getStatus(), request.out);
+		FCGX_SetExitStatus(e.getStatus(), request->out);
 		renderException(e);
 	} catch (const CException & e) {
 		renderException(e);
@@ -243,4 +235,14 @@ SControllerToRun CWebApplication::resolveController(string route, const IModule 
 		}
 	}
 	return ret;
+}
+
+void CWebApplication::setWebRequestPool(IWebRequestPool * pool)
+{
+	_requestPool = pool;
+}
+
+IWebRequestPool * CWebApplication::getWebRequestPool() const
+{
+	return _requestPool;
 }

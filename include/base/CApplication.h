@@ -18,6 +18,7 @@
 #include "pugixml.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using namespace pugi;
@@ -36,14 +37,16 @@ private:
 	xml_document * _xmlConfig;
 	TArgumentsList _arguments;
 	CLogger _logger;
-	static CApplication * _instance;
+	static boost::mutex _instanceLocker;
+	static map<long, CApplication*> _instances;
 	boost::filesystem::path _runtimePath;
 	boost::filesystem::path _executablePath;
 	CLogRouter * _log;
 	TOutputStack _outputStack;
 
 public:
-	CApplication(const string &configPath, int argc, char * const argv[]);
+	CApplication(const string & configPath, int argc, char * const argv[]);
+	CApplication(const xml_document & configDocument, int argc, char * const argv[]);
 	virtual ~CApplication();
 	virtual string getId() const;
 	virtual void setId(const string &id);
@@ -63,6 +66,7 @@ public:
 	boost::filesystem::path getExecutablePath() const;
 	virtual boost::filesystem::path resolveBasePath() const;
 	static CApplication * getInstance();
+	static long getThreadId();
 	TOutputStack & getOutputStack();
 
 protected:

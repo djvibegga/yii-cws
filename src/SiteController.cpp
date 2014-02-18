@@ -73,18 +73,20 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
 	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
 
+	usleep(50000);
+
 	string url = am->publish(
 		boost::filesystem::path("./assets")
 	);
 
-	cs->registerMetaTag(_("7ca4fb0526bc4815"), _("yandex-verification"));
-	cs->registerCssFile(url + "/style.css", _("screen"));
-	cs->registerCss("initial", _("body #content {padding: 5px; }"), _("screen"));
-	cs->registerScriptFile(url + "/test.js");
-
-	cs->registerScriptFile(url + "/subassets/sub.js", CClientScript::POS_BEGIN);
-	cs->registerScriptFile(cs->getCoreScriptUrl() + "/jquery.min.js");
-	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
+//	cs->registerMetaTag(_("7ca4fb0526bc4815"), _("yandex-verification"));
+//	cs->registerCssFile(url + "/style.css", _("screen"));
+//	cs->registerCss("initial", _("body #content {padding: 5px; }"), _("screen"));
+//	cs->registerScriptFile(url + "/test.js");
+//
+//	cs->registerScriptFile(url + "/subassets/sub.js", CClientScript::POS_BEGIN);
+//	cs->registerScriptFile(cs->getCoreScriptUrl() + "/jquery.min.js");
+//	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
 
 	render("am", cpptempl::data_map());
 }

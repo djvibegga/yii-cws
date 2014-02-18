@@ -16,10 +16,12 @@
 #include <boost/filesystem.hpp>
 #include <stdlib.h>
 #include <signal.h>
+#include <boost/thread.hpp>
 
 using namespace std;
 
-CApplication * CApplication::_instance = 0;
+map<long, CApplication*> CApplication::_instances;
+boost::mutex CApplication::_instanceLocker;
 bool CApplication::_failHandlerCalled = false;
 
 CApplication::CApplication(const string &configPath, int argc, char * const argv[])
@@ -30,6 +32,19 @@ CApplication::CApplication(const string &configPath, int argc, char * const argv
 	signal(SIGSEGV, CApplication::_programFailCallback);
 	_configPath = configPath;
 	_xmlConfig = new xml_document();
+	for (int i = 0; i < argc; ++i) {
+		_arguments.push_back(argv[i]);
+	}
+}
+
+CApplication::CApplication(const xml_document & configDocument, int argc, char * const argv[])
+: CModule(""),
+  _xmlConfig(0),
+  _log(0)
+{
+	signal(SIGSEGV, CApplication::_programFailCallback);
+	_xmlConfig = new xml_document();
+	_xmlConfig->reset(configDocument);
 	for (int i = 0; i < argc; ++i) {
 		_arguments.push_back(argv[i]);
 	}
@@ -59,15 +74,21 @@ void CApplication::setId(const string &id)
 
 void CApplication::init() throw(CException)
 {
-	_instance = this;
+	_instanceLocker.lock();
+	_instances[getThreadId()] = this;
+	_instanceLocker.unlock();
+
 	attachEventHandler("onFatalError", this, EVENT_HANDLER(&CApplication::onProgramError));
 	_log = new CLogRouter(this);
 	_log->init();
-	xml_parse_result result = _xmlConfig->load_file(_configPath.c_str());
-	if (result.status != status_ok) {
-		stringstream ss;
-		ss << "Can\'t parse application config: '" << _configPath << "'.";
-		throw CException(ss.str());
+	if (_xmlConfig->empty() && !_configPath.empty()) {
+		xml_parse_result result;
+		result = _xmlConfig->load_file(_configPath.c_str());
+		if (result.status != status_ok) {
+			stringstream ss;
+			ss << "Can\'t parse application config: '" << _configPath << "'.";
+			throw CException(ss.str());
+		}
 	}
 	boost::filesystem::path executablePath(_arguments[0]);
 	_executablePath = boost::filesystem::absolute(executablePath).normalize();
@@ -183,7 +204,17 @@ void CApplication::onProgramError()
 
 CApplication * CApplication::getInstance()
 {
-	return _instance;
+	_instanceLocker.lock();
+	CApplication * instance = _instances[getThreadId()];
+	_instanceLocker.unlock();
+	return instance;
+}
+
+long CApplication::getThreadId()
+{
+	stringstream threadId;
+	threadId << boost::this_thread::get_id();
+	return strtol(threadId.str().c_str(), 0, 16);
 }
 
 TOutputStack & CApplication::getOutputStack()

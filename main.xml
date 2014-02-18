@@ -1,5 +1,6 @@
 <server name="testc" host="127.0.0.1" port="9015">
-    <threadsCount value="1000"/>
+    <requestConcurrency value="1000"/>
+    <instanceCount value="150"/>
     <components>
         <db>
             <cdn value="mysql:host=127.0.0.1;port=3306;dbname=test"/>

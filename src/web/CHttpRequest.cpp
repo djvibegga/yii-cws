@@ -49,13 +49,13 @@ void CHttpRequest::setParam(const string &name, const string &value)
 bool CHttpRequest::hasEnvVar(const char * name) const
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	return FCGX_GetParam(name, app->request.envp) != 0;
+	return FCGX_GetParam(name, app->request->envp) != 0;
 }
 
 string CHttpRequest::getEnvVar(const char * name) const
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	return FCGX_GetParam(name, app->request.envp);
+	return FCGX_GetParam(name, app->request->envp);
 }
 
 string CHttpRequest::getEnvVar(const string &name) const
@@ -118,7 +118,7 @@ string CHttpRequest::getRequestBody()
 		sscanf(contentLength.c_str(), "%d", &len);
 		stringstream body;
 		int ch;
-		while ((ch = FCGX_GetChar(app->request.in)) >= 0) {
+		while ((ch = FCGX_GetChar(app->request->in)) >= 0) {
 			body << (char)ch;
 		}
 		_body = body.str();
