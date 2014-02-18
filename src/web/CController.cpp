@@ -11,6 +11,7 @@
 #include "base/Jvibetto.h"
 #include "web/CTemplateView.h"
 #include "web/CLayoutView.h"
+#include "web/CClientScript.h"
 
 CController::CController(const string & id, CModule * module)
 : CBaseController(),
@@ -142,7 +143,7 @@ _string CController::renderPartial(const string & view, const cpptempl::data_map
         try {
             _string output = renderFile(viewFile, data, true);
             if (processOutput) {
-                output = this->processOutput(output);
+                this->processOutput(output);
             }
             if (ret) {
                 return output;
@@ -163,7 +164,7 @@ _string CController::renderPartial(IView & viewInstance, bool ret, bool processO
 {
 	_string output = renderInternal(viewInstance, true);
 	if (processOutput) {
-		output = this->processOutput(output);
+		this->processOutput(output);
 	}
 	if (ret) {
 		return output;
@@ -216,7 +217,7 @@ _string CController::render(const string & view, const cpptempl::data_map & data
 _string CController::render(IView & viewInstance, bool ret) throw (CException)
 {
 	if (beforeRender(viewInstance)) {
-		_string output = renderPartial(viewInstance, true);
+		_string output = renderPartial(viewInstance, true, false);
 		IView * layout = viewInstance.getLayout().get();
 		if (layout != 0) {
 			CTemplateView * templateLayout = dynamic_cast<CTemplateView*>(layout);
@@ -235,7 +236,7 @@ _string CController::render(IView & viewInstance, bool ret) throw (CException)
 			output = renderInternal(*layout, true);
 		}
 		afterRender(viewInstance, output);
-		output = processOutput(output);
+		processOutput(output);
 
 		if (ret) {
 			return output;
@@ -255,21 +256,22 @@ void CController::afterRender(const IView & viewInstance, _string &output)
 {
 }
 
-_string CController::processOutput(const _string & output)
+void CController::processOutput(_string & output)
 {
-	/*Yii::app()->getClientScript()->render($output);
-
-	// if using page caching, we should delay dynamic output replacement
-	if($this->_dynamicOutput!==null && $this->isCachingStackEmpty())
-	{
-		$output=$this->processDynamicOutput($output);
-		$this->_dynamicOutput=null;
+	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
+	if (cs) {
+		cs->render(output);
 	}
-
-	if($this->_pageStates===null)
-		$this->_pageStates=$this->loadPageStates();
-	if(!empty($this->_pageStates))
-		$this->savePageStates($this->_pageStates,$output);*/
-
-	return output;
+//
+//	// if using page caching, we should delay dynamic output replacement
+//	if($this->_dynamicOutput!==null && $this->isCachingStackEmpty())
+//	{
+//		$output=$this->processDynamicOutput($output);
+//		$this->_dynamicOutput=null;
+//	}
+//
+//	if($this->_pageStates===null)
+//		$this->_pageStates=$this->loadPageStates();
+//	if(!empty($this->_pageStates))
+//		$this->savePageStates($this->_pageStates,$output);*/
 }

@@ -56,7 +56,7 @@ public:
 	virtual void setLayout(TViewPtr layout);
 	virtual _string render(const string & view, const cpptempl::data_map & data, bool ret = false) throw (CException);
 	virtual _string render(IView & viewInstance, bool ret = false) throw (CException);
-	virtual _string processOutput(const _string & output);
+	virtual void processOutput(_string & output);
 };
 
 #endif /* CCONTROLLER_H_ */

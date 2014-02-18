@@ -9,6 +9,7 @@
 #define DEFINES_H_
 
 #include "config.h"
+#include <string>
 
 using namespace std;
 

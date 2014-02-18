@@ -12,6 +12,7 @@
 #include <db/CDbDataReader.h>
 #include <db/CDbCriteria.h>
 #include <web/CAssetManager.h>
+#include <web/CClientScript.h>
 #include <utils/CMap.h>
 #include "TestWidget.h"
 #include "Goal.h"
@@ -70,16 +71,20 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 void SiteController::actionAssetManager(CHttpRequest * const request, CHttpResponse * response)
 {
 	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
+	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
 
 	string url = am->publish(
 		boost::filesystem::path("./assets")
 	);
 
-	url = am->publish(
-		boost::filesystem::path("./assets/test.js")
-	);
+	cs->registerMetaTag(_("7ca4fb0526bc4815"), _("yandex-verification"));
+	cs->registerCssFile(url + "/style.css", _("screen"));
+	cs->registerCss("initial", _("body #content {padding: 5px; }"), _("screen"));
+	cs->registerScriptFile(url + "/test.js");
 
-	*response
-		<< _("url of test asset directory is: ")
-		<< _("<script type=\"text/javascript\" src=\"") << cpptempl::utf8_to_wide(url) << _("\"></script>");
+	cs->registerScriptFile(url + "/subassets/sub.js", CClientScript::POS_BEGIN);
+	cs->registerScriptFile(cs->getCoreScriptUrl() + "/jquery.min.js");
+	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
+
+	render("am", cpptempl::data_map());
 }

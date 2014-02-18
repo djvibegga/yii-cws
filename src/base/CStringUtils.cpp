@@ -80,6 +80,15 @@ string CStringUtils::implode(const string &glue, const vector<string> &pieces)
 	return ret;
 }
 
+wstring CStringUtils::implode(const wstring &glue, const vector<wstring> &pieces)
+{
+	wstring ret = *pieces.begin();
+	for (vector<wstring>::const_iterator iter = ++pieces.begin(); iter != pieces.end(); ++iter) {
+		ret += glue + *iter;
+	}
+	return ret;
+}
+
 vector<string> CStringUtils::explode(const string &separator, const string & needle)
 {
     std::string::size_type pos = needle.find(separator);
