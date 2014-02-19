@@ -27,6 +27,7 @@ protected:
 	string configPath;
 	int argc;
 	char * const * argv;
+	int listenSocket;
 
 public:
 	CWebRequestPool(const string &configPath, int argc, char * const argv[]);
@@ -38,6 +39,9 @@ public:
 
 protected:
 	virtual CWebApplication * createAppInstance() = 0;
+	virtual void mainLoop() throw (CException);
+	virtual void openSocket();
+	virtual void startInstances();
 };
 
 #endif /* CWEBREQUESTLICATIONPOOL_H_ */

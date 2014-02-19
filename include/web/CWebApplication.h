@@ -56,9 +56,14 @@ public:
 	virtual CModule * getParent() const;
 	virtual boost::filesystem::path getLayoutPath() const;
 	virtual void setLayoutPath(const boost::filesystem::path & path);
+	double getIdleMedian() const;
 
 protected:
 	FCGX_Request * request;
+	useconds_t idleTimeout;
+	useconds_t idleTime;
+	double idleMedian;
+
 	void mainLoop() throw(CException);
 	virtual void handleRequest();
 	virtual void beginRequest();

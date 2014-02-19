@@ -1,6 +1,9 @@
 <server name="testc" host="127.0.0.1" port="9015">
     <requestConcurrency value="1000"/>
-    <instanceCount value="150"/>
+    <instance>
+        <count value="500"/>
+        <idleTimeout value="100000"/>
+    </instance>
     <components>
         <db>
             <cdn value="mysql:host=127.0.0.1;port=3306;dbname=test"/>

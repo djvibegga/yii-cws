@@ -23,8 +23,11 @@
 using namespace std;
 using namespace pugi;
 
+class CApplication;
+
 typedef vector<string> TArgumentsList;
 typedef stack<IOutputBuffer*> TOutputStack;
+typedef map<long, CApplication*> TAppInstanceMap;
 
 class CEvent;
 
@@ -38,7 +41,7 @@ private:
 	TArgumentsList _arguments;
 	CLogger _logger;
 	static boost::mutex _instanceLocker;
-	static map<long, CApplication*> _instances;
+	static TAppInstanceMap _instances;
 	boost::filesystem::path _runtimePath;
 	boost::filesystem::path _executablePath;
 	CLogRouter * _log;
@@ -70,6 +73,7 @@ public:
 	TOutputStack & getOutputStack();
 
 protected:
+	time_t startTime;
 	virtual void beginRequest();
 	virtual void handleRequest();
 	virtual void endRequest();

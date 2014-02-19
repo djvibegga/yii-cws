@@ -20,14 +20,15 @@
 
 using namespace std;
 
-map<long, CApplication*> CApplication::_instances;
+TAppInstanceMap CApplication::_instances;
 boost::mutex CApplication::_instanceLocker;
 bool CApplication::_failHandlerCalled = false;
 
 CApplication::CApplication(const string &configPath, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0),
-  _log(0)
+  _log(0),
+  startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
 	_configPath = configPath;
@@ -40,7 +41,8 @@ CApplication::CApplication(const string &configPath, int argc, char * const argv
 CApplication::CApplication(const xml_document & configDocument, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0),
-  _log(0)
+  _log(0),
+  startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
 	_xmlConfig = new xml_document();
@@ -108,6 +110,7 @@ void CApplication::init() throw(CException)
 
 void CApplication::run() throw(CException)
 {
+	startTime = time(0);
 }
 
 void CApplication::handleRequest()

@@ -21,14 +21,20 @@ using namespace std;
 CWebApplication::CWebApplication(const string &configPath, int argc, char * const argv[])
 : CApplication(configPath, argc, argv),
   _requestPool(0),
-  request(0)
+  request(0),
+  idleTimeout(100000),
+  idleTime(0),
+  idleMedian(0)
 {
 }
 
 CWebApplication::CWebApplication(const xml_document & configDocument, int argc, char * const argv[])
 : CApplication(configDocument, argc, argv),
   _requestPool(0),
-  request(0)
+  request(0),
+  idleTimeout(100000),
+  idleTime(0),
+  idleMedian(0)
 {
 }
 
@@ -44,6 +50,11 @@ void CWebApplication::registerComponents()
 void CWebApplication::init() throw(CException)
 {
 	CApplication::init();
+	idleTimeout = getConfigRoot()
+		.child("server")
+		.child("instance")
+		.child("idleTimeout")
+		.attribute("value").as_uint();
 	_layoutPath = resolveLayoutPath();
 }
 
@@ -74,13 +85,16 @@ void CWebApplication::mainLoop() throw(CException)
 	if (pool) {
 		while (true) {
 			request = pool->popRequest();
-			if (request != 0) {
+			if (request == 0) {
+				usleep(idleTimeout);
+				idleTime += idleTimeout;
+				idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
+			} else {
 				handleRequest();
 				FCGX_Finish_r(request);
+				delete request;
+				request = 0;
 			}
-			delete request;
-			request = 0;
-			usleep(1000);
 		}
 	}
 }
@@ -176,6 +190,11 @@ boost::filesystem::path CWebApplication::getLayoutPath() const
 void CWebApplication::setLayoutPath(const boost::filesystem::path & path)
 {
 	_layoutPath = path;
+}
+
+double CWebApplication::getIdleMedian() const
+{
+	return idleMedian;
 }
 
 boost::filesystem::path CWebApplication::resolveLayoutPath()

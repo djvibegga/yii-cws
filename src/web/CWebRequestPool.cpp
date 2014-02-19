@@ -11,7 +11,8 @@
 CWebRequestPool::CWebRequestPool(const string &configPath, int argc, char * const argv[])
 : configPath(configPath),
   argc(argc),
-  argv(argv)
+  argv(argv),
+  listenSocket(0)
 {
 	_xmlConfig = new xml_document();
 }
@@ -28,43 +29,44 @@ void CWebRequestPool::init() throw(CException)
 		ss << "Can\'t parse application config: '" << configPath << "'.";
 		throw CException(ss.str());
 	}
-
-	const xml_node &configRoot = _xmlConfig->root();
-	int instancesCount = configRoot.child("server").child("instanceCount").attribute("value").as_int();
-	for (int i = 0; i < instancesCount; ++i) {
-		CWebApplication * instance = createAppInstance();
-		instance->setWebRequestPool(this);
-		boost::thread threadObj(boost::bind(&CWebRequestPool::_runInstance, this, boost::ref(*instance)));
-	}
 }
 
 void CWebRequestPool::run() throw (CException)
 {
+	openSocket();
+	startInstances();
+	mainLoop();
+}
+
+void CWebRequestPool::openSocket()
+{
 	string port = ":";
 	const xml_node &configRoot = _xmlConfig->root();
 	port.append(configRoot.child("server").attribute("port").value());
-	cout << "Server started on port: " << port << endl;
+	cout << "Server is trying to start on port: " << port << endl;
 	int listenQueueBacklog = configRoot.child("server")
 		.child("requestConcurrency")
 		.attribute("value").as_int();
-	cout << "Server started with listeners: " << listenQueueBacklog << endl;
 
 	if (FCGX_Init()) {
 		throw CException("Can\'t initialize FCGX.");
 	} else {
-		//log << "Initialized FCGX." << endl;
+		cout << "Initialized FCGX." << endl;
 	}
 
-	int  listen_socket = FCGX_OpenSocket(port.c_str(), listenQueueBacklog);
-	if (listen_socket < 0) {
-		throw CException("Can\'t open socket.");
+	listenSocket = FCGX_OpenSocket(port.c_str(), listenQueueBacklog);
+	if (listenSocket < 0) {
+		throw CException("Can't open socket.");
 	} else {
-		//log << "Socket opened successfully." << endl;
+		cout << "Server has started with concurrent listeners limit: " << listenQueueBacklog << endl;
 	}
+}
 
+void CWebRequestPool::mainLoop() throw (CException)
+{
 	while (true) {
 		FCGX_Request * request = new FCGX_Request();
-		if (FCGX_InitRequest(request, listen_socket, 0)) {
+		if (FCGX_InitRequest(request, listenSocket, 0)) {
 			throw CException("Can\'t initialize FCGX Request.");
 		}
 		if (FCGX_Accept_r(request) == 0) {
@@ -72,6 +74,21 @@ void CWebRequestPool::run() throw (CException)
 			_requests.push(request);
 			_queueLocker.unlock();
 		}
+	}
+}
+
+void CWebRequestPool::startInstances()
+{
+	unlink("server.pid");
+	const xml_node &configRoot = _xmlConfig->root();
+	int instancesCount = configRoot
+		.child("server")
+		.child("instance")
+		.child("count").attribute("value").as_int();
+	for (int i = 0; i < instancesCount; ++i) {
+		CWebApplication * instance = createAppInstance();
+		instance->setWebRequestPool(this);
+		boost::thread threadObj(boost::bind(&CWebRequestPool::_runInstance, this, boost::ref(*instance)));
 	}
 }
 
