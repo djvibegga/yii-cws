@@ -260,7 +260,7 @@ void CController::processOutput(_string & output)
 {
 	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
 	if (cs) {
-		//cs->render(output);
+		cs->render(output);
 	}
 //
 //	// if using page caching, we should delay dynamic output replacement

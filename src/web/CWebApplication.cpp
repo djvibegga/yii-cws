@@ -256,6 +256,16 @@ SControllerToRun CWebApplication::resolveController(string route, const IModule 
 	return ret;
 }
 
+CAssetManager * CWebApplication::getAssetManager() const
+{
+	return dynamic_cast<CAssetManager*>(getComponent("assetManager"));
+}
+
+CClientScript * CWebApplication::getClientScript() const
+{
+	return dynamic_cast<CClientScript*>(getComponent("clientScript"));
+}
+
 void CWebApplication::setWebRequestPool(IWebRequestPool * pool)
 {
 	_requestPool = pool;

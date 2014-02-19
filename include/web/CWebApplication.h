@@ -16,6 +16,8 @@
 #include "web/CHttpResponse.h"
 #include "web/CWebModule.h"
 #include "web/CUrlManager.h"
+#include "web/CClientScript.h"
+#include "web/CAssetManager.h"
 #include <web/CController.h>
 
 struct SControllerToRun
@@ -46,6 +48,8 @@ public:
 	CHttpRequest * getRequest() const;
 	CHttpResponse * getResponse() const;
 	CUrlManager * getUrlManager() const;
+	CAssetManager * getAssetManager() const;
+	CClientScript * getClientScript() const;
 
 	void setWebRequestPool(IWebRequestPool * pool);
 	IWebRequestPool * getWebRequestPool() const;
