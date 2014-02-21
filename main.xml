@@ -1,7 +1,7 @@
 <server name="testc" host="127.0.0.1" port="9015">
     <requestConcurrency value="1000"/>
     <instance>
-        <count value="500"/>
+        <count value="100"/>
         <idleTimeout value="100000"/>
     </instance>
     <components>

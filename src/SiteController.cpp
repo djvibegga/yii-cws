@@ -80,11 +80,14 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	cs->registerMetaTag(_("7ca4fb0526bc4815"), _("yandex-verification"));
 	cs->registerCssFile(url + "/style.css", _("screen"));
 	cs->registerCss("initial", _("body #content {padding: 5px; }"), _("screen"));
-	cs->registerScriptFile(url + "/test.js");
 
 	cs->registerScriptFile(url + "/subassets/sub.js", CClientScript::POS_BEGIN);
-	cs->registerScriptFile(cs->getCoreScriptUrl() + "/jquery.min.js");
+
+	cs->registerPackage("bbq");
+	cs->registerPackage("cookie");
 	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
+
+	cs->registerScriptFile(url + "/test.js");
 
 	render("am", cpptempl::data_map());
 }

@@ -7,9 +7,12 @@
 
 #include "web/CClientScript.h"
 #include "web/CAssetManager.h"
+#include "web/CWebApplication.h"
 #include "base/Jvibetto.h"
 #include "base/CStringUtils.h"
 #include <boost/regex.hpp>
+
+using namespace std;
 
 const int CClientScript::POS_HEAD = 0;
 const int CClientScript::POS_BEGIN = 1;
@@ -37,6 +40,10 @@ void CClientScript::init()
 {
 	CApplicationComponent::init();
 	_baseUrl = resolveCoreScriptUrl();
+	loadPackages(
+		boost::filesystem::path(JVIBETTO_PATH + string("/web/js/packages.xml")),
+		corePackages
+	);
 }
 
 void CClientScript::setCoreScriptUrl(const string & url)
@@ -54,35 +61,38 @@ string CClientScript::resolveCoreScriptUrl() const
 	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
 	boost::filesystem::path srcPath(
 		boost::filesystem::canonical(
-			boost::filesystem::path(Jvibetto::app()->getBasePath().string() + "/" + __FILE__).parent_path()
+			boost::filesystem::path(boost::filesystem::path(JVIBETTO_PATH))
 		)
 	);
-	return am->publish(srcPath.string() + "/js/source");
+	return am->publish(srcPath.string() + "/web/js/source");
 }
 
 string CClientScript::getPackageBaseUrl(const string & name)
 {
-	TScriptPackageMap::const_iterator packageFound = coreScripts.find(name);
+	TScriptPackageUnorderedMap::iterator packageFound = coreScripts.find(name);
 	if (packageFound == coreScripts.end()) {
 		return "";
 	}
 
-	TScriptPackage package = packageFound->second;
+	TScriptPackage package = packageFound.second;
 	string baseUrl;
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	if (!package.baseUrl.empty()) {
 		baseUrl = package.baseUrl;
-//		if($baseUrl==='' || $baseUrl[0]!=='/' && strpos($baseUrl,'://')===false)
-//			$baseUrl=Yii::app()->getRequest()->getBaseUrl().'/'.$baseUrl;
-//		$baseUrl=rtrim($baseUrl,'/');
+		if (baseUrl.empty() || (baseUrl.find("/") != 0 && baseUrl.find("://") == ::string::npos)) {
+			baseUrl = app->getRequest()->getBaseUrl() + "/" + baseUrl;
+		}
+		baseUrl = CStringUtils::rtrim(baseUrl, "/");
 	} else if (!package.basePath.empty()) {
-		baseUrl = app->getAssetManager()->publish()
-			//->getAssgetAssetManager()->publish(Yii::getPathOfAlias($package['basePath']));
+		baseUrl = app->getAssetManager()->publish(
+			Jvibetto::getPathOfAlias(package.basePath)
+		);
 	} else {
 		baseUrl = getCoreScriptUrl();
 	}
-//	return $this->coreScripts[$name]['baseUrl']=$baseUrl;
-	return "";
+	package.baseUrl = baseUrl;
+	coreScripts.push(name, package);
+	return baseUrl;
 }
 
 CClientScript & CClientScript::addPackage(const string & name, const TScriptPackage & definition)
@@ -100,7 +110,51 @@ void CClientScript::reset()
 	scripts = TInlineJavascriptMap();
 	metaTags = TMetaTagsList();
 	linkTags = TLinkTagsList();
+	coreScripts = TScriptPackageUnorderedMap();
 	//recordCachingAction("clientScript", "reset", array());
+}
+
+void CClientScript::loadPackages(const boost::filesystem::path & from, TScriptPackageMap & dest) throw (CException)
+{
+	xml_document document;
+	xml_parse_result result;
+	result = document.load_file(from.string().c_str());
+	if (result.status != status_ok) {
+		stringstream ss;
+		ss << "Can't parse clientScript packages config: '" << from << "'.";
+		throw CException(ss.str());
+	}
+	xml_node root = document.root().child("packages");
+	xml_object_range<xml_named_node_iterator> xmlPackages = root.children("package");
+	for (xml_object_range<xml_named_node_iterator>::const_iterator iter = xmlPackages.begin(); iter != xmlPackages.end(); ++iter) {
+		TScriptPackage package;
+		if (!iter->child("basePath").empty()) {
+			package.basePath = iter->child("basePath").attribute("value").as_string();
+		}
+		if (!iter->child("baseUrl").empty()) {
+			package.basePath = iter->child("baseUrl").attribute("value").as_string();
+		}
+		if (!iter->child("js").empty()) {
+			xml_object_range<xml_named_node_iterator> xmlPackageFiles = iter->child("js").children("file");
+			for (xml_object_range<xml_named_node_iterator>::const_iterator jsIter = xmlPackageFiles.begin(); jsIter != xmlPackageFiles.end(); ++jsIter) {
+				package.js.push_back(jsIter->attribute("path").as_string());
+			}
+		}
+		if (!iter->child("css").empty()) {
+			xml_object_range<xml_named_node_iterator> xmlPackageFiles = iter->child("css").children("file");
+			for (xml_object_range<xml_named_node_iterator>::const_iterator cssIter = xmlPackageFiles.begin(); cssIter != xmlPackageFiles.end(); ++cssIter) {
+				package.css.push_back(cssIter->attribute("path").as_string());
+			}
+		}
+		if (!iter->child("depends").empty()) {
+			xml_object_range<xml_named_node_iterator> xmlPackageDependencies = iter->child("depends").children("package");
+			for (xml_object_range<xml_named_node_iterator>::const_iterator depIter = xmlPackageDependencies.begin(); depIter != xmlPackageDependencies.end(); ++depIter) {
+				package.depends.push_back(depIter->attribute("name").as_string());
+			}
+		}
+
+		dest[iter->attribute("name").as_string()] = package;
+	}
 }
 
 void CClientScript::render(_string & output)
@@ -127,67 +181,76 @@ void CClientScript::render(_string & output)
 
 void CClientScript::renderCoreScripts()
 {
-//	if($this->coreScripts===null)
-//		return;
-//	$cssFiles=array();
-//	$jsFiles=array();
-//	foreach($this->coreScripts as $name=>$package)
-//	{
-//		$baseUrl=$this->getPackageBaseUrl($name);
-//		if(!empty($package['js']))
-//		{
-//			foreach($package['js'] as $js)
-//				$jsFiles[$baseUrl.'/'.$js]=$baseUrl.'/'.$js;
-//		}
-//		if(!empty($package['css']))
-//		{
-//			foreach($package['css'] as $css)
-//				$cssFiles[$baseUrl.'/'.$css]='';
-//		}
-//	}
-//	// merge in place
-//	if($cssFiles!==array())
-//	{
-//		foreach($this->cssFiles as $cssFile=>$media)
-//			$cssFiles[$cssFile]=$media;
-//		$this->cssFiles=$cssFiles;
-//	}
-//	if($jsFiles!==array())
-//	{
-//		if(isset($this->scriptFiles[$this->coreScriptPosition]))
-//		{
-//			foreach($this->scriptFiles[$this->coreScriptPosition] as $url => $value)
-//				$jsFiles[$url]=$value;
-//		}
-//		$this->scriptFiles[$this->coreScriptPosition]=$jsFiles;
-//	}
+	if (coreScripts.empty()) {
+		return;
+	}
+	TCssFileMap cssFiles;
+	TClientFileMap jsFiles;
+	string baseUrl;
+	TScriptPackage package;
+
+	for (TScriptPackageUnorderedMap::iterator iter = coreScripts.begin(); iter != coreScripts.end(); ++iter) {
+		baseUrl = getPackageBaseUrl(iter.first);
+		package = iter.second;
+		if (!package.js.empty()) {
+			for (TScriptPackageJavascriptList::const_iterator jsIter = package.js.begin(); jsIter != package.js.end(); ++jsIter) {
+				jsFiles.push(baseUrl + "/" + *jsIter, _("text/javascript"));
+			}
+		}
+		if (!package.css.empty()) {
+			for (TScriptPackageCssList::const_iterator cssIter = package.css.begin(); cssIter != package.css.end(); ++cssIter) {
+				cssFiles.push(baseUrl + "/" + *cssIter, _(""));
+			}
+		}
+	}
+
+	if (!jsFiles.empty()) {
+		TJavascriptFileMap::const_iterator scriptsFound = this->scriptFiles.find(POS_HEAD);
+		if (scriptsFound != this->scriptFiles.end()) {
+			for (TClientFileMap::iterator iter = scriptsFound->second.begin(); iter != scriptsFound->second.end(); ++iter) {
+				jsFiles.push(iter.first, iter.second);
+			}
+		}
+		this->scriptFiles[POS_HEAD] = jsFiles;
+	}
+
+	if (!cssFiles.empty()) {
+		for (TCssFileMap::iterator iter = this->cssFiles.begin(); iter != this->cssFiles.end(); ++iter) {
+			cssFiles.push(iter.first, iter.second);
+		}
+		this->cssFiles = cssFiles;
+	}
 }
 
 CClientScript & CClientScript::registerCoreScript(const string & name)
 {
-//	if(isset($this->coreScripts[$name]))
-//		return $this;
-//	if(isset($this->packages[$name]))
-//		$package=$this->packages[$name];
-//	else
-//	{
-//		if($this->corePackages===null)
-//			$this->corePackages=require(YII_PATH.'/web/js/packages.php');
-//		if(isset($this->corePackages[$name]))
-//			$package=$this->corePackages[$name];
-//	}
-//	if(isset($package))
-//	{
-//		if(!empty($package['depends']))
-//		{
-//			foreach($package['depends'] as $p)
-//				$this->registerCoreScript($p);
-//		}
-//		$this->coreScripts[$name]=$package;
-//		$this->hasScripts=true;
+	if (coreScripts.find(name) != coreScripts.end()) {
+		return *this;
+	}
+	TScriptPackage package;
+	bool isPackagePresented = false;
+	TScriptPackageMap::const_iterator packageFound = packages.find(name);
+	if (packageFound != packages.end()) {
+		package = packageFound->second;
+		isPackagePresented = true;
+	} else {
+		TScriptPackageMap::const_iterator corePackageFound = corePackages.find(name);
+		if (corePackageFound != corePackages.end()) {
+			package = corePackageFound->second;
+			isPackagePresented = true;
+		}
+	}
+	if (isPackagePresented) {
+		if (!package.depends.empty()) {
+			for (TScriptPackageDependencyList::const_iterator iter = package.depends.begin(); iter != package.depends.end(); ++iter) {
+				registerCoreScript(*iter);
+			}
+		}
+		coreScripts.push(name, package);
+		hasScripts = true;
 //		$params=func_get_args();
 //		$this->recordCachingAction('clientScript','registerCoreScript',$params);
-//	}
+	}
 	return *this;
 }
 
@@ -203,7 +266,7 @@ CClientScript & CClientScript::registerScriptFile(const string & url, int positi
 	if (found == scriptFiles.end()) {
 		scriptFiles[position] = TClientFileMap();
 	}
-	scriptFiles[position][url] = _("text/javascript");
+	scriptFiles[position].push(url, _("text/javascript"));
 //	$params=func_get_args();
 //	$this->recordCachingAction('clientScript','registerScriptFile',$params);
 	return *this;
@@ -216,7 +279,7 @@ CClientScript & CClientScript::registerScript(const string & id, const _string &
 	if (found == scripts.end()) {
 		scripts[position] = TInlineJavascriptCodeMap();
 	}
-	scripts[position][id] = script;
+	scripts[position].push(id, script);
 	if (position == POS_READY || position == POS_LOAD) {
 		registerCoreScript("jquery");
 	}
@@ -228,7 +291,7 @@ CClientScript & CClientScript::registerScript(const string & id, const _string &
 CClientScript & CClientScript::registerCssFile(const string & url, const _string & media)
 {
 	hasScripts = true;
-	cssFiles[url] = media;
+	cssFiles.push(url, media);
 	//$params=func_get_args();
 	//$this->recordCachingAction('clientScript','registerCssFile',$params);
 	return *this;
@@ -240,7 +303,7 @@ CClientScript & CClientScript::registerCss(const string & id, const _string & cs
 	TCssBlock block;
 	block.media = media;
 	block.code = css;
-	this->css[id] = block;
+	this->css.push(id, block);
 	//$params=func_get_args();
 	//$this->recordCachingAction('clientScript','registerCss',$params);
 	return *this;
@@ -357,17 +420,17 @@ void CClientScript::renderHead(_string & output)
 	for (TLinkTagsList::const_iterator iter = linkTags.begin(); iter != linkTags.end(); ++iter) {
 		html += CHtml::linkTag(_(""), _(""), _(""), _(""), *iter) + _("\n");
 	}
-	for (TCssFileMap::const_iterator iter = cssFiles.begin(); iter != cssFiles.end(); ++iter) {
-		html += CHtml::cssFile(iter->first, iter->second) + _("\n");
+	for (TCssFileMap::iterator iter = cssFiles.begin(); iter != cssFiles.end(); ++iter) {
+		html += CHtml::cssFile(iter.first, iter.second) + _("\n");
 	}
-	for (TInlineCssMap::const_iterator iter = css.begin(); iter != css.end(); ++iter) {
-		html += CHtml::css(iter->second.code, iter->second.media) + _("\n");
+	for (TInlineCssMap::iterator iter = css.begin(); iter != css.end(); ++iter) {
+		html += CHtml::css(iter.second.code, iter.second.media) + _("\n");
 	}
 	if (enableJavaScript) {
-		TJavascriptFileMap::const_iterator filesFound = scriptFiles.find(POS_HEAD);
+		TJavascriptFileMap::iterator filesFound = scriptFiles.find(POS_HEAD);
 		if (filesFound != scriptFiles.end()) {
-			for (TClientFileMap::const_iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
-				html += CHtml::scriptFile(iter->first, iter->second) + _("\n");
+			for (TClientFileMap::iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
+				html += CHtml::scriptFile(iter.first, iter.second) + _("\n");
 			}
 		}
 		TInlineJavascriptMap::const_iterator scriptsFound = scripts.find(POS_HEAD);
@@ -400,8 +463,8 @@ void CClientScript::renderBodyBegin(_string & output)
 
 	TJavascriptFileMap::const_iterator filesFound = scriptFiles.find(POS_BEGIN);
 	if (filesFound != scriptFiles.end()) {
-		for (TClientFileMap::const_iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
-			html += CHtml::scriptFile(iter->first, iter->second) + _("\n");
+		for (TClientFileMap::iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
+			html += CHtml::scriptFile(iter.first, iter.second) + _("\n");
 		}
 	}
 	TInlineJavascriptMap::const_iterator scriptsFound = scripts.find(POS_BEGIN);
@@ -439,8 +502,8 @@ void CClientScript::renderBodyEnd(_string & output)
 
 	TJavascriptFileMap::const_iterator filesFound = scriptFiles.find(POS_END);
 	if (filesFound != scriptFiles.end()) {
-		for (TClientFileMap::const_iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
-			html += CHtml::scriptFile(iter->first, iter->second) + _("\n");
+		for (TClientFileMap::iterator iter = filesFound->second.begin(); iter != filesFound->second.end(); ++iter) {
+			html += CHtml::scriptFile(iter.first, iter.second) + _("\n");
 		}
 	}
 
@@ -453,26 +516,26 @@ void CClientScript::renderBodyEnd(_string & output)
 
 	TInlineJavascriptMap::const_iterator readyFound = scripts.find(POS_READY);
 	if (readyFound != scripts.end()) {
-		_string js = readyFound->second.begin()->second;
-		for (TInlineJavascriptCodeMap::const_iterator iter = ++readyFound->second.begin(); iter != readyFound->second.end(); ++iter) {
-			js += _("\n") + iter->second;
+		_string js = readyFound->second.begin().second;
+		for (TInlineJavascriptCodeMap::iterator iter = ++readyFound->second.begin(); iter != readyFound->second.end(); ++iter) {
+			js += _("\n") + iter.second;
 		}
 		if (isFullPage) {
 			js = _("jQuery(function($) {\n") + js + _("\n});");
 		}
-		batch["#CClientScript#ready#"] = js;
+		batch.push("#CClientScript#ready#", js);
 	}
 
 	TInlineJavascriptMap::const_iterator loadFound = scripts.find(POS_LOAD);
 	if (loadFound != scripts.end()) {
-		_string js = loadFound->second.begin()->second;
-		for (TInlineJavascriptCodeMap::const_iterator iter = ++loadFound->second.begin(); iter != loadFound->second.end(); ++iter) {
-			js += _("\n") + iter->second;
+		_string js = loadFound->second.begin().second;
+		for (TInlineJavascriptCodeMap::iterator iter = ++loadFound->second.begin(); iter != loadFound->second.end(); ++iter) {
+			js += _("\n") + iter.second;
 		}
 		if (isFullPage) {
 			js = _("jQuery(window).on('load',function() {\n") + js + _("\n});");
 		}
-		batch["#CClientScript#load#"] = js;
+		batch.push("#CClientScript#load#", js);
 	}
 
 	if (!batch.empty()) {
@@ -493,8 +556,8 @@ void CClientScript::renderBodyEnd(_string & output)
 _string CClientScript::renderScriptBatch(const TInlineJavascriptCodeMap & scripts)
 {
 	_string html;
-	for (TInlineJavascriptCodeMap::const_iterator iter = scripts.begin(); iter != scripts.end(); ++iter) {
-		html += CHtml::script(iter->second);
+	for (TInlineJavascriptCodeMap::iterator iter = scripts.begin(); iter != scripts.end(); ++iter) {
+		html += CHtml::script(iter.second);
 	}
 	return html;
 }

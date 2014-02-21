@@ -1,0 +1,138 @@
+<packages>
+    <package name="jquery">
+        <js>
+            <file path="jquery.min.js" />
+        </js>
+    </package>
+    <package name="yii">
+        <js>
+            <file path="jquery.yii.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="yiitab">
+        <js>
+            <file path="jquery.yiitab.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="yiiactiveform">
+        <js>
+            <file path="jquery.yiiactiveform.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="jquery.ui">
+        <js>
+            <file path="jui/js/jquery-ui.min.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="bgiframe">
+        <js>
+            <file path="jquery.bgiframe.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="ajaxqueue">
+        <js>
+            <file path="jquery.ajaxqueue.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="autocomplete">
+        <js>
+            <file path="jquery.autocomplete.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+            <package name="bgiframe" />
+            <package name="ajaxqueue" />
+        </depends>
+    </package>
+    <package name="maskedinput">
+        <js>
+            <file path="jquery.maskedinput.min.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="cookie">
+        <js>
+            <file path="jquery.cookie.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="treeview">
+        <js>
+            <file path="jquery.treeview.js" />
+            <file path="jquery.treeview.edit.js" />
+            <file path="jquery.treeview.async.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+            <package name="cookie" />
+        </depends>
+    </package>
+    <package name="multifile">
+        <js>
+            <file path="jquery.multifile.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="rating">
+        <js>
+            <file path="jquery.rating.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+            <package name="metadata" />
+        </depends>
+    </package>
+    <package name="metadata">
+        <js>
+            <file path="jquery.metadata.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="bbq">
+        <js>
+            <file path="jquery.ba-bbq.min.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="history">
+        <js>
+            <file path="jquery.history.js" />
+        </js>
+        <depends>
+            <package name="jquery" />
+        </depends>
+    </package>
+    <package name="punycode">
+        <js>
+            <file path="punycode.min.js" />
+        </js>
+    </package>
+</packages>

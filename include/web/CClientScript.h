@@ -10,6 +10,7 @@
 
 #include "base/CApplicationComponent.h"
 #include "web/helpers/CHtml.h"
+#include "utils/insert_orderer_map.h"
 
 typedef list<string> TScriptPackageDependencyList;
 typedef list<string> TScriptPackageJavascriptList;
@@ -24,6 +25,7 @@ struct ScriptPackage
 	TScriptPackageDependencyList depends;
 };
 typedef ScriptPackage TScriptPackage;
+typedef insert_ordered_map<string, TScriptPackage> TScriptPackageUnorderedMap;
 typedef map<string, TScriptPackage> TScriptPackageMap;
 
 typedef map<string, string> TScriptMap;
@@ -35,12 +37,12 @@ struct CssBlock
 };
 typedef CssBlock TCssBlock;
 
-typedef map<string, _string> TInlineJavascriptCodeMap;
+typedef insert_ordered_map<string, _string> TInlineJavascriptCodeMap;
 typedef map<int, TInlineJavascriptCodeMap> TInlineJavascriptMap;
-typedef map<string, TCssBlock> TInlineCssMap;
-typedef map<string, _string> TClientFileMap;
+typedef insert_ordered_map<string, TCssBlock> TInlineCssMap;
+typedef insert_ordered_map<string, _string> TClientFileMap;
 typedef map<int, TClientFileMap> TJavascriptFileMap;
-typedef map<string, _string> TCssFileMap;
+typedef insert_ordered_map<string, _string> TCssFileMap;
 typedef list<TTagAttributesMap> TMetaTagsList;
 typedef list<TTagAttributesMap> TLinkTagsList;
 
@@ -72,6 +74,8 @@ public:
 	TInlineJavascriptMap scripts;
 
 	void reset();
+	void loadPackages(const boost::filesystem::path & from, TScriptPackageMap & dest) throw (CException);
+
 	CClientScript & registerCoreScript(const string & name);
 	virtual void renderCoreScripts();
 	CClientScript & registerPackage(const string & name);
@@ -96,15 +100,16 @@ public:
 	virtual void renderBodyBegin(_string & output);
 	virtual void renderBodyEnd(_string & output);
 
-		bool isCssFileRegistered(const string & url) const;
-		bool isCssRegistered(const string & id) const;
-		bool isScriptRegistered(const string & id, int position = POS_READY) const;
-		bool isScriptFileRegistered(const string & url, int position = POS_HEAD) const;
+	bool isCssFileRegistered(const string & url) const;
+	bool isCssRegistered(const string & id) const;
+	bool isScriptRegistered(const string & id, int position = POS_READY) const;
+	bool isScriptFileRegistered(const string & url, int position = POS_HEAD) const;
 
 protected:
 	TScriptPackageMap packages;
+	TScriptPackageMap corePackages;
 	bool hasScripts;
-	TScriptPackageMap coreScripts;
+	TScriptPackageUnorderedMap coreScripts;
 	TInlineCssMap css;
 	TJavascriptFileMap scriptFiles;
 	TCssFileMap cssFiles;
