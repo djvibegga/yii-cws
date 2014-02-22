@@ -29,16 +29,15 @@ public:
 	data_map & getData();
 	virtual bool open() throw (CException);
 	virtual void close() throw (CException);
-	virtual string read(const string & sessionId) const throw (CException);
-	virtual bool write(const string & sessionId, const string & data) const throw (CException);
+	virtual _string read(const string & sessionId) const throw (CException);
+	virtual bool write(const string & sessionId, const _string & data) const throw (CException);
 	virtual void destroy(const string & sessionId) const throw (CException);
 
 protected:
-	virtual void reset();
 	virtual string resolveSessionId() const;
 	virtual string generateUniqueSessionId() const;
-	virtual bool serializeData(string & dest);
-	virtual bool unserializeData(const string & src);
+	virtual bool serializeData(_string & dest);
+	virtual bool unserializeData(const _string & src);
 };
 
 #endif /* CHTTPSESION_H_ */

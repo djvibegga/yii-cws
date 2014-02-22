@@ -56,7 +56,7 @@ bool CHttpSession::open() throw (CException)
 	if (_sessionId.empty()) {
 		_sessionId = generateUniqueSessionId();
 	}
-	string strData = read(_sessionId);
+	_string strData = read(_sessionId);
 	if (!strData.empty()) {
 		return unserializeData(strData);
 	}
@@ -68,20 +68,13 @@ void CHttpSession::close() throw (CException)
 	if (_sessionId.empty()) {
 		return;
 	}
-	string strData;
+	_string strData;
 	if (serializeData(strData)) {
 		write(_sessionId, strData);
 	}
-	reset();
 }
 
-void CHttpSession::reset()
-{
-	_sessionId = "";
-	_sessionData = data_map();
-}
-
-bool CHttpSession::serializeData(string & dest)
+bool CHttpSession::serializeData(_string & dest)
 {
 	if (_sessionData.empty()) {
 		return false;
@@ -90,7 +83,7 @@ bool CHttpSession::serializeData(string & dest)
 	return true;
 }
 
-bool CHttpSession::unserializeData(const string & src)
+bool CHttpSession::unserializeData(const _string & src)
 {
 	if (src.empty()) {
 		return false;
@@ -99,12 +92,12 @@ bool CHttpSession::unserializeData(const string & src)
 	return true;
 }
 
-string CHttpSession::read(const string & sessionId) const throw (CException)
+_string CHttpSession::read(const string & sessionId) const throw (CException)
 {
-	return "";
+	return _("");
 }
 
-bool CHttpSession::write(const string & sessionId, const string & data) const throw (CException)
+bool CHttpSession::write(const string & sessionId, const _string & data) const throw (CException)
 {
 	return true;
 }
