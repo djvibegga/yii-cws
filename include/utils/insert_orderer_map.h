@@ -8,7 +8,7 @@
 #ifndef INSERT_ORDERER_MAP_H_
 #define INSERT_ORDERER_MAP_H_
 
-#include <list>
+#include <vector>
 #include <map>
 
 using namespace std;
@@ -16,8 +16,8 @@ using namespace std;
 template <class _K, class _V> class insert_ordered_map
 {
 private:
-	list<_V> _values;
-	list<_K> _keys;
+	vector<_V> _values;
+	vector<_K> _keys;
 
 public:
 	insert_ordered_map()
@@ -35,15 +35,15 @@ public:
 		friend class insert_ordered_map;
 
 	private:
-		typename list<_K>::const_iterator _keyIter;
-		typename list<_V>::const_iterator _valueIter;
+		typename vector<_K>::const_iterator _keyIter;
+		typename vector<_V>::const_iterator _valueIter;
 		const insert_ordered_map<_K, _V> & _iomap;
 
 	public:
 		iterator(
 			const insert_ordered_map<_K, _V> & iomap,
-			typename list<_K>::const_iterator keyIter,
-			typename list<_V>::const_iterator valueIter)
+			typename vector<_K>::const_iterator keyIter,
+			typename vector<_V>::const_iterator valueIter)
 		: _keyIter(keyIter),
 		  _valueIter(valueIter),
 		  _iomap(iomap)
@@ -120,8 +120,8 @@ public:
 
 	void push(const _K & key, const _V & value)
 	{
-		typename list<_K>::iterator kIter = _keys.begin();
-		typename list<_V>::iterator vIter = _values.begin();
+		typename vector<_K>::iterator kIter = _keys.begin();
+		typename vector<_V>::iterator vIter = _values.begin();
 		for (; kIter != _keys.end(); ++kIter, ++vIter) {
 			if (*kIter == key) {
 				break;
@@ -142,8 +142,8 @@ public:
 
 	insert_ordered_map<_K, _V>::iterator find(const _K & key) const
 	{
-		typename list<_K>::const_iterator kIter = _keys.begin();
-		typename list<_V>::const_iterator vIter = _values.begin();
+		typename vector<_K>::const_iterator kIter = _keys.begin();
+		typename vector<_V>::const_iterator vIter = _values.begin();
 		for (; kIter != _keys.end(); ++kIter, ++vIter) {
 			if (*kIter == key) {
 				break;

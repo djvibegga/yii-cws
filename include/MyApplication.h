@@ -20,6 +20,8 @@ public:
 
 protected:
 	void registerComponents();
+	virtual CUrlManager * createUrlManager();
+	virtual CLogRouter * createLogRouter();
 };
 
 #endif /* MYAPPLICATION_H_ */

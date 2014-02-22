@@ -35,18 +35,29 @@ MyApplication::MyApplication(const xml_document & configDocument, int argc, char
 
 MyApplication::~MyApplication()
 {
-
 }
 
-void MyApplication::registerComponents()
+CUrlManager * MyApplication::createUrlManager()
 {
-	CLogRouter * log = getLog();
-	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	CUrlManager * manager = CWebApplication::createUrlManager();
+	//manager->addRule(new MyUrlRule());
+	//manager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
+	return manager;
+}
+
+CLogRouter * MyApplication::createLogRouter()
+{
+	CLogRouter * log = CWebApplication::createLogRouter();
 	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
 	fileRoute->setLevels("info,error,warning,trace,profile");
 	fileRoute->init();
 	log->addRoute(fileRoute);
+	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	return log;
+}
 
+void MyApplication::registerComponents()
+{
 	CDbConnection * connection = new CDbConnection(this);
 	connection->setId("db");
 	connection->init();
@@ -55,24 +66,14 @@ void MyApplication::registerComponents()
 	}
 	setComponent(connection);
 
-	CViewRenderer * viewRenderer = new CBaseViewRenderer(this);
-	viewRenderer->init();
-
 	TestBehavior * behavior = new TestBehavior();
 	attachBehavior(behavior);
 
-	CUrlManager * urlManager = new CUrlManager(this);
-	urlManager->init();
-
 	CAssetManager * am = new CAssetManager(this);
-	//am->linkAssets = true;
 	am->init();
 
 	CClientScript * cs = new CClientScript(this);
 	cs->init();
-
-	//urlManager->addRule(new MyUrlRule());
-	//urlManager->addRule(new CUrlRule("site/index", "main/<id:\\d+>/<name:\\w+>*"));
 
 	SiteController * siteController = new SiteController(this);
 	siteController->init();

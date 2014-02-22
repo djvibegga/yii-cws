@@ -12,9 +12,9 @@
 #include "web/helpers/CHtml.h"
 #include "utils/insert_orderer_map.h"
 
-typedef list<string> TScriptPackageDependencyList;
-typedef list<string> TScriptPackageJavascriptList;
-typedef list<string> TScriptPackageCssList;
+typedef vector<string> TScriptPackageDependencyList;
+typedef vector<string> TScriptPackageJavascriptList;
+typedef vector<string> TScriptPackageCssList;
 
 struct ScriptPackage
 {
@@ -43,8 +43,8 @@ typedef insert_ordered_map<string, TCssBlock> TInlineCssMap;
 typedef insert_ordered_map<string, _string> TClientFileMap;
 typedef map<int, TClientFileMap> TJavascriptFileMap;
 typedef insert_ordered_map<string, _string> TCssFileMap;
-typedef list<TTagAttributesMap> TMetaTagsList;
-typedef list<TTagAttributesMap> TLinkTagsList;
+typedef vector<TTagAttributesMap> TMetaTagsList;
+typedef vector<TTagAttributesMap> TLinkTagsList;
 
 class CClientScript: public CApplicationComponent
 {
@@ -60,8 +60,8 @@ public:
 	void setCoreScriptUrl(const string & url);
 	string getCoreScriptUrl() const;
 
-	string getPackageBaseUrl(const string & name);
-	CClientScript & addPackage(const string & name, const TScriptPackage & definition);
+	string getPackageBaseUrl(const string & name, const TScriptPackage & package) const;
+	CClientScript & addPackage(const string & name, TScriptPackage & definition);
 
 	static const int POS_HEAD;
 	static const int POS_BEGIN;

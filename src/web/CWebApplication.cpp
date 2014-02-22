@@ -22,6 +22,7 @@ using namespace std;
 CWebApplication::CWebApplication(const string &configPath, int argc, char * const argv[])
 : CApplication(configPath, argc, argv),
   _requestPool(0),
+  enableSessions(true),
   request(0),
   idleTimeout(100000),
   idleTime(0),
@@ -32,6 +33,7 @@ CWebApplication::CWebApplication(const string &configPath, int argc, char * cons
 CWebApplication::CWebApplication(const xml_document & configDocument, int argc, char * const argv[])
 : CApplication(configDocument, argc, argv),
   _requestPool(0),
+  enableSessions(true),
   request(0),
   idleTimeout(100000),
   idleTime(0),
@@ -51,6 +53,13 @@ void CWebApplication::registerComponents()
 void CWebApplication::init() throw(CException)
 {
 	CApplication::init();
+	createUrlManager();
+}
+
+void CWebApplication::applyConfig(const xml_node & config)
+{
+	CApplication::applyConfig(config);
+
 	idleTimeout = getConfigRoot()
 		.child("server")
 		.child("instance")
@@ -117,13 +126,11 @@ void CWebApplication::handleRequest()
 void CWebApplication::beginRequest()
 {
 	CApplication::beginRequest();
-	CHttpRequest * request = new CHttpRequest();
-	CHttpResponse * response = new CHttpResponse(this);
-	request->init();
-	response->init();
-	setComponent("request", request);
-	setComponent("response", response);
-	getOutputStack().push(response);
+	createHttpRequest();
+	getOutputStack().push(createHttpResponse());
+	if (enableSessions) {
+		createHttpSession();
+	}
 }
 
 void CWebApplication::processRequest()
@@ -144,6 +151,9 @@ void CWebApplication::endRequest()
 {
 	while (!getOutputStack().empty()) {
 		getOutputStack().pop();
+	}
+	if (enableSessions) {
+		delete getComponent("session");
 	}
 	delete getComponent("request");
 	delete getComponent("response");
@@ -279,4 +289,32 @@ void CWebApplication::setWebRequestPool(IWebRequestPool * pool)
 IWebRequestPool * CWebApplication::getWebRequestPool() const
 {
 	return _requestPool;
+}
+
+CHttpRequest * CWebApplication::createHttpRequest()
+{
+	CHttpRequest * request = new CHttpRequest(this);
+	request->init();
+	return request;
+}
+
+CHttpResponse * CWebApplication::createHttpResponse()
+{
+	CHttpResponse * response = new CHttpResponse(this);
+	response->init();
+	return response;
+}
+
+CHttpSession * CWebApplication::createHttpSession()
+{
+	CHttpSession * session = new CHttpSession(this);
+	session->init();
+	return session;
+}
+
+CUrlManager * CWebApplication::createUrlManager()
+{
+	CUrlManager * urlManager = new CUrlManager(this);
+	urlManager->init();
+	return urlManager;
 }

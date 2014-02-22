@@ -18,7 +18,8 @@
 #include "web/CUrlManager.h"
 #include "web/CClientScript.h"
 #include "web/CAssetManager.h"
-#include <web/CController.h>
+#include "web/CController.h"
+#include "web/CHttpSession.h"
 
 struct SControllerToRun
 {
@@ -39,6 +40,7 @@ private:
 public:
 	TRouteStruct catchAllRequest;
 	string defaultControllerRoute;
+	bool enableSessions;
 
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	CWebApplication(const xml_document & configDocument, int argc, char * const argv[]);
@@ -68,6 +70,7 @@ protected:
 	useconds_t idleTime;
 	double idleMedian;
 
+	virtual void applyConfig(const xml_node & config);
 	void mainLoop() throw(CException);
 	virtual void handleRequest();
 	virtual void beginRequest();
@@ -75,11 +78,14 @@ protected:
 	virtual void endRequest();
 	virtual void registerComponents();
 	virtual boost::filesystem::path resolveLayoutPath();
-
 	virtual void runController(const string &route);
 	virtual SControllerToRun resolveController(string route, const IModule * owner);
-
 	virtual void renderException(const CException & e) const;
+
+	virtual CHttpRequest * createHttpRequest();
+	virtual CHttpResponse * createHttpResponse();
+	virtual CHttpSession * createHttpSession();
+	virtual CUrlManager * createUrlManager();
 };
 
 #endif /* CWEBAPPLICATION_H_ */

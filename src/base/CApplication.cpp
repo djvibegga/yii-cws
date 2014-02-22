@@ -11,6 +11,7 @@
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
+#include "web/renderers/CBaseViewRenderer.h"
 #include <sstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
@@ -81,8 +82,7 @@ void CApplication::init() throw(CException)
 	_instanceLocker.unlock();
 
 	attachEventHandler("onFatalError", this, EVENT_HANDLER(&CApplication::onProgramError));
-	_log = new CLogRouter(this);
-	_log->init();
+
 	if (_xmlConfig->empty() && !_configPath.empty()) {
 		xml_parse_result result;
 		result = _xmlConfig->load_file(_configPath.c_str());
@@ -103,9 +103,15 @@ void CApplication::init() throw(CException)
 		setRuntimePath(string(_executablePath.parent_path().c_str()) + "/runtime");
 	}
 
+	_log = createLogRouter();
+
+#ifdef JV_DEBUG
 	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
+#endif
 
 	CModule::init();
+
+	createViewRenderer();
 }
 
 void CApplication::run() throw(CException)
@@ -193,6 +199,20 @@ boost::filesystem::path CApplication::getExecutablePath() const
 IViewRenderer * CApplication::getViewRenderer() const
 {
     return dynamic_cast<IViewRenderer*>(getComponent("viewRenderer"));
+}
+
+IViewRenderer * CApplication::createViewRenderer()
+{
+	CBaseViewRenderer * renderer = new CBaseViewRenderer(this);
+	renderer->init();
+	return renderer;
+}
+
+CLogRouter * CApplication::createLogRouter()
+{
+	CLogRouter * log = new CLogRouter(this);
+	log->init();
+	return log;
 }
 
 CLogRouter * CApplication::getLog()

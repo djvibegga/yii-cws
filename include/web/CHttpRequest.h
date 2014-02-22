@@ -14,6 +14,8 @@
 
 using namespace std;
 
+class CWebApplication;
+
 class CHttpRequest: public CApplicationComponent
 {
 private:
@@ -29,7 +31,7 @@ private:
 	int _securePort;
 
 public:
-	CHttpRequest();
+	CHttpRequest(CWebApplication * app);
 	virtual ~CHttpRequest();
 	virtual void init();
 

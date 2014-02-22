@@ -12,7 +12,7 @@
 #include "utils/CHash.h"
 #include "sys/stat.h"
 
-const string CAssetManager::DEFAULT_BASEPATH = "assets";
+const string CAssetManager::DEFAULT_BASEPATH = "public/assets";
 
 CAssetManager::CAssetManager(CModule * module)
 : CApplicationComponent("assetManager", module),

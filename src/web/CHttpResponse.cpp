@@ -11,7 +11,7 @@
 
 
 CHttpResponse::CHttpResponse(CWebApplication * app)
-: CApplicationComponent(app),
+: CApplicationComponent("response", app),
   _startedOutput(false),
   _app(app)
 {

@@ -18,8 +18,8 @@
 
 using namespace std;
 
-CHttpRequest::CHttpRequest()
-: CApplicationComponent("request", 0),
+CHttpRequest::CHttpRequest(CWebApplication * app)
+: CApplicationComponent("request", app),
   _port(0),
   _securePort(0)
 {

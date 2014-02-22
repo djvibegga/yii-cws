@@ -53,8 +53,8 @@ public:
 	virtual ~CApplication();
 	virtual string getId() const;
 	virtual void setId(const string &id);
-	virtual void init() throw(CException);
-	virtual void run() throw(CException);
+	virtual void init() throw (CException);
+	virtual void run() throw (CException);
 	void onBeginRequest(CEvent & event);
 	void onEndRequest(CEvent & event);
 	xml_node getConfigRoot() const;
@@ -79,6 +79,8 @@ protected:
 	virtual void endRequest();
 	virtual void onProgramError();
 	virtual void processRequest() = 0;
+	virtual IViewRenderer * createViewRenderer();
+	virtual CLogRouter * createLogRouter();
 
 private:
 	void logProfileItems(CEvent & event);

@@ -50,7 +50,7 @@ void CClientScript::init()
 void CClientScript::applyConfig(const xml_node & config)
 {
 	if (!config.child("packages").empty()) {
-		//loadPackages(config.child("packages"), packages);
+		loadPackages(config.child("packages"), packages);
 	}
 }
 
@@ -75,15 +75,9 @@ string CClientScript::resolveCoreScriptUrl() const
 	return am->publish(srcPath.string() + "/web/js/source");
 }
 
-string CClientScript::getPackageBaseUrl(const string & name)
+string CClientScript::getPackageBaseUrl(const string & name, const TScriptPackage & package) const
 {
 	PROFILE_BEGIN("begin CClientScript::getPackageBaseUrl(" + name + ")");
-	TScriptPackageUnorderedMap::iterator packageFound = coreScripts.find(name);
-	if (packageFound == coreScripts.end()) {
-		return "";
-	}
-
-	TScriptPackage package = packageFound.second();
 	string baseUrl;
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	if (!package.baseUrl.empty()) {
@@ -99,14 +93,13 @@ string CClientScript::getPackageBaseUrl(const string & name)
 	} else {
 		baseUrl = getCoreScriptUrl();
 	}
-	package.baseUrl = baseUrl;
-	coreScripts.push(name, package);
 	PROFILE_END();
 	return baseUrl;
 }
 
-CClientScript & CClientScript::addPackage(const string & name, const TScriptPackage & definition)
+CClientScript & CClientScript::addPackage(const string & name, TScriptPackage & definition)
 {
+	definition.baseUrl = getPackageBaseUrl(name, definition);
 	packages[name] = definition;
 	return *this;
 }
@@ -168,8 +161,9 @@ void CClientScript::loadPackages(const xml_node & root, TScriptPackageMap & dest
 				package.depends.push_back(depIter->attribute("name").as_string());
 			}
 		}
-
-		dest[iter->attribute("name").as_string()] = package;
+		string name = iter->attribute("name").as_string();
+		package.baseUrl = getPackageBaseUrl(name, package);
+		dest[name] = package;
 	}
 }
 
@@ -201,20 +195,18 @@ void CClientScript::renderCoreScripts()
 	}
 	TCssFileMap cssFiles;
 	TClientFileMap jsFiles;
-	string baseUrl;
 	TScriptPackage package;
 
 	for (TScriptPackageUnorderedMap::iterator iter = coreScripts.begin(); iter != coreScripts.end(); ++iter) {
-		baseUrl = getPackageBaseUrl(iter.first());
 		package = iter.second();
 		if (!package.js.empty()) {
 			for (TScriptPackageJavascriptList::const_iterator jsIter = package.js.begin(); jsIter != package.js.end(); ++jsIter) {
-				jsFiles.push(baseUrl + "/" + *jsIter, _("text/javascript"));
+				jsFiles.push(package.baseUrl + "/" + *jsIter, _("text/javascript"));
 			}
 		}
 		if (!package.css.empty()) {
 			for (TScriptPackageCssList::const_iterator cssIter = package.css.begin(); cssIter != package.css.end(); ++cssIter) {
-				cssFiles.push(baseUrl + "/" + *cssIter, _(""));
+				cssFiles.push(package.baseUrl + "/" + *cssIter, _(""));
 			}
 		}
 	}

@@ -8,7 +8,7 @@
 #ifndef CPROFILER_H_
 #define CPROFILER_H_
 
-#include <list>
+#include <vector>
 #include <sys/time.h>
 #include <string>
 #include "config.h"
@@ -22,7 +22,7 @@ struct TProfileLogItem
 	timeval timeEnd;
 };
 
-typedef list<TProfileLogItem> TProfileLogList;
+typedef vector<TProfileLogItem> TProfileLogList;
 
 class CProfiler
 {

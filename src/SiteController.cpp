@@ -74,7 +74,7 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
 
 	string url = am->publish(
-		boost::filesystem::path("./assets")
+		Jvibetto::getPathOfAlias("application.assets")
 	);
 
 	cs->registerMetaTag(_("7ca4fb0526bc4815"), _("yandex-verification"));
