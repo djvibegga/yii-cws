@@ -16,8 +16,8 @@ using namespace std;
 template <class _K, class _V> class insert_ordered_map
 {
 private:
-	map<_K, _V> _map;
-	list<_K> _order;
+	list<_V> _values;
+	list<_K> _keys;
 
 public:
 	insert_ordered_map()
@@ -25,50 +25,42 @@ public:
 	}
 
 	insert_ordered_map(const insert_ordered_map & other)
-	: _map(other._map),
-	  _order(other._order)
+	: _values(other._values),
+	  _keys(other._keys)
 	{
 	}
 
 	class iterator
 	{
+		friend class insert_ordered_map;
+
 	private:
-		typename list<_K>::const_iterator _position;
+		typename list<_K>::const_iterator _keyIter;
+		typename list<_V>::const_iterator _valueIter;
 		const insert_ordered_map<_K, _V> & _iomap;
 
 	public:
-		_K first;
-		_V second;
-
-	public:
-		iterator(const insert_ordered_map<_K, _V> & iomap, typename list<_K>::const_iterator position)
-		: _position(position),
+		iterator(
+			const insert_ordered_map<_K, _V> & iomap,
+			typename list<_K>::const_iterator keyIter,
+			typename list<_V>::const_iterator valueIter)
+		: _keyIter(keyIter),
+		  _valueIter(valueIter),
 		  _iomap(iomap)
 		{
-			if (!_iomap._order.empty() && position != _iomap._order.end()) {
-				first = *position;
-				typename map<_K, _V>::const_iterator found = _iomap._map.find(first);
-				if (found != _iomap._map.end()) {
-					second = found->second;
-				}
-			}
 		}
 
 		iterator(const insert_ordered_map<_K, _V>::iterator & other)
-		: _position(other._position),
-		  _iomap(other._iomap),
-		  first(other.first),
-		  second(other.second)
+		: _keyIter(other._keyIter),
+		  _valueIter(other._valueIter),
+		  _iomap(other._iomap)
 		{
 		}
 
 		insert_ordered_map<_K, _V>::iterator & operator ++()
 	    {
-		   ++_position;
-		   if (_position != _iomap._order.end()) {
-			   first = *_position;
-			   second = _iomap._map.find(first)->second;
-		   }
+		   ++_keyIter;
+		   ++_valueIter;
 		   return *this;
 	    }
 
@@ -76,61 +68,88 @@ public:
 		{
 		   if (this != &other) {
 			   _iomap = other._iomap;
-			   _position = other._position;
-			   first = other.first;
-			   second = other.second;
+			   _keyIter = other._keyIter;
+			   _valueIter = other._valueIter;
 		   }
 		   return *this;
 	   }
 
 		bool operator ==(const insert_ordered_map<_K, _V>::iterator & other)
 	    {
-		    return _position == other._position;
+		    return _keyIter == other._keyIter;
 	    }
 
 		bool operator !=(const insert_ordered_map<_K, _V>::iterator & other)
 		{
-		    return _position != other._position;
+			return _keyIter != other._keyIter;
+		}
+
+		_K first() const
+		{
+			return *_keyIter;
+		}
+
+		_V second() const
+		{
+			return *_valueIter;
 		}
 	};
 
 	insert_ordered_map<_K, _V>::iterator begin() const
 	{
-		return insert_ordered_map<_K, _V>::iterator(*this, _order.begin());
+		return insert_ordered_map<_K, _V>::iterator(
+			*this,
+			_keys.begin(),
+			_values.begin()
+		);
 	}
 
 	insert_ordered_map<_K, _V>::iterator end() const
 	{
-		return insert_ordered_map<_K, _V>::iterator(*this, _order.end());
+		return insert_ordered_map<_K, _V>::iterator(
+			*this,
+			_keys.end(),
+			_values.end()
+		);
 	}
 
 	bool empty() const
 	{
-		return _order.empty();
+		return _keys.empty();
 	}
 
 	void push(const _K & key, const _V & value)
 	{
-		_map[key] = value;
-		if (find(key) == end()) {
-			_order.push_back(key);
+		typename list<_K>::iterator kIter = _keys.begin();
+		typename list<_V>::iterator vIter = _values.begin();
+		for (; kIter != _keys.end(); ++kIter, ++vIter) {
+			if (*kIter == key) {
+				break;
+			}
+		}
+		if (kIter == _keys.end()) {
+			_keys.push_back(key);
+			_values.push_back(value);
+		} else {
+			*vIter = value;
 		}
 	}
 
-	_V operator [](const _K & key)
+	_V operator [](const _K & key) const
 	{
-		return _map[key];
+		return find(key).second();
 	}
 
 	insert_ordered_map<_K, _V>::iterator find(const _K & key) const
 	{
-		typename list<_K>::const_iterator iter;
-		for (iter = _order.begin(); iter != _order.end(); ++iter) {
-			if (*iter == key) {
+		typename list<_K>::const_iterator kIter = _keys.begin();
+		typename list<_V>::const_iterator vIter = _values.begin();
+		for (; kIter != _keys.end(); ++kIter, ++vIter) {
+			if (*kIter == key) {
 				break;
 			}
 		}
-		return insert_ordered_map<_K, _V>::iterator(*this, iter);
+		return insert_ordered_map<_K, _V>::iterator(*this, kIter, vIter);
 	}
 };
 

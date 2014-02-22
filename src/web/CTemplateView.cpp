@@ -8,6 +8,7 @@
 #include "web/CTemplateView.h"
 #include "base/cpptempl.h"
 #include "base/CStringUtils.h"
+#include "base/CProfiler.h"
 #include "base/Jvibetto.h"
 
 TDynamicTemplateCacheMap CTemplateView::_dynamicTemplateCache;
@@ -47,6 +48,7 @@ void CTemplateView::init()
 
 void CTemplateView::run() throw (CException)
 {
+	PROFILE_BEGIN("CTemplateView::run(). View file: " + _viewFile);
 	cpptempl::data_map & data = getData();
 	wstring text;
 	TStaticTemplateCacheMap::const_iterator found = _staticTemplateCache.find(_viewFile);
@@ -77,4 +79,5 @@ void CTemplateView::run() throw (CException)
 	    cpptempl::wide_to_utf8(text)
 #endif
 	);
+	PROFILE_END();
 }

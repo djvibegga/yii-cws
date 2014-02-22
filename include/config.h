@@ -13,6 +13,5 @@
 //#define JV_DEBUG
 #define _UNICODE
 //#define JV_DB_PARAM_LOGGING
-//#define __GXX_EXPERIMENTAL_CXX0X__
 
 #endif /* CONFIG_H_ */

@@ -34,17 +34,13 @@ public:
 
 #ifdef JV_DEBUG
 #define PROFILE_BEGIN(msg) \
-	timeval timeBegin; \
-	gettimeofday(&timeBegin, 0); \
 	TProfileLogItem item; \
+	gettimeofday(&item.timeBegin, 0); \
 	item.message = msg; \
-	item.timeBegin = timeBegin; \
-	CProfiler::items.push_back(item)
 
 #define PROFILE_END() \
-	timeval timeEnd;\
-	gettimeofday(&timeEnd, 0);\
-	CProfiler::items.back().timeEnd = timeEnd
+	gettimeofday(&item.timeEnd, 0);\
+	CProfiler::items.push_back(item);
 
 #else
 

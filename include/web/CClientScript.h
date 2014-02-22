@@ -75,6 +75,7 @@ public:
 
 	void reset();
 	void loadPackages(const boost::filesystem::path & from, TScriptPackageMap & dest) throw (CException);
+	void loadPackages(const xml_node & root, TScriptPackageMap & dest) throw (CException);
 
 	CClientScript & registerCoreScript(const string & name);
 	virtual void renderCoreScripts();
@@ -104,6 +105,8 @@ public:
 	bool isCssRegistered(const string & id) const;
 	bool isScriptRegistered(const string & id, int position = POS_READY) const;
 	bool isScriptFileRegistered(const string & url, int position = POS_HEAD) const;
+
+	virtual void applyConfig(const xml_node & config);
 
 protected:
 	TScriptPackageMap packages;

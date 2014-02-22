@@ -1,7 +1,7 @@
 <server name="testc" host="127.0.0.1" port="9015">
     <requestConcurrency value="1000"/>
     <instance>
-        <count value="100"/>
+        <count value="1"/>
         <idleTimeout value="100000"/>
     </instance>
     <components>
@@ -13,5 +13,30 @@
         <urlManager>
             <urlFormat value="path"/>
         </urlManager>
+        <clientScript>
+            <packages>
+                <package name="subtest">
+                    <basePath value="application.assets" />
+                    <js>
+                        <file path="subassets/sub.js" />
+                    </js>
+                    <depends>
+                        <package name="jquery" />
+                    </depends>
+                </package>
+                <package name="test">
+                    <basePath value="application.assets" />
+                    <js>
+                        <file path="test.js" />
+                    </js>
+                    <css>
+                        <file path="style.css" />
+                    </css>
+                    <depends>
+                        <package name="jquery" />
+                    </depends>
+                </package>
+            </packages>
+        </clientScript>
     </components>
 </server>

@@ -9,6 +9,7 @@
 #include "web/CController.h"
 #include "base/CHttpException.h"
 #include "base/CStringUtils.h"
+#include "base/CProfiler.h"
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -101,6 +102,7 @@ void CWebApplication::mainLoop() throw(CException)
 
 void CWebApplication::handleRequest()
 {
+	PROFILE_BEGIN("CWebApplication::handleRequest()");
 	try {
 		CApplication::handleRequest();
 	} catch (const CHttpException & e) {
@@ -109,6 +111,7 @@ void CWebApplication::handleRequest()
 	} catch (const CException & e) {
 		renderException(e);
 	}
+	PROFILE_END();
 }
 
 void CWebApplication::beginRequest()
@@ -204,6 +207,7 @@ boost::filesystem::path CWebApplication::resolveLayoutPath()
 
 void CWebApplication::runController(const string &route)
 {
+	PROFILE_BEGIN("CWebApplication::runController(" + route + ")");
 	SControllerToRun ca = resolveController(route, 0);
 	if (ca.actionId.empty()) {
 		throw CHttpException(404, string("Unable to resolve the request."));
@@ -214,6 +218,7 @@ void CWebApplication::runController(const string &route)
 		controller->run(ca.actionId, getRequest(), this->getResponse());
 		setComponent("controller", oldController);
 	}
+	PROFILE_END();
 }
 
 SControllerToRun CWebApplication::resolveController(string route, const IModule * owner)
