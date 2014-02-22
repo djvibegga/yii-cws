@@ -13,6 +13,10 @@
         <urlManager>
             <urlFormat value="path"/>
         </urlManager>
+        <session>
+            <autoOpen value="true" />
+            <gcTimeout value="60" />
+        </session>
         <clientScript>
             <packages>
                 <package name="subtest">

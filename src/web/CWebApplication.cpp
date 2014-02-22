@@ -54,6 +54,9 @@ void CWebApplication::init() throw(CException)
 {
 	CApplication::init();
 	createUrlManager();
+	if (enableSessions) {
+		createHttpSession();
+	}
 }
 
 void CWebApplication::applyConfig(const xml_node & config)
@@ -127,10 +130,13 @@ void CWebApplication::beginRequest()
 {
 	CApplication::beginRequest();
 	createHttpRequest();
-	getOutputStack().push(createHttpResponse());
 	if (enableSessions) {
-		createHttpSession();
+		CHttpSession * session = dynamic_cast<CHttpSession*>(getComponent("session"));
+		if (session->autoOpen) {
+			session->open();
+		}
 	}
+	getOutputStack().push(createHttpResponse());
 }
 
 void CWebApplication::processRequest()
@@ -153,7 +159,7 @@ void CWebApplication::endRequest()
 		getOutputStack().pop();
 	}
 	if (enableSessions) {
-		delete getComponent("session");
+		dynamic_cast<CHttpSession*>(getComponent("session"))->reset();
 	}
 	delete getComponent("request");
 	delete getComponent("response");

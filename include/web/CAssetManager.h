@@ -44,6 +44,7 @@ public:
 	virtual string getPublishedUrl(const boost::filesystem::path & path, bool hashByName = false) const;
 
 protected:
+	virtual void applyConfig(const xml_node & config);
 	virtual string hash(const boost::filesystem::path & path) const;
 	string generatePath(const boost::filesystem::path & file, bool hashByName = false) const;
 };

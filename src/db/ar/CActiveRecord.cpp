@@ -43,7 +43,9 @@ CDbConnection * CActiveRecord::getDbConnection() const
 
 TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria)
 {
+#ifdef JV_DEBUG
 	Jvibetto::trace(typeid(this).name() + string(".findAll()"), LOG_CATEGORY);
+#endif
 	return query(criteria, true);
 }
 

@@ -189,3 +189,13 @@ string CAssetManager::generatePath(const boost::filesystem::path & file, bool ha
 	}
 	return hash(forHashing);
 }
+
+void CAssetManager::applyConfig(const xml_node & config)
+{
+	if (!config.child("linkAssets").empty()) {
+		linkAssets = config
+			.child("linkAssets")
+			.attribute("value")
+			.as_bool();
+	}
+}

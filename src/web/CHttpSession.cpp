@@ -8,17 +8,40 @@
 #include "web/CHttpSession.h"
 #include "web/CWebApplication.h"
 #include "base/Jvibetto.h"
+#include <boost/thread.hpp>
 
 const string CHttpSession::SESSION_ID_KEY = "sessid";
+const long int CHttpSession::DEFAULT_GC_SESSIONS_TIMEOUT = 1920;
+bool CHttpSession::_isGCRunned = false;
 
 CHttpSession::CHttpSession(CModule * module)
-: CApplicationComponent("session", module)
+: CApplicationComponent("session", module),
+  gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
+  autoOpen(false)
 {
 }
 
 CHttpSession::CHttpSession(const string &id, CModule * module)
-: CApplicationComponent(id, module)
+: CApplicationComponent(id, module),
+  gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
+  autoOpen(false)
 {
+}
+
+void CHttpSession::applyConfig(const xml_node & config)
+{
+	if (!config.child("gcTimeout").empty()) {
+		gcTimeout = config
+			.child("gcTimeout")
+			.attribute("value")
+			.as_int();
+	}
+	if (!config.child("autoOpen").empty()) {
+		autoOpen = config
+			.child("autoOpen")
+			.attribute("value")
+			.as_bool();
+	}
 }
 
 void CHttpSession::setSessionId(const string & sessionId)
@@ -48,17 +71,31 @@ data_map & CHttpSession::getData()
 	return _sessionData;
 }
 
+void CHttpSession::reset()
+{
+	_sessionData = data_map();
+	_sessionId.clear();
+}
+
 bool CHttpSession::open() throw (CException)
 {
+	if (!_isGCRunned) {
+		boost::thread gcThread(boost::bind(
+			&CHttpSession::_runGarbageCollector, this,
+			boost::ref(gcTimeout)
+		));
+		_isGCRunned = true;
+	}
 	if (_sessionId.empty()) {
 		_sessionId = resolveSessionId();
 	}
 	if (_sessionId.empty()) {
 		_sessionId = generateUniqueSessionId();
-	}
-	_string strData = read(_sessionId);
-	if (!strData.empty()) {
-		return unserializeData(strData);
+	} else {
+		_string strData = read(_sessionId);
+		if (!strData.empty()) {
+			return unserializeData(strData);
+		}
 	}
 	return false;
 }
@@ -105,4 +142,19 @@ bool CHttpSession::write(const string & sessionId, const _string & data) const t
 void CHttpSession::destroy(const string & sessionId) const throw (CException)
 {
 
+}
+
+void CHttpSession::gcSessions() const throw (CException)
+{
+#ifdef JV_DEBUG
+	Jvibetto::trace("CHttpSession::gcSessions()");
+#endif
+}
+
+void CHttpSession::_runGarbageCollector(long int & interval)
+{
+	while (true) {
+		sleep(interval);
+		gcSessions();
+	}
 }

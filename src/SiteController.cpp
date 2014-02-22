@@ -87,5 +87,8 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 
 	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
 
-	render("am", cpptempl::data_map());
+	cpptempl::data_map viewData;
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	viewData["sessionId"] = session->getSessionId();
+	render("am", viewData);
 }
