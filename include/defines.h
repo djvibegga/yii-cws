@@ -16,9 +16,13 @@ using namespace std;
 #ifdef _UNICODE
 #define _string wstring
 #define _(data) L##data
+#define _to_utf8(data) cpptempl::wide_to_utf8(data)
+#define utf8_to_(data) cpptempl::utf8_to_wide(data)
 #else
 #define _string string
 #define _(data) data
+#define _to_utf8(data) data
+#define utf8_to_(data) data
 #endif
 
 #endif /* DEFINES_H_ */

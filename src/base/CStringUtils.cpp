@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <algorithm>
 #include <fstream>
+#include <stdio.h>
 
 using namespace std;
 
@@ -153,4 +154,16 @@ string CStringUtils::fileGetContents(const string & path) throw (CException)
     in.seekg(0);
     in.read(&buffer[0], size);
     return buffer;
+}
+
+void CStringUtils::filePutContents(const string & path, const string & content) throw (CException)
+{
+	_IO_FILE * file = fopen(path.c_str(), "w");
+	if (!file) {
+		throw CException("Can\'t open file for writing: '" + path + "'.");
+	}
+	flockfile(file);
+	fprintf(file, "%s", content.c_str());
+	funlockfile(file);
+	fclose(file);
 }

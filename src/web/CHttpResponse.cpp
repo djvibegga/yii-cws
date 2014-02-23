@@ -35,11 +35,7 @@ void CHttpResponse::echo(const _string & content)
 	}
 	FCGX_FPrintF(
 		_app->request->out,
-#ifdef _UNICODE
-		cpptempl::wide_to_utf8(content).c_str()
-#else
-		content.c_str()
-#endif
+		_to_utf8(content).c_str()
 	);
 }
 

@@ -111,7 +111,7 @@ _string CHtml::css(const _string & text, const _string & media)
 
 _string CHtml::cssFile(const string & url, const _string & media)
 {
-	return linkTag(_("stylesheet"), _("text/css"), cpptempl::utf8_to_wide(url), media);
+	return linkTag(_("stylesheet"), _("text/css"), utf8_to_(url), media);
 }
 
 _string CHtml::script(const _string & text, const _string & type)
@@ -129,7 +129,7 @@ _string CHtml::scriptFile(const string & url, const _string & type)
 {
 	TTagAttributesMap htmlOptions;
 	htmlOptions[_("type")] = type;
-	htmlOptions[_("src")] = cpptempl::utf8_to_wide(url);
+	htmlOptions[_("src")] = utf8_to_(url);
 	return tag(_("script"), htmlOptions, _(""), true);
 }
 

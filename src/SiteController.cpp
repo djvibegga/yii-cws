@@ -89,6 +89,14 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 
 	cpptempl::data_map viewData;
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	TSessionDataMap & sessionData = session->getData();
+	if (sessionData.find("key") == sessionData.end()) {
+		(*session)["key"] = _to_utf8(_("привет"));
+		viewData["sessionKey"] = _("unknown");
+	} else {
+		viewData["sessionKey"] = utf8_to_(sessionData["key"]);
+	}
+
 	viewData["sessionId"] = session->getSessionId();
 	render("am", viewData);
 }

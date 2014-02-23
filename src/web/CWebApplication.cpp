@@ -85,11 +85,7 @@ void CWebApplication::renderException(const CException & e) const
 #else
 	string message = e.getMessage();
 #endif
-#ifdef _UNICODE
-	response->echo(cpptempl::utf8_to_wide(message));
-#else
-	response->echo(message);
-#endif
+	response->echo(utf8_to_(message));
 }
 
 void CWebApplication::mainLoop() throw(CException)
@@ -159,7 +155,7 @@ void CWebApplication::endRequest()
 		getOutputStack().pop();
 	}
 	if (enableSessions) {
-		dynamic_cast<CHttpSession*>(getComponent("session"))->reset();
+		dynamic_cast<CHttpSession*>(getComponent("session"))->close();
 	}
 	delete getComponent("request");
 	delete getComponent("response");
