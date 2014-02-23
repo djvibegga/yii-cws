@@ -11,6 +11,7 @@
 #include "base/CApplicationComponent.h"
 #include "base/CException.h"
 #include <boost/filesystem.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/map.hpp>
 
@@ -26,15 +27,15 @@ private:
 	string _sessionId;
 	TSessionDataMap _sessionData;
 	static bool _isGCRunned;
-	void _runGarbageCollector(long int & interval);
+	static boost::mutex _gcMutexLocker;
 
 public:
 	long int gcTimeout;
 	bool autoOpen;
 
 	CHttpSession();
-	CHttpSession(CModule * module);
-	CHttpSession(const string &id, CModule * module);
+	CHttpSession(CWebApplication * app);
+	CHttpSession(const string &id, CWebApplication * app);
 	CHttpSession(const CHttpSession & other);
 	virtual void init();
 	void setSessionId(const string & sessionId);
@@ -52,6 +53,7 @@ public:
 protected:
 	boost::filesystem::path sessionsPath;
 
+	void ensureGCRunned() throw (CException);
 	virtual boost::filesystem::path resolveSessionFilePath() const;
 	virtual void applyConfig(const xml_node & config);
 	virtual string resolveSessionId() const;
@@ -64,6 +66,20 @@ protected:
 	{
 		ar & _sessionData;
 	}
+};
+
+
+class CHttpSessionGCRunner: public IRunable
+{
+private:
+	CWebApplication * _instance;
+	long int _timeout;
+
+public:
+	CHttpSessionGCRunner(CWebApplication * app, long int timeout);
+	virtual ~CHttpSessionGCRunner();
+	virtual void init() throw (CException);
+	virtual void run() throw (CException);
 };
 
 #endif /* CHTTPSESION_H_ */

@@ -15,13 +15,12 @@
 #include <boost/thread/mutex.hpp>
 #include <queue>
 
-class CWebRequestPool: public IWebRequestPool
+class CWebRequestPool: public IWebRequestPool, public IRunable
 {
 private:
 	boost::mutex _queueLocker;
 	queue<FCGX_Request*> _requests;
 	xml_document * _xmlConfig;
-	void _runInstance(CWebApplication & instance);
 
 protected:
 	string configPath;
@@ -32,13 +31,12 @@ protected:
 public:
 	CWebRequestPool(const string &configPath, int argc, char * const argv[]);
 	virtual ~CWebRequestPool();
-	virtual void init() throw(CException);
-	virtual void run() throw(CException);
+	virtual void init() throw (CException);
+	virtual void run() throw (CException);
 	virtual FCGX_Request * popRequest();
-	const xml_document & getConfigDocument();
+	const xml_document & getConfigDocument() const;
 
 protected:
-	virtual CWebApplication * createAppInstance() = 0;
 	virtual void mainLoop() throw (CException);
 	virtual void openSocket();
 	virtual void startInstances();

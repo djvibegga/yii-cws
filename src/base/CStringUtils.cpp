@@ -8,8 +8,6 @@
 #include "base/CStringUtils.h"
 #include <curl/curl.h>
 #include <algorithm>
-#include <fstream>
-#include <stdio.h>
 
 using namespace std;
 
@@ -131,39 +129,4 @@ string CStringUtils::urlDecode(const string & src)
 	string ret(decoded);
 	delete [] decoded;
 	return ret;
-}
-
-string CStringUtils::dirName(const string & path)
-{
-    std::string::size_type pos = path.find_last_of("/");
-	if (pos == ::string::npos) {
-		return "";
-	}
-	return path.substr(0, pos);
-}
-
-string CStringUtils::fileGetContents(const string & path) throw (CException)
-{
-    std::ifstream in(path.c_str());
-    if (!in.is_open()) {
-    	throw CException("File \"" + path + "\" has not found.", 0, __FILE__, __LINE__);
-    }
-    in.seekg(0, std::ios::end);
-    size_t size = in.tellg();
-    std::string buffer(size, ' ');
-    in.seekg(0);
-    in.read(&buffer[0], size);
-    return buffer;
-}
-
-void CStringUtils::filePutContents(const string & path, const string & content) throw (CException)
-{
-	_IO_FILE * file = fopen(path.c_str(), "w");
-	if (!file) {
-		throw CException("Can\'t open file for writing: '" + path + "'.");
-	}
-	flockfile(file);
-	fprintf(file, "%s", content.c_str());
-	funlockfile(file);
-	fclose(file);
 }

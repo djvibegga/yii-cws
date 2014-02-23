@@ -14,7 +14,7 @@ TestWebRequestPool::TestWebRequestPool(const string &configPath, int argc, char 
 
 }
 
-CWebApplication * TestWebRequestPool::createAppInstance()
+CWebApplication * TestWebRequestPool::createAppInstance() const
 {
 	return new MyApplication(getConfigDocument(), argc, argv);
 }

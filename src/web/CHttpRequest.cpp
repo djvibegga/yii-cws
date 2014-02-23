@@ -9,6 +9,7 @@
 #include "web/CWebApplication.h"
 #include "base/Jvibetto.h"
 #include "base/CStringUtils.h"
+#include "utils/CFile.h"
 #include "fcgi_stdio.h"
 
 #include <iostream>
@@ -214,7 +215,7 @@ string CHttpRequest::getScriptUrl()
 string CHttpRequest::getBaseUrl(bool absolute)
 {
 	if (_baseUrl.empty()) {
-		_baseUrl = CStringUtils::rtrim(CStringUtils::dirName(getScriptUrl()), "\\/");
+		_baseUrl = CStringUtils::rtrim(CFile::dirName(getScriptUrl()), "\\/");
 	}
 	return absolute ? getHostInfo() + _baseUrl : _baseUrl;
 }

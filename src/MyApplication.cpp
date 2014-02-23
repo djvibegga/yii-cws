@@ -52,6 +52,8 @@ CLogRouter * MyApplication::createLogRouter()
 	fileRoute->setLevels("info,error,warning,trace,profile");
 	fileRoute->init();
 	log->addRoute(fileRoute);
+	//getLogger().autoFlush = 1;
+	//getLogger().autoDump = true;
 	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
 	return log;
 }

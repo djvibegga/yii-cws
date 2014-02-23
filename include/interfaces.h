@@ -134,12 +134,22 @@ public:
 };
 
 struct FCGX_Request;
+class CWebApplication;
 
 class IWebRequestPool
 {
 public:
 	virtual ~IWebRequestPool() {};
+	virtual CWebApplication * createAppInstance() const = 0;
 	virtual FCGX_Request * popRequest() = 0;
+};
+
+class IRunable
+{
+public:
+	virtual ~IRunable() {};
+	virtual void init() throw (CException) = 0;
+	virtual void run() throw (CException) = 0;
 };
 
 #endif /* INTERFACES_H_ */

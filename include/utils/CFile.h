@@ -9,6 +9,7 @@
 #define CFILE_H_
 
 #include "base/CComponent.h"
+#include "base/CException.h"
 
 typedef list<string> TFileList;
 typedef list<string> TExtensionList;
@@ -31,6 +32,9 @@ public:
 		unsigned int newDirMode,
 		unsigned int newFileMode,
 		int level = -1) throw (boost::filesystem3::filesystem_error);
+	static string dirName(const string & path);
+	static string getContents(const string & path) throw (CException);
+	static void putContents(const string & path, const string & content) throw (CException);
 
 protected:
 	static TFileList findRecursive(

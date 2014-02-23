@@ -16,7 +16,7 @@ public:
 	TestWebRequestPool(const string &configPath, int argc, char * const argv[]);
 
 protected:
-	virtual CWebApplication * createAppInstance();
+	virtual CWebApplication * createAppInstance() const;
 };
 
 #endif /* TESTWEBAPPPOOL_H_ */

@@ -6,8 +6,8 @@
  */
 
 #include "web/CWebRequestPool.h"
+#include "base/CAsyncTask.h"
 #include "fcgi_stdio.h"
-#include <boost/thread.hpp>
 
 CWebRequestPool::CWebRequestPool(const string &configPath, int argc, char * const argv[])
 : configPath(configPath),
@@ -86,11 +86,17 @@ void CWebRequestPool::startInstances()
 		.child("server")
 		.child("instance")
 		.child("count").attribute("value").as_int();
+	cout << "Starting the application with " << instancesCount << " instances: " << endl;
 	for (int i = 0; i < instancesCount; ++i) {
 		CWebApplication * instance = createAppInstance();
 		instance->setWebRequestPool(this);
-		boost::thread threadObj(boost::bind(&CWebRequestPool::_runInstance, this, boost::ref(*instance)));
+		CAsyncTask * task = new CAsyncTask(instance);
+		task->init();
+		task->run();
+		cout << "The application instance " << (i + 1) << " has runned..." << endl;
+		usleep(100000); //TODO: remove this hardcore. This is temp fix to run miltiple app instances
 	}
+	cout << "The application pool has runned." << endl;
 }
 
 FCGX_Request * CWebRequestPool::popRequest()
@@ -106,13 +112,7 @@ FCGX_Request * CWebRequestPool::popRequest()
 	return incoming;
 }
 
-const xml_document & CWebRequestPool::getConfigDocument()
+const xml_document & CWebRequestPool::getConfigDocument() const
 {
 	return *_xmlConfig;
-}
-
-void CWebRequestPool::_runInstance(CWebApplication & instance)
-{
-	instance.init();
-	instance.run();
 }

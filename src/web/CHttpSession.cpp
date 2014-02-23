@@ -8,8 +8,8 @@
 #include "web/CHttpSession.h"
 #include "web/CWebApplication.h"
 #include "base/Jvibetto.h"
-#include "base/CStringUtils.h"
-#include <boost/thread.hpp>
+#include "base/CAsyncTask.h"
+#include "utils/CFile.h"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -19,24 +19,24 @@
 const string CHttpSession::SESSION_ID_KEY = "sessid";
 const long int CHttpSession::DEFAULT_GC_SESSIONS_TIMEOUT = 1920;
 bool CHttpSession::_isGCRunned = false;
+boost::mutex CHttpSession::_gcMutexLocker;
 
 CHttpSession::CHttpSession()
 : CApplicationComponent("session", Jvibetto::app()),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false)
 {
-
 }
 
-CHttpSession::CHttpSession(CModule * module)
-: CApplicationComponent("session", module),
+CHttpSession::CHttpSession(CWebApplication * app)
+: CApplicationComponent("session", app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false)
 {
 }
 
-CHttpSession::CHttpSession(const string &id, CModule * module)
-: CApplicationComponent(id, module),
+CHttpSession::CHttpSession(const string &id, CWebApplication * app)
+: CApplicationComponent(id, app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false)
 {
@@ -124,13 +124,7 @@ void CHttpSession::reset()
 
 bool CHttpSession::open() throw (CException)
 {
-	if (!_isGCRunned) {
-		boost::thread gcThread(boost::bind(
-			&CHttpSession::_runGarbageCollector, this,
-			boost::ref(gcTimeout)
-		));
-		_isGCRunned = true;
-	}
+	ensureGCRunned();
 	if (_sessionId.empty()) {
 		_sessionId = resolveSessionId();
 	}
@@ -185,6 +179,26 @@ bool CHttpSession::unserializeData(const string & src)
 	return true;
 }
 
+void CHttpSession::ensureGCRunned() throw (CException)
+{
+	_gcMutexLocker.lock();
+	if (!_isGCRunned) {
+		IWebRequestPool * pool = dynamic_cast<CWebApplication*>(getModule())
+			->getWebRequestPool();
+		if (pool) {
+			CWebApplication * instance = pool->createAppInstance();
+			CHttpSessionGCRunner * gcRunner = new CHttpSessionGCRunner(instance, gcTimeout);
+			CAsyncTask * gcTask = new CAsyncTask(gcRunner);
+			gcTask->init();
+			gcTask->run();
+			_isGCRunned = true;
+		} else {
+			throw CException("You can't enable http sessions without running CWebRequestPool.");
+		}
+	}
+	_gcMutexLocker.unlock();
+}
+
 boost::filesystem::path CHttpSession::resolveSessionFilePath() const
 {
 	return boost::filesystem::path(
@@ -195,7 +209,7 @@ boost::filesystem::path CHttpSession::resolveSessionFilePath() const
 _string CHttpSession::read(const string & sessionId) const
 {
 	try {
-		return utf8_to_(CStringUtils::fileGetContents(
+		return utf8_to_(CFile::getContents(
 			resolveSessionFilePath().string()
 		));
 	} catch (CException & e) {
@@ -206,7 +220,7 @@ _string CHttpSession::read(const string & sessionId) const
 bool CHttpSession::write(const string & sessionId, const _string & data) const
 {
 	try {
-		CStringUtils::filePutContents(
+		CFile::putContents(
 			resolveSessionFilePath().string(),
 			_to_utf8(data)
 		);
@@ -224,14 +238,37 @@ void CHttpSession::destroy(const string & sessionId) const throw (CException)
 void CHttpSession::gcSessions() const throw (CException)
 {
 #ifdef JV_DEBUG
-	//Jvibetto::trace("CHttpSession::gcSessions()");
+	Jvibetto::trace("CHttpSession::gcSessions()");
 #endif
 }
 
-void CHttpSession::_runGarbageCollector(long int & interval)
+
+CHttpSessionGCRunner::CHttpSessionGCRunner(CWebApplication * app, long int timeout)
+: _instance(app),
+  _timeout(timeout)
+{
+}
+
+CHttpSessionGCRunner::~CHttpSessionGCRunner()
+{
+	if (_instance != 0) {
+		delete _instance;
+	}
+}
+
+void CHttpSessionGCRunner::init() throw (CException)
+{
+	if (_instance == 0) {
+		throw CException("Bad pointer to an instance of web application was passed.");
+	}
+	_instance->init();
+}
+
+void CHttpSessionGCRunner::run() throw (CException)
 {
 	while (true) {
-		sleep(interval);
-		gcSessions();
+		sleep(_timeout);
+		CHttpSession * session = dynamic_cast<CHttpSession*>(_instance->getComponent("session"));
+		session->gcSessions();
 	}
 }

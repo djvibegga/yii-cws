@@ -7,9 +7,9 @@
 
 #include "web/CTemplateView.h"
 #include "base/cpptempl.h"
-#include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
+#include "utils/CFile.h"
 
 TDynamicTemplateCacheMap CTemplateView::_dynamicTemplateCache;
 TStaticTemplateCacheMap CTemplateView::_staticTemplateCache;
@@ -53,7 +53,9 @@ void CTemplateView::run() throw (CException)
 	wstring text;
 	TStaticTemplateCacheMap::const_iterator found = _staticTemplateCache.find(_viewFile);
 	if (found == _staticTemplateCache.end()) {
-		_staticTemplateCache[_viewFile] = text = cpptempl::utf8_to_wide(CStringUtils::fileGetContents(_viewFile));
+		_staticTemplateCache[_viewFile] = text = cpptempl::utf8_to_wide(
+			CFile::getContents(_viewFile)
+		);
 	} else {
 		text = found->second;
 	}

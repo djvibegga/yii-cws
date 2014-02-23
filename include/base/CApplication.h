@@ -31,7 +31,7 @@ typedef map<long, CApplication*> TAppInstanceMap;
 
 class CEvent;
 
-class CApplication: public CModule
+class CApplication: public CModule, public IRunable
 {
 private:
 	static bool _failHandlerCalled;

@@ -6,8 +6,10 @@
  */
 
 #include "utils/CFile.h"
+#include <sys/stat.h>
 #include <boost/regex.hpp>
-#include "sys/stat.h"
+#include <fstream>
+#include <stdio.h>
 
 TFileList CFile::find(
 	const boost::filesystem::path & where,
@@ -155,4 +157,39 @@ void CFile::copyDirectoryRecursive(
 		}
 		++iter;
 	}
+}
+
+string CFile::dirName(const string & path)
+{
+    std::string::size_type pos = path.find_last_of("/");
+	if (pos == ::string::npos) {
+		return "";
+	}
+	return path.substr(0, pos);
+}
+
+string CFile::getContents(const string & path) throw (CException)
+{
+    std::ifstream in(path.c_str());
+    if (!in.is_open()) {
+    	throw CException("File \"" + path + "\" has not found.", 0, __FILE__, __LINE__);
+    }
+    in.seekg(0, std::ios::end);
+    size_t size = in.tellg();
+    std::string buffer(size, ' ');
+    in.seekg(0);
+    in.read(&buffer[0], size);
+    return buffer;
+}
+
+void CFile::putContents(const string & path, const string & content) throw (CException)
+{
+	_IO_FILE * file = fopen(path.c_str(), "w");
+	if (!file) {
+		throw CException("Can\'t open file for writing: '" + path + "'.");
+	}
+	flockfile(file);
+	fprintf(file, "%s", content.c_str());
+	funlockfile(file);
+	fclose(file);
 }

@@ -34,9 +34,6 @@ public:
 	static vector<boost::smatch> regexMatchAll(const string & needle, const boost::regex matcher);
 	static string urlEncode(const string & src);
 	static string urlDecode(const string & src);
-	static string dirName(const string & path);
-	static string fileGetContents(const string & path) throw (CException);
-	static void filePutContents(const string & path, const string & content) throw (CException);
 
 	static bool lengthComparator(const string & a, const string & b);
 };
