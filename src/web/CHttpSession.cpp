@@ -10,6 +10,9 @@
 #include "base/Jvibetto.h"
 #include "base/CStringUtils.h"
 #include <boost/thread.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -96,7 +99,11 @@ string CHttpSession::resolveSessionId() const
 
 string CHttpSession::generateUniqueSessionId() const
 {
-	return "test";
+	boost::uuids::basic_random_generator<boost::mt19937> gen;
+	boost::uuids::uuid id = gen();
+	stringstream ss;
+	ss << id;
+	return ss.str();
 }
 
 TSessionDataMap & CHttpSession::getData()

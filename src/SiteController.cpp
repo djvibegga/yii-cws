@@ -34,6 +34,7 @@ void SiteController::init()
     CController::init();
 	registerAction("index", ACTION(&SiteController::actionIndex));
 	registerAction("am", ACTION(&SiteController::actionAssetManager));
+	registerAction("session", ACTION(&SiteController::actionSession));
 }
 
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
@@ -88,6 +89,12 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	cs->registerScript("test", _("alert('yes');"), CClientScript::POS_READY);
 
 	cpptempl::data_map viewData;
+	render("am", viewData);
+}
+
+void SiteController::actionSession(CHttpRequest * const request, CHttpResponse * response)
+{
+	cpptempl::data_map viewData;
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	TSessionDataMap & sessionData = session->getData();
 	if (sessionData.find("key") == sessionData.end()) {
@@ -98,5 +105,5 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	}
 
 	viewData["sessionId"] = session->getSessionId();
-	render("am", viewData);
+	render("session", viewData);
 }

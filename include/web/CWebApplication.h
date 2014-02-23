@@ -8,7 +8,6 @@
 #ifndef CWEBAPPLICATION_H_
 #define CWEBAPPLICATION_H_
 
-#include "fcgi_stdio.h"
 #include "interfaces.h"
 #include "base/CException.h"
 #include "base/CApplication.h"

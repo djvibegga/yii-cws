@@ -6,6 +6,7 @@
  */
 
 #include "web/CWebApplication.h"
+#include "fcgi_stdio.h"
 #include "web/CController.h"
 #include "base/CHttpException.h"
 #include "base/CStringUtils.h"

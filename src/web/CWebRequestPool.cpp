@@ -6,6 +6,7 @@
  */
 
 #include "web/CWebRequestPool.h"
+#include "fcgi_stdio.h"
 #include <boost/thread.hpp>
 
 CWebRequestPool::CWebRequestPool(const string &configPath, int argc, char * const argv[])
