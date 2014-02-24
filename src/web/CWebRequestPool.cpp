@@ -45,9 +45,8 @@ void CWebRequestPool::openSocket()
 	const xml_node &configRoot = _xmlConfig->root();
 	port.append(configRoot.child("server").attribute("port").value());
 	cout << "Server is trying to start on port: " << port << endl;
-	int listenQueueBacklog = configRoot.child("server")
-		.child("requestConcurrency")
-		.attribute("value").as_int();
+	int listenQueueBacklog = 0;
+	PARSE_XML_CONF_INT_PROPERTY(configRoot.child("server"), listenQueueBacklog, "requestConcurrency");
 
 	if (FCGX_Init()) {
 		throw CException("Can\'t initialize FCGX.");
@@ -82,10 +81,11 @@ void CWebRequestPool::startInstances()
 {
 	unlink("server.pid");
 	const xml_node &configRoot = _xmlConfig->root();
-	int instancesCount = configRoot
-		.child("server")
-		.child("instance")
-		.child("count").attribute("value").as_int();
+	int instancesCount = 0;
+	PARSE_XML_CONF_UINT_PROPERTY(
+		configRoot.child("server").child("instance"),
+		instancesCount, "count"
+	);
 	cout << "Starting the application with " << instancesCount << " instances: " << endl;
 	for (int i = 0; i < instancesCount; ++i) {
 		CWebApplication * instance = createAppInstance();

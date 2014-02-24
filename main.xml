@@ -15,7 +15,7 @@
         </urlManager>
         <session>
             <autoOpen value="true" />
-            <gcTimeout value="60" />
+            <gcTimeout value="6" />
         </session>
         <clientScript>
             <packages>

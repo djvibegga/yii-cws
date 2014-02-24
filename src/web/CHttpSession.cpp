@@ -10,35 +10,40 @@
 #include "base/Jvibetto.h"
 #include "base/CAsyncTask.h"
 #include "utils/CFile.h"
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/random_generator.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
 const string CHttpSession::SESSION_ID_KEY = "sessid";
 const long int CHttpSession::DEFAULT_GC_SESSIONS_TIMEOUT = 1920;
+const long int CHttpSession::DEFAULT_SESSION_LIFE_TIME = 1800;
+const string CHttpSession::DEFAULT_SESSION_STATE_FILE_EXTENSION = ".state";
 bool CHttpSession::_isGCRunned = false;
+boost::uuids::basic_random_generator<boost::mt19937> CHttpSession::_gen;
 boost::mutex CHttpSession::_gcMutexLocker;
+boost::mutex CHttpSession::_idGeneratorLocker;
 
 CHttpSession::CHttpSession()
 : CApplicationComponent("session", Jvibetto::app()),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
-  autoOpen(false)
+  autoOpen(false),
+  lifeTime(DEFAULT_SESSION_LIFE_TIME)
 {
 }
 
 CHttpSession::CHttpSession(CWebApplication * app)
 : CApplicationComponent("session", app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
-  autoOpen(false)
+  autoOpen(false),
+  lifeTime(DEFAULT_SESSION_LIFE_TIME)
 {
 }
 
 CHttpSession::CHttpSession(const string &id, CWebApplication * app)
 : CApplicationComponent(id, app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
-  autoOpen(false)
+  autoOpen(false),
+  lifeTime(DEFAULT_SESSION_LIFE_TIME)
 {
 }
 
@@ -47,7 +52,8 @@ CHttpSession::CHttpSession(const CHttpSession & other)
   _sessionId(other._sessionId),
   _sessionData(other._sessionData),
   gcTimeout(other.gcTimeout),
-  autoOpen(other.autoOpen)
+  autoOpen(other.autoOpen),
+  lifeTime(other.lifeTime)
 {
 }
 
@@ -67,18 +73,9 @@ void CHttpSession::init()
 
 void CHttpSession::applyConfig(const xml_node & config)
 {
-	if (!config.child("gcTimeout").empty()) {
-		gcTimeout = config
-			.child("gcTimeout")
-			.attribute("value")
-			.as_int();
-	}
-	if (!config.child("autoOpen").empty()) {
-		autoOpen = config
-			.child("autoOpen")
-			.attribute("value")
-			.as_bool();
-	}
+	PARSE_XML_CONF_INT_PROPERTY(config, gcTimeout, "gcTimeout");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, autoOpen, "autoOpen");
+	PARSE_XML_CONF_INT_PROPERTY(config, lifeTime, "lifeTime");
 }
 
 void CHttpSession::setSessionId(const string & sessionId)
@@ -100,9 +97,9 @@ string CHttpSession::resolveSessionId() const
 
 string CHttpSession::generateUniqueSessionId() const
 {
-	//TODO: optimize unique ID generator. Now it is very slow...
-	boost::uuids::basic_random_generator<boost::mt19937> gen;
-	boost::uuids::uuid id = gen();
+	_idGeneratorLocker.lock();
+	boost::uuids::uuid id = _gen();
+	_idGeneratorLocker.unlock();
 	stringstream ss;
 	ss << id;
 	return ss.str();
@@ -200,10 +197,10 @@ void CHttpSession::ensureGCRunned() throw (CException)
 	_gcMutexLocker.unlock();
 }
 
-boost::filesystem::path CHttpSession::resolveSessionFilePath() const
+boost::filesystem::path CHttpSession::resolveSessionFilePath(const string & sessionId) const
 {
 	return boost::filesystem::path(
-		sessionsPath.string() + "/" + _sessionId + ".state"
+		sessionsPath.string() + "/" + sessionId + ".state"
 	);
 }
 
@@ -211,7 +208,7 @@ _string CHttpSession::read(const string & sessionId) const
 {
 	try {
 		return utf8_to_(CFile::getContents(
-			resolveSessionFilePath().string()
+			resolveSessionFilePath(_sessionId).string()
 		));
 	} catch (CException & e) {
 		return _("");
@@ -222,7 +219,7 @@ bool CHttpSession::write(const string & sessionId, const _string & data) const
 {
 	try {
 		CFile::putContents(
-			resolveSessionFilePath().string(),
+			resolveSessionFilePath(_sessionId).string(),
 			_to_utf8(data)
 		);
 	} catch (CException & e) {
@@ -233,16 +230,23 @@ bool CHttpSession::write(const string & sessionId, const _string & data) const
 
 void CHttpSession::destroy(const string & sessionId) const throw (CException)
 {
-
+	boost::filesystem::remove(resolveSessionFilePath(_sessionId).string());
 }
 
 void CHttpSession::gcSessions() const throw (CException)
 {
-#ifdef JV_DEBUG
-	Jvibetto::trace("CHttpSession::gcSessions()");
-#endif
+	TExtensionList extensions;
+	extensions.push_back(DEFAULT_SESSION_STATE_FILE_EXTENSION);
+	TFileList sessions = CFile::find(sessionsPath, extensions, TExcludeList(), 1, true);
+	time_t now = time(0);
+	boost::filesystem::path sessionFile;
+	for (TFileList::const_iterator iter = sessions.begin(); iter != sessions.end(); ++iter) {
+		sessionFile = *iter;
+		if (now - boost::filesystem::last_write_time(sessionFile) > lifeTime) {
+			boost::filesystem::remove(sessionFile);
+		}
+	}
 }
-
 
 CHttpSessionGCRunner::CHttpSessionGCRunner(CWebApplication * app, long int timeout)
 : _instance(app),
@@ -271,6 +275,9 @@ void CHttpSessionGCRunner::run() throw (CException)
 	while (true) {
 		sleep(_timeout);
 		CHttpSession * session = dynamic_cast<CHttpSession*>(_instance->getComponent("session"));
+#ifdef JV_DEBUG
+		Jvibetto::trace("CHttpSession::gcSessions()");
+#endif
 		session->gcSessions();
 	}
 }

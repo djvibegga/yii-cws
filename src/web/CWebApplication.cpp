@@ -64,11 +64,10 @@ void CWebApplication::applyConfig(const xml_node & config)
 {
 	CApplication::applyConfig(config);
 
-	idleTimeout = getConfigRoot()
-		.child("server")
-		.child("instance")
-		.child("idleTimeout")
-		.attribute("value").as_uint();
+	PARSE_XML_CONF_UINT_PROPERTY(
+		getConfigRoot().child("server").child("instance"),
+		idleTimeout, "idleTimeout"
+	);
 	_layoutPath = resolveLayoutPath();
 }
 

@@ -14,6 +14,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/random_generator.hpp>
 
 typedef map<string, string> TSessionDataMap;
 
@@ -24,14 +26,20 @@ class CHttpSession: public CApplicationComponent
 private:
 	static const string SESSION_ID_KEY;
 	static const long int DEFAULT_GC_SESSIONS_TIMEOUT;
+	static const long int DEFAULT_SESSION_LIFE_TIME;
+	static const string DEFAULT_SESSION_STATE_FILE_EXTENSION;
 	string _sessionId;
 	TSessionDataMap _sessionData;
 	static bool _isGCRunned;
+	static boost::uuids::basic_random_generator<boost::mt19937> _gen;
 	static boost::mutex _gcMutexLocker;
+	static boost::mutex _idGeneratorLocker;
+
 
 public:
 	long int gcTimeout;
 	bool autoOpen;
+	long int lifeTime;
 
 	CHttpSession();
 	CHttpSession(CWebApplication * app);
@@ -54,7 +62,7 @@ protected:
 	boost::filesystem::path sessionsPath;
 
 	void ensureGCRunned() throw (CException);
-	virtual boost::filesystem::path resolveSessionFilePath() const;
+	virtual boost::filesystem::path resolveSessionFilePath(const string & sessionId) const;
 	virtual void applyConfig(const xml_node & config);
 	virtual string resolveSessionId() const;
 	virtual string generateUniqueSessionId() const;

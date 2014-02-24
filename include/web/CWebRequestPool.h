@@ -9,7 +9,6 @@
 #define CWEBREQUESTLICATIONPOOL_H_
 
 #include "defines.h"
-#include "fcgi_stdio.h"
 #include "interfaces.h"
 #include "CWebApplication.h"
 #include <boost/thread/mutex.hpp>

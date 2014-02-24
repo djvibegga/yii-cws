@@ -60,6 +60,54 @@ public:
 
 using namespace pugi;
 
+#define PARSE_XML_CONF_INT_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_int();\
+}
+
+#define PARSE_XML_CONF_UINT_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_uint();\
+}
+
+#define PARSE_XML_CONF_STRING_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_string();\
+}
+
+#define PARSE_XML_CONF_BOOL_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_bool();\
+}
+
+#define PARSE_XML_CONF_FLOAT_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_float();\
+}
+
+#define PARSE_XML_CONF_DOUBLE_PROPERTY(xmlNode, attributeName, childName) \
+if (!xmlNode.child(childName).empty()) {\
+	attributeName = xmlNode\
+		.child(childName)\
+		.attribute("value")\
+		.as_double();\
+}
+
 class IConfigureable
 {
 public:
