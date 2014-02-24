@@ -9,9 +9,7 @@
 #include "base/Jvibetto.h"
 #include <sstream>
 
-TProfileLogList CProfiler::items;
-
-string CProfiler::formatItem(const TProfileLogItem & item)
+string CProfiler::_formatItem(const TProfileLogItem & item)
 {
 	unsigned long microsecBegin = ((unsigned long long)item.timeBegin.tv_sec * 1000000) + item.timeBegin.tv_usec;
 	unsigned long microsecEnd = ((unsigned long long)item.timeEnd.tv_sec * 1000000) + item.timeEnd.tv_usec;
@@ -22,7 +20,13 @@ string CProfiler::formatItem(const TProfileLogItem & item)
 
 void CProfiler::logItems()
 {
-	for (TProfileLogList::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
-		Jvibetto::log(formatItem(*iter), CLogger::LEVEL_PROFILE);
+	for (TProfileLogList::const_iterator iter = _items.begin(); iter != _items.end(); ++iter) {
+		Jvibetto::log(_formatItem(*iter), CLogger::LEVEL_PROFILE);
 	}
+	_items.clear();
+}
+
+void CProfiler::add(const TProfileLogItem & item)
+{
+	_items.push_back(item);
 }

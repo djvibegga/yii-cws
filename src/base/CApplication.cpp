@@ -171,6 +171,11 @@ CLogger & CApplication::getLogger()
 	return _logger;
 }
 
+CProfiler & CApplication::getProfiler()
+{
+	return _profiler;
+}
+
 boost::filesystem::path CApplication::getRuntimePath() const
 {
 	return _runtimePath;
@@ -247,7 +252,7 @@ TOutputStack & CApplication::getOutputStack()
 
 void CApplication::logProfileItems(CEvent & event)
 {
-	CProfiler::logItems();
+	_profiler.logItems();
 }
 
 void CApplication::_programFailCallback(int signum)

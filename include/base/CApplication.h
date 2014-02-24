@@ -10,6 +10,7 @@
 
 #include "base/CModule.h"
 #include "base/CException.h"
+#include "base/CProfiler.h"
 #include "logging/CLogger.h"
 #include "logging/CLogRouter.h"
 #include <string>
@@ -40,6 +41,7 @@ private:
 	xml_document * _xmlConfig;
 	TArgumentsList _arguments;
 	CLogger _logger;
+	CProfiler _profiler;
 	static boost::mutex _instanceLocker;
 	static TAppInstanceMap _instances;
 	boost::filesystem::path _runtimePath;
@@ -61,6 +63,7 @@ public:
 	xml_node getConfigByNamePath(const TNamesPath & path) const;
 	TArgumentsList getArguments() const;
 	CLogger & getLogger();
+	CProfiler & getProfiler();
 	IViewRenderer * getViewRenderer() const;
 	void setRuntimePath(const string & path);
 	void setRuntimePath(const boost::filesystem::path & path);

@@ -48,10 +48,10 @@ CUrlManager * MyApplication::createUrlManager()
 CLogRouter * MyApplication::createLogRouter()
 {
 	CLogRouter * log = CWebApplication::createLogRouter();
-	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
-	fileRoute->setLevels("info,error,warning,trace,profile");
-	fileRoute->init();
-	log->addRoute(fileRoute);
+//	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
+//	fileRoute->setLevels("info,error,warning,trace,profile");
+//	fileRoute->init();
+//	log->addRoute(fileRoute);
 	//getLogger().autoFlush = 1;
 	//getLogger().autoDump = true;
 	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));

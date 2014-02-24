@@ -8,12 +8,8 @@
 #ifndef CPROFILER_H_
 #define CPROFILER_H_
 
-#include <vector>
+#include "base/CComponent.h"
 #include <sys/time.h>
-#include <string>
-#include "config.h"
-
-using namespace std;
 
 struct TProfileLogItem
 {
@@ -24,12 +20,15 @@ struct TProfileLogItem
 
 typedef vector<TProfileLogItem> TProfileLogList;
 
-class CProfiler
+class CProfiler: public CComponent
 {
+private:
+	TProfileLogList _items;
+	static string _formatItem(const TProfileLogItem & item);
+
 public:
-	static TProfileLogList items;
-	static string formatItem(const TProfileLogItem & item);
-	static void logItems();
+	void add(const TProfileLogItem & item);
+	void logItems();
 };
 
 #ifdef JV_DEBUG
@@ -40,7 +39,7 @@ public:
 
 #define PROFILE_END() \
 	gettimeofday(&item.timeEnd, 0);\
-	CProfiler::items.push_back(item);
+	CApplication::getInstance()->getProfiler().add(item);
 
 #else
 

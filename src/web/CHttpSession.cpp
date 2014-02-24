@@ -62,6 +62,7 @@ void CHttpSession::init()
 			boost::filesystem::create_directories(sessionsPath);
 		}
 	}
+	ensureGCRunned();
 }
 
 void CHttpSession::applyConfig(const xml_node & config)
@@ -99,6 +100,7 @@ string CHttpSession::resolveSessionId() const
 
 string CHttpSession::generateUniqueSessionId() const
 {
+	//TODO: optimize unique ID generator. Now it is very slow...
 	boost::uuids::basic_random_generator<boost::mt19937> gen;
 	boost::uuids::uuid id = gen();
 	stringstream ss;
@@ -124,7 +126,6 @@ void CHttpSession::reset()
 
 bool CHttpSession::open() throw (CException)
 {
-	ensureGCRunned();
 	if (_sessionId.empty()) {
 		_sessionId = resolveSessionId();
 	}
@@ -266,6 +267,7 @@ void CHttpSessionGCRunner::init() throw (CException)
 
 void CHttpSessionGCRunner::run() throw (CException)
 {
+	cout << "Session garbage collector has runned with timeout: " << _timeout << "." << endl;
 	while (true) {
 		sleep(_timeout);
 		CHttpSession * session = dynamic_cast<CHttpSession*>(_instance->getComponent("session"));
