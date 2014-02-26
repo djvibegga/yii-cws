@@ -22,7 +22,8 @@ using namespace std;
 CHttpRequest::CHttpRequest(CWebApplication * app)
 : CApplicationComponent("request", app),
   _port(0),
-  _securePort(0)
+  _securePort(0),
+  _cookies(*this)
 {
 
 }
@@ -259,6 +260,11 @@ int CHttpRequest::getPort()
 		}
 	}
 	return _port;
+}
+
+CCookieCollection & CHttpRequest::getCookies()
+{
+	return _cookies;
 }
 
 string CHttpRequest::getHostInfo(const string & schema)

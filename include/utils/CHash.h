@@ -16,6 +16,7 @@ class CHash
 {
 public:
 	static unsigned int crc32(const string & input);
+	static string md5(const string & input);
 };
 
 #endif /* CHASH_H_ */

@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const unsigned int CStringUtils::_TIME_STR_BUFFER_LENGTH = 80;
+
 string CStringUtils::ltrim(const string & needle, const string & what)
 {
 	string ret = needle;
@@ -129,4 +131,18 @@ string CStringUtils::urlDecode(const string & src)
 	string ret(decoded);
 	delete [] decoded;
 	return ret;
+}
+
+string CStringUtils::fromTimestamp(const string & format, time_t timestamp, bool isGmt)
+{
+	struct tm * timeinfo;
+	if (isGmt) {
+		timeinfo = gmtime(&timestamp);
+	} else {
+		timeinfo = localtime(&timestamp);
+	}
+	char buffer[_TIME_STR_BUFFER_LENGTH];
+	string ret;
+	strftime(buffer, _TIME_STR_BUFFER_LENGTH, format.c_str(), timeinfo);
+	return string(buffer);
 }

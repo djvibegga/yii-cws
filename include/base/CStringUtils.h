@@ -21,6 +21,9 @@ typedef map<string, string> TReplacementMap;
 
 class CStringUtils
 {
+private:
+	static const unsigned int _TIME_STR_BUFFER_LENGTH;
+
 public:
 	static string ltrim(const string & needle, const string & what);
 	static string rtrim(const string & needle, const string & what);
@@ -34,6 +37,7 @@ public:
 	static vector<boost::smatch> regexMatchAll(const string & needle, const boost::regex matcher);
 	static string urlEncode(const string & src);
 	static string urlDecode(const string & src);
+	static string fromTimestamp(const string & format, time_t timestamp, bool isGmt = false);
 
 	static bool lengthComparator(const string & a, const string & b);
 };

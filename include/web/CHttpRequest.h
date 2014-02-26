@@ -10,6 +10,7 @@
 
 #include "base/CApplicationComponent.h"
 #include "base/CHttpException.h"
+#include "web/CHttpCookie.h"
 #include <map>
 
 using namespace std;
@@ -29,6 +30,7 @@ private:
 	string _hostInfo;
 	int _port;
 	int _securePort;
+	CCookieCollection _cookies;
 
 public:
 	CHttpRequest(CWebApplication * app);
@@ -56,6 +58,7 @@ public:
 	bool getIsSecureConnection() const;
 	int getSecurePort();
 	int getPort();
+	CCookieCollection & getCookies();
 
 protected:
 	TRequestParams parseQueryString(string query) throw (CHttpException);

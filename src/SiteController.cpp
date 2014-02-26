@@ -35,6 +35,7 @@ void SiteController::init()
 	registerAction("index", ACTION(&SiteController::actionIndex));
 	registerAction("am", ACTION(&SiteController::actionAssetManager));
 	registerAction("session", ACTION(&SiteController::actionSession));
+	registerAction("cookies", ACTION(&SiteController::actionCookies));
 }
 
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
@@ -106,4 +107,14 @@ void SiteController::actionSession(CHttpRequest * const request, CHttpResponse *
 
 	viewData["sessionId"] = session->getSessionId();
 	render("session", viewData);
+}
+
+void SiteController::actionCookies(CHttpRequest * const request, CHttpResponse * response)
+{
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CCookieCollection & cookies = request->getCookies();
+	cookies.add(CHttpCookie("lang", "ru", "", "/"));
+	cookies.add(CHttpCookie("sessid", session->getSessionId(), "", "/", time(0) + 100));
+	cookies.remove("lang");
+	*response << _("I am site/cookie action");
 }
