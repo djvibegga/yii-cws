@@ -113,8 +113,15 @@ void SiteController::actionCookies(CHttpRequest * const request, CHttpResponse *
 {
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	CCookieCollection & cookies = request->getCookies();
+
+	cpptempl::data_map viewData;
+	if (cookies.find("sessid") != cookies.end()) {
+		viewData["sessid"] = cookies["sessid"].value;
+	}
+
 	cookies.add(CHttpCookie("lang", "ru", "", "/"));
 	cookies.add(CHttpCookie("sessid", session->getSessionId(), "", "/", time(0) + 100));
 	cookies.remove("lang");
-	*response << _("I am site/cookie action");
+
+	render("cookies", viewData);
 }

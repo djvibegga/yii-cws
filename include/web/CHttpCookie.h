@@ -41,6 +41,7 @@ class CCookieCollection: public TCookieMap
 {
 private:
 	const CHttpRequest & _request;
+	static const char * _cookieVar;
 
 public:
 	CCookieCollection(const CHttpRequest & request);

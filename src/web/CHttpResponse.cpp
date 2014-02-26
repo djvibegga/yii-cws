@@ -91,6 +91,20 @@ void CHttpResponse::removeCookie(const CHttpCookie & cookie) throw (CException)
 void CHttpResponse::_putCookieHeaders()
 {
 	string headers;
+	for (TCookieMap::const_iterator iter = _removedCookies.begin(); iter != _removedCookies.end(); ++iter) {
+		headers.append("Set-Cookie:" + iter->first + "=deleted;path=" + iter->second.path);
+		if (!iter->second.domain.empty()) {
+			headers.append(";domain=" + iter->second.domain);
+		}
+		if (iter->second.secure) {
+			headers.append(";secure");
+		}
+		if (iter->second.httpOnly) {
+			headers.append(";httpOnly");
+		}
+		headers.append(";expires=Thu, 01 Jan 1970 00:00:00 GMT");
+		headers.append("\r\n");
+	}
 	for (TCookieMap::const_iterator iter = _newCookies.begin(); iter != _newCookies.end(); ++iter) {
 		headers.append("Set-Cookie:" + iter->first + "=" + iter->second.value + ";path=" + iter->second.path);
 		if (!iter->second.domain.empty()) {
@@ -105,20 +119,6 @@ void CHttpResponse::_putCookieHeaders()
 		if (iter->second.httpOnly) {
 			headers.append(";httpOnly");
 		}
-		headers.append("\r\n");
-	}
-	for (TCookieMap::const_iterator iter = _removedCookies.begin(); iter != _removedCookies.end(); ++iter) {
-		headers.append("Set-Cookie:" + iter->first + "=deleted;path=" + iter->second.path);
-		if (!iter->second.domain.empty()) {
-			headers.append(";domain=" + iter->second.domain);
-		}
-		if (iter->second.secure) {
-			headers.append(";secure");
-		}
-		if (iter->second.httpOnly) {
-			headers.append(";httpOnly");
-		}
-		headers.append(";expires=Thu, 01 Jan 1970 00:00:00 GMT");
 		headers.append("\r\n");
 	}
 	echo(headers);

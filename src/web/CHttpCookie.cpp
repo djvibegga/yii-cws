@@ -8,6 +8,7 @@
 #include "web/CHttpCookie.h"
 #include "web/CHttpRequest.h"
 #include "web/CHttpResponse.h"
+#include "base/CStringUtils.h"
 #include "base/Jvibetto.h"
 
 CHttpCookie::CHttpCookie()
@@ -63,11 +64,27 @@ CHttpCookie & CHttpCookie::operator=(const CHttpCookie & other)
     return *this;
 }
 
+const char * CCookieCollection::_cookieVar = "HTTP_COOKIE";
+
 CCookieCollection::CCookieCollection(const CHttpRequest & request)
 : TCookieMap(),
   _request(request)
 {
-	//TODO: parse cookies from request...
+	if (request.hasEnvVar(_cookieVar)) {
+		string cookiesStr = request.getEnvVar(_cookieVar);
+		vector<string> cookies = CStringUtils::explode(";", cookiesStr);
+		vector<string> cookieItem;
+		string key;
+		string value;
+		for (vector<string>::const_iterator iter = cookies.begin(); iter != cookies.end(); ++iter) {
+			cookieItem = CStringUtils::explode("=", *iter, 2);
+			if (cookieItem.size() == 2) {
+				key = CStringUtils::trim(cookieItem[0]);
+				value = CStringUtils::trim(cookieItem[1]);
+				TCookieMap::operator [](key) = CHttpCookie(key, value);
+			}
+		}
+	}
 }
 
 void CCookieCollection::add(const string & name, const CHttpCookie & cookie)
