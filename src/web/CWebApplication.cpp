@@ -11,6 +11,8 @@
 #include "base/CHttpException.h"
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
+#include "base/Jvibetto.h"
+#include <sqlapi/SQLAPI.h>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -85,6 +87,7 @@ void CWebApplication::renderException(const CException & e) const
 #else
 	string message = e.getMessage();
 #endif
+	Jvibetto::log(message, CLogger::LEVEL_ERROR);
 	response->echo(utf8_to_(message));
 }
 
@@ -118,6 +121,8 @@ void CWebApplication::handleRequest()
 		renderException(e);
 	} catch (const CException & e) {
 		renderException(e);
+	} catch (const SAException & e) {
+		Jvibetto::log(e.ErrText().GetMultiByteChars(), CLogger::LEVEL_ERROR);
 	}
 	PROFILE_END();
 }

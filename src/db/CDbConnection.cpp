@@ -3,6 +3,9 @@
 #include "db/CDbConnection.h"
 #include <boost/regex.hpp>
 #include <base/Jvibetto.h>
+#include <sqlapi/myAPI.h>
+
+//SAConnection CDbConnection::glConnection;
 
 CDbConnection::CDbConnection(CModule * module)
 : CApplicationComponent(module),
@@ -32,6 +35,7 @@ bool CDbConnection::open() throw(CException)
 	boost::smatch match;
 
 	_saConnection = new SAConnection();
+	_saConnection->setClient(SA_MySQL_Client);
 	string driver, host, port, dbname = "";
 	if (!boost::regex_match(connectionString, match, pattern)) {
 		string message = "Invalid connection string passed. ";
@@ -111,4 +115,30 @@ CDbCommandBuilder * CDbConnection::getCommandBuilder() const
 void CDbConnection::setCommandBuilder(CDbCommandBuilder * builder)
 {
 	_commandBuilder = builder;
+}
+
+void CDbConnection::threadInit() throw (CException)
+{
+	mysql_thread_init();
+//	if (glConnection.Client() == SA_MySQL_Client) {
+//		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
+//		if (nativeAPI) {
+//			nativeAPI->mysql_thread_init();
+//			return;
+//		}
+//	}
+//	throw CException("Can\'t notify about thread is created via native API.");
+}
+
+void CDbConnection::threadEnd() throw (CException)
+{
+	mysql_thread_end();
+//	if (glConnection.Client() == SA_MySQL_Client) {
+//		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
+//		if (nativeAPI) {
+//			nativeAPI->mysql_thread_end();
+//			return;
+//		}
+//	}
+//	throw CException("Can\'t notify about thread is terminated via native API.");
 }

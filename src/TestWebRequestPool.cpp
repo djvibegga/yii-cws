@@ -11,7 +11,6 @@
 TestWebRequestPool::TestWebRequestPool(const string &configPath, int argc, char * const argv[])
 : CWebRequestPool(configPath, argc, argv)
 {
-
 }
 
 CWebApplication * TestWebRequestPool::createAppInstance() const

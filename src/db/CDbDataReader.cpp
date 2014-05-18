@@ -6,6 +6,7 @@
  */
 
 #include "db/CDbDataReader.h"
+#include <sqlapi/myAPI.h>
 
 CDbDataReader::CDbDataReader(SACommand * command)
 : _closed(false),

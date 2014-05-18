@@ -214,8 +214,9 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 
 	try {
 		SAConnection * connection = _connection->getConnection();
-		_saCommand = new SACommand(connection);
-		_saCommand->setCommandText(_text.c_str());
+		_saCommand = new SACommand(connection, _text.c_str(), SA_CmdSQLStmt);
+		//_saCommand->setOption("UseStatement") = "TRUE";
+		_saCommand->setOption("HandleResult") = "store";
 		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
 			iter->second.bind(_saCommand);
 		}

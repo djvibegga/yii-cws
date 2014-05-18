@@ -12,6 +12,7 @@
 #include <logging/CConsoleLogRoute.h>
 #include <db/CDbConnection.h>
 #include <base/CEvent.h>
+#include <mysql/mysql.h>
 #include <web/renderers/CBaseViewRenderer.h>
 
 #include "SiteController.h"
@@ -48,13 +49,13 @@ CUrlManager * MyApplication::createUrlManager()
 CLogRouter * MyApplication::createLogRouter()
 {
 	CLogRouter * log = CWebApplication::createLogRouter();
-//	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
-//	fileRoute->setLevels("info,error,warning,trace,profile");
-//	fileRoute->init();
-//	log->addRoute(fileRoute);
-	//getLogger().autoFlush = 1;
-	//getLogger().autoDump = true;
-	//getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+	CFileLogRoute * fileRoute = new CFileLogRoute("application.log");
+	fileRoute->setLevels("info,error,warning,trace,profile");
+	fileRoute->init();
+	log->addRoute(fileRoute);
+	getLogger().autoFlush = 1;
+	getLogger().autoDump = true;
+	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
 	return log;
 }
 

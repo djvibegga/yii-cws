@@ -25,9 +25,11 @@ private:
 	CDbCommandBuilder * _commandBuilder;
 
 public:
+
 	string connectionString;
 	string username;
 	string password;
+	//static SAConnection glConnection;
 
 	CDbConnection(CModule * module);
 	CDbConnection(CModule * module, string dsn, string username, string password);
@@ -41,6 +43,9 @@ public:
 	CDbCommand createCommand(const string & query);
 	void setCommandBuilder(CDbCommandBuilder * builder);
 	CDbCommandBuilder * getCommandBuilder() const;
+
+	static void threadInit() throw (CException);
+	static void threadEnd() throw (CException);
 };
 
 #endif //__C_DB_CONNECTION_H__

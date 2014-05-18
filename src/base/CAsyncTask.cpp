@@ -7,6 +7,7 @@
 
 #include "base/CAsyncTask.h"
 #include <boost/thread.hpp>
+#include <db/CDbConnection.h>
 
 TAsyncTaskMap CAsyncTask::_tasks;
 
@@ -38,6 +39,8 @@ void CAsyncTask::run() throw (CException)
 
 void CAsyncTask::_runInThread(IRunable & runable)
 {
+	CDbConnection::threadInit();
 	runable.init();
 	runable.run();
+	CDbConnection::threadEnd();
 }
