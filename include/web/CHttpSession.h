@@ -24,7 +24,7 @@ class CHttpSession: public CApplicationComponent
 	friend class boost::serialization::access;
 
 private:
-	static const string SESSION_ID_KEY;
+	static const string SESSION_ID_DEFAULT_KEY;
 	static const long int DEFAULT_GC_SESSIONS_TIMEOUT;
 	static const long int DEFAULT_SESSION_LIFE_TIME;
 	static const string DEFAULT_SESSION_STATE_FILE_EXTENSION;
@@ -37,9 +37,15 @@ private:
 
 
 public:
+	static const string LOG_CATEGORY;
+
 	long int gcTimeout;
 	bool autoOpen;
 	long int lifeTime;
+	bool passSessionIdByRequestParam;
+	bool passSessionIdByCookie;
+	string sessionIdRequestParamName;
+	string sessionIdCookieName;
 
 	CHttpSession();
 	CHttpSession(CWebApplication * app);
@@ -68,6 +74,7 @@ protected:
 	virtual string generateUniqueSessionId() const;
 	virtual bool serializeData(string & dest);
 	virtual bool unserializeData(const string & src);
+	virtual void saveSessionIdIntoCookies(const string & sessionId);
 
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version)

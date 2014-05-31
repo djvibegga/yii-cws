@@ -14,7 +14,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-const string CHttpSession::SESSION_ID_KEY = "sessid";
+const string CHttpSession::LOG_CATEGORY = "system.web";
+const string CHttpSession::SESSION_ID_DEFAULT_KEY = "sessid";
 const long int CHttpSession::DEFAULT_GC_SESSIONS_TIMEOUT = 1920;
 const long int CHttpSession::DEFAULT_SESSION_LIFE_TIME = 1800;
 const string CHttpSession::DEFAULT_SESSION_STATE_FILE_EXTENSION = ".state";
@@ -27,7 +28,11 @@ CHttpSession::CHttpSession()
 : CApplicationComponent("session", Jvibetto::app()),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false),
-  lifeTime(DEFAULT_SESSION_LIFE_TIME)
+  lifeTime(DEFAULT_SESSION_LIFE_TIME),
+  passSessionIdByRequestParam(false),
+  passSessionIdByCookie(true),
+  sessionIdRequestParamName(SESSION_ID_DEFAULT_KEY),
+  sessionIdCookieName(SESSION_ID_DEFAULT_KEY)
 {
 }
 
@@ -35,7 +40,11 @@ CHttpSession::CHttpSession(CWebApplication * app)
 : CApplicationComponent("session", app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false),
-  lifeTime(DEFAULT_SESSION_LIFE_TIME)
+  lifeTime(DEFAULT_SESSION_LIFE_TIME),
+  passSessionIdByRequestParam(false),
+  passSessionIdByCookie(true),
+  sessionIdRequestParamName(SESSION_ID_DEFAULT_KEY),
+  sessionIdCookieName(SESSION_ID_DEFAULT_KEY)
 {
 }
 
@@ -43,7 +52,11 @@ CHttpSession::CHttpSession(const string &id, CWebApplication * app)
 : CApplicationComponent(id, app),
   gcTimeout(DEFAULT_GC_SESSIONS_TIMEOUT),
   autoOpen(false),
-  lifeTime(DEFAULT_SESSION_LIFE_TIME)
+  lifeTime(DEFAULT_SESSION_LIFE_TIME),
+  passSessionIdByRequestParam(false),
+  passSessionIdByCookie(true),
+  sessionIdRequestParamName(SESSION_ID_DEFAULT_KEY),
+  sessionIdCookieName(SESSION_ID_DEFAULT_KEY)
 {
 }
 
@@ -53,7 +66,11 @@ CHttpSession::CHttpSession(const CHttpSession & other)
   _sessionData(other._sessionData),
   gcTimeout(other.gcTimeout),
   autoOpen(other.autoOpen),
-  lifeTime(other.lifeTime)
+  lifeTime(other.lifeTime),
+  passSessionIdByRequestParam(false),
+  passSessionIdByCookie(true),
+  sessionIdRequestParamName(SESSION_ID_DEFAULT_KEY),
+  sessionIdCookieName(SESSION_ID_DEFAULT_KEY)
 {
 }
 
@@ -76,6 +93,10 @@ void CHttpSession::applyConfig(const xml_node & config)
 	PARSE_XML_CONF_INT_PROPERTY(config, gcTimeout, "gcTimeout");
 	PARSE_XML_CONF_BOOL_PROPERTY(config, autoOpen, "autoOpen");
 	PARSE_XML_CONF_INT_PROPERTY(config, lifeTime, "lifeTime");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, passSessionIdByRequestParam, "passSessionIdByRequestParam");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, passSessionIdByCookie, "passSessionIdByCookie");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, sessionIdRequestParamName, "sessionIdRequestParamName");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, sessionIdCookieName, "sessionIdCookieName");
 }
 
 void CHttpSession::setSessionId(const string & sessionId)
@@ -90,9 +111,22 @@ string CHttpSession::getSessionId() const
 
 string CHttpSession::resolveSessionId() const
 {
-	return (dynamic_cast<CWebApplication*>(Jvibetto::app()))
-		->getRequest()
-		->getParam(SESSION_ID_KEY);
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	string sessionId = "";
+	if (passSessionIdByRequestParam) {
+		sessionId = app->getRequest()->getParam(sessionIdRequestParamName);
+		if (!sessionId.empty()) {
+			return sessionId;
+		}
+	}
+	if (passSessionIdByCookie) {
+		CCookieCollection & cookies = app->getRequest()->getCookies();
+		TCookieMap::const_iterator found = cookies.find(sessionIdCookieName);
+		if (found != cookies.end()) {
+			return found->second.value;
+		}
+	}
+	return "";
 }
 
 string CHttpSession::generateUniqueSessionId() const
@@ -133,6 +167,9 @@ bool CHttpSession::open() throw (CException)
 		if (!strData.empty()) {
 			return unserializeData(_to_utf8(strData));
 		}
+	}
+	if (passSessionIdByCookie) {
+		saveSessionIdIntoCookies(_sessionId);
 	}
 	return false;
 }
@@ -175,6 +212,19 @@ bool CHttpSession::unserializeData(const string & src)
 	ia >> *this;
 
 	return true;
+}
+
+void CHttpSession::saveSessionIdIntoCookies(const string & sessionId)
+{
+	CHttpCookie cookie(sessionIdCookieName, sessionId);
+	CHttpRequest * request = dynamic_cast<CHttpRequest*>(Jvibetto::app()->getComponent("request"));
+	request->getCookies().add(cookie);
+#ifdef JV_DEBUG
+	stringstream message;
+	message << "Session ID has been saved into cookies. ID: "
+		    << sessionId << ", Cookie name: " << sessionIdCookieName;
+	Jvibetto::trace(message.str(), LOG_CATEGORY);
+#endif
 }
 
 void CHttpSession::ensureGCRunned() throw (CException)

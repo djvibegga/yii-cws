@@ -132,13 +132,13 @@ void CWebApplication::beginRequest()
 {
 	CApplication::beginRequest();
 	createHttpRequest();
+	getOutputStack().push(createHttpResponse());
 	if (enableSessions) {
 		CHttpSession * session = dynamic_cast<CHttpSession*>(getComponent("session"));
 		if (session->autoOpen) {
 			session->open();
 		}
 	}
-	getOutputStack().push(createHttpResponse());
 }
 
 void CWebApplication::processRequest()

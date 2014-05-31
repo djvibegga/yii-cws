@@ -53,9 +53,15 @@ CLogRouter * MyApplication::createLogRouter()
 	fileRoute->setLevels("info,error,warning,trace,profile");
 	fileRoute->init();
 	log->addRoute(fileRoute);
-//	getLogger().autoFlush = 1;
-//	getLogger().autoDump = true;
-//	getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
+#ifdef JV_DEBUG
+	CConsoleLogRoute * consoleRoute = new CConsoleLogRoute();
+	consoleRoute->setLevels("info,error,warning,trace,profile");
+	consoleRoute->init();
+	log->addRoute(consoleRoute);
+	getLogger().autoFlush = 1;
+	getLogger().autoDump = true;
+#endif
+//    getLogger().attachEventHandler("onLog", this, EVENT_HANDLER(&MyApplication::logStdout));
 	return log;
 }
 
@@ -68,9 +74,6 @@ void MyApplication::registerComponents()
 		Jvibetto::log("Can't open database connection.", CLogger::LEVEL_ERROR);
 	}
 	setComponent(connection);
-
-//	TestBehavior * behavior = new TestBehavior();
-//	attachBehavior(behavior);
 
 	CAssetManager * am = new CAssetManager(this);
 	am->init();

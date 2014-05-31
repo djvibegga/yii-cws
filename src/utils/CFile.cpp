@@ -98,7 +98,7 @@ void CFile::copyDirectory(
 	const TExcludeList & exclude,
 	unsigned int newDirMode,
 	unsigned int newFileMode,
-	int level) throw (boost::filesystem3::filesystem_error)
+	int level) throw (boost::filesystem::filesystem_error)
 {
 	if (!boost::filesystem::is_directory(dst)) {
 		boost::filesystem::create_directories(dst);
@@ -115,7 +115,7 @@ void CFile::copyDirectoryRecursive(
 	const TExcludeList & exclude,
 	unsigned int newDirMode,
 	unsigned int newFileMode,
-	int level) throw (boost::filesystem3::filesystem_error)
+	int level) throw (boost::filesystem::filesystem_error)
 {
 	if (!boost::filesystem::is_directory(dst)) {
 		boost::filesystem::create_directories(dst);
@@ -140,7 +140,7 @@ void CFile::copyDirectoryRecursive(
 					if (newFileMode) {
 						chmod(target.c_str(), newFileMode);
 					}
-				} catch (boost::filesystem3::filesystem_error & e) {
+				} catch (boost::filesystem::filesystem_error & e) {
 
 				}
 			} else if (level) {
