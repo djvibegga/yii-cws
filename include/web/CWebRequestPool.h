@@ -32,7 +32,7 @@ public:
 	virtual ~CWebRequestPool();
 	virtual void init() throw (CException);
 	virtual void run() throw (CException);
-	virtual FCGX_Request * popRequest();
+	virtual FCGX_Request * popRequest() throw (boost::lock_error);
 	const xml_document & getConfigDocument() const;
 
 protected:

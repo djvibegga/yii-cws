@@ -99,16 +99,14 @@ void CWebRequestPool::startInstances()
 	cout << "The application pool has runned." << endl;
 }
 
-FCGX_Request * CWebRequestPool::popRequest()
+FCGX_Request * CWebRequestPool::popRequest() throw (boost::lock_error)
 {
-	_queueLocker.lock();
+	boost::lock_guard<boost::mutex> guard(_queueLocker);
 	if (_requests.empty()) {
-		_queueLocker.unlock();
 		return 0;
 	}
 	FCGX_Request * incoming = _requests.front();
 	_requests.pop();
-	_queueLocker.unlock();
 	return incoming;
 }
 

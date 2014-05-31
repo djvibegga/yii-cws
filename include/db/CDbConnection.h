@@ -29,10 +29,11 @@ public:
 	string connectionString;
 	string username;
 	string password;
-	//static SAConnection glConnection;
+	static SAConnection glConnection;
 
 	CDbConnection(CModule * module);
 	CDbConnection(CModule * module, string dsn, string username, string password);
+	virtual ~CDbConnection();
 	bool open() throw(CException);
 	void close();
 	virtual void init();

@@ -12,6 +12,7 @@
 #include <map>
 #include <vector>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 #include "defines.h"
 #include "base/CException.h"
 
@@ -189,7 +190,7 @@ class IWebRequestPool
 public:
 	virtual ~IWebRequestPool() {};
 	virtual CWebApplication * createAppInstance() const = 0;
-	virtual FCGX_Request * popRequest() = 0;
+	virtual FCGX_Request * popRequest() throw (boost::lock_error) = 0;
 };
 
 class IRunable

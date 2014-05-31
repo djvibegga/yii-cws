@@ -18,10 +18,10 @@ public:
 	SiteController(CModule * parent);
 	virtual ~SiteController();
 	void init();
-	void actionIndex(CHttpRequest * const request, CHttpResponse * response);
-	void actionAssetManager(CHttpRequest * const request, CHttpResponse * response);
-	void actionSession(CHttpRequest * const request, CHttpResponse * response);
-	void actionCookies(CHttpRequest * const request, CHttpResponse * response);
+	void actionIndex(CHttpRequest * const request, CHttpResponse * response) throw (CException);
+	void actionAssetManager(CHttpRequest * const request, CHttpResponse * response) throw (CException);
+	void actionSession(CHttpRequest * const request, CHttpResponse * response) throw (CException);
+	void actionCookies(CHttpRequest * const request, CHttpResponse * response) throw (CException);
 };
 
 #endif /* SITECONTROLLER_H_ */

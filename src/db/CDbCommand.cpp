@@ -215,8 +215,9 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 	try {
 		SAConnection * connection = _connection->getConnection();
 		_saCommand = new SACommand(connection, _text.c_str(), SA_CmdSQLStmt);
-		//_saCommand->setOption("UseStatement") = "TRUE";
-		_saCommand->setOption("HandleResult") = "store";
+		if (connection->Client() == SA_MySQL_Client) {
+			_saCommand->setOption("UseStatement") = "TRUE";
+		}
 		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
 			iter->second.bind(_saCommand);
 		}
@@ -228,8 +229,11 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 	} catch (const SAException & e) {
 
 		string message = e.ErrText().GetMultiByteChars();
+		stringstream ss;
+		ss << "CDbCommand::_queryInternal() failed: " << message
+		   << ". Code: " << (int)e.ErrNativeCode();
 		Jvibetto::log(
-			"CDbCommand::_queryInternal() failed: " + message
+			"CDbCommand::_queryInternal() failed: " + ss.str()
 			+ ". The SQL statement executed was: " + _text + "."
 		);
 #ifdef JV_DEBUG

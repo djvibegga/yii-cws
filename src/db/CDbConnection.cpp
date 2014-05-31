@@ -5,7 +5,7 @@
 #include <base/Jvibetto.h>
 #include <sqlapi/myAPI.h>
 
-//SAConnection CDbConnection::glConnection;
+SAConnection CDbConnection::glConnection;
 
 CDbConnection::CDbConnection(CModule * module)
 : CApplicationComponent(module),
@@ -27,6 +27,13 @@ CDbConnection::CDbConnection(CModule * module, string dsn, string username, stri
 	connectionString = dsn;
 	this->username = username;
 	this->password = password;
+}
+
+CDbConnection::~CDbConnection()
+{
+	if (_commandBuilder == 0) {
+		delete _commandBuilder;
+	}
 }
 
 bool CDbConnection::open() throw(CException)
@@ -54,6 +61,11 @@ bool CDbConnection::open() throw(CException)
 		return false;
 	}
 	_isActive = true;
+
+	if (_commandBuilder == 0) {
+		_commandBuilder = new CDbCommandBuilder(this, CDbSchema());
+	}
+
 	return true;
 }
 
@@ -63,14 +75,14 @@ void CDbConnection::close()
 	delete _saConnection;
 	_saConnection = 0;
 	_isActive = false;
+	if (_commandBuilder == 0) {
+		delete _commandBuilder;
+	}
 }
 
 void CDbConnection::init()
 {
 	CApplicationComponent::init();
-	if (_commandBuilder == 0) {
-		_commandBuilder = new CDbCommandBuilder(this, CDbSchema());
-	}
 }
 
 SAConnection * CDbConnection::getConnection() const
@@ -119,26 +131,26 @@ void CDbConnection::setCommandBuilder(CDbCommandBuilder * builder)
 
 void CDbConnection::threadInit() throw (CException)
 {
-	mysql_thread_init();
-//	if (glConnection.Client() == SA_MySQL_Client) {
-//		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
-//		if (nativeAPI) {
-//			nativeAPI->mysql_thread_init();
-//			return;
-//		}
-//	}
-//	throw CException("Can\'t notify about thread is created via native API.");
+	//mysql_thread_init();
+	if (glConnection.Client() == SA_MySQL_Client) {
+		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
+		if (nativeAPI) {
+			nativeAPI->mysql_thread_init();
+			return;
+		}
+	}
+	throw CException("Can\'t notify about thread is created via native API.");
 }
 
 void CDbConnection::threadEnd() throw (CException)
 {
-	mysql_thread_end();
-//	if (glConnection.Client() == SA_MySQL_Client) {
-//		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
-//		if (nativeAPI) {
-//			nativeAPI->mysql_thread_end();
-//			return;
-//		}
-//	}
-//	throw CException("Can\'t notify about thread is terminated via native API.");
+	//mysql_thread_end();
+	if (glConnection.Client() == SA_MySQL_Client) {
+		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
+		if (nativeAPI) {
+			nativeAPI->mysql_thread_end();
+			return;
+		}
+	}
+	throw CException("Can\'t notify about thread is terminated via native API.");
 }

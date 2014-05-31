@@ -16,7 +16,7 @@ public:
 	ProductController(CModule * parent);
 	virtual ~ProductController();
 	void init();
-	void actionTest(CHttpRequest * const request, CHttpResponse * response);
+	void actionTest(CHttpRequest * const request, CHttpResponse * response) throw (CException);
 };
 
 #endif /* PRODUCTCONTROLLER_H_ */

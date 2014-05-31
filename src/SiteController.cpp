@@ -38,7 +38,7 @@ void SiteController::init()
 	registerAction("cookies", ACTION(&SiteController::actionCookies));
 }
 
-void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response)
+void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response) throw (CException)
 {
 	//CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	/*CUrlManager * urlManager = app->getUrlManager();
@@ -46,8 +46,8 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 	route.params = boost::assign::map_list_of("id", "100500") ("name", "maks") ("hui", "pizda");*/
 
 	CDbCriteria criteria;
-	//unsigned long id = 1;
-	//criteria.compare("id", id, ">=");
+//	unsigned long id = 950;
+//	criteria.compare("id", id, ">=");
 
     TActiveRecordList records = Goal::model()->findAll(criteria);
 
@@ -70,7 +70,7 @@ void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * r
 //	render("index", viewData);
 }
 
-void SiteController::actionAssetManager(CHttpRequest * const request, CHttpResponse * response)
+void SiteController::actionAssetManager(CHttpRequest * const request, CHttpResponse * response) throw (CException)
 {
 	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
 	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
@@ -93,7 +93,7 @@ void SiteController::actionAssetManager(CHttpRequest * const request, CHttpRespo
 	render("am", viewData);
 }
 
-void SiteController::actionSession(CHttpRequest * const request, CHttpResponse * response)
+void SiteController::actionSession(CHttpRequest * const request, CHttpResponse * response) throw (CException)
 {
 	cpptempl::data_map viewData;
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
@@ -109,7 +109,7 @@ void SiteController::actionSession(CHttpRequest * const request, CHttpResponse *
 	render("session", viewData);
 }
 
-void SiteController::actionCookies(CHttpRequest * const request, CHttpResponse * response)
+void SiteController::actionCookies(CHttpRequest * const request, CHttpResponse * response) throw (CException)
 {
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	CCookieCollection & cookies = request->getCookies();

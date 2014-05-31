@@ -41,7 +41,7 @@ CDbConnection * CActiveRecord::getDbConnection() const
 	return _connection;
 }
 
-TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria)
+TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria) throw (CDbException)
 {
 #ifdef JV_DEBUG
 	Jvibetto::trace(typeid(this).name() + string(".findAll()"), LOG_CATEGORY);
@@ -49,13 +49,13 @@ TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria)
 	return query(criteria, true);
 }
 
-TActiveRecordPtr CActiveRecord::find(const CDbCriteria & criteria)
+TActiveRecordPtr CActiveRecord::find(const CDbCriteria & criteria) throw (CDbException)
 {
 	TActiveRecordList records = query(criteria, false);
 	return records[0];
 }
 
-TActiveRecordList CActiveRecord::query(const CDbCriteria & criteria, bool all)
+TActiveRecordList CActiveRecord::query(const CDbCriteria & criteria, bool all) throw (CDbException)
 {
 	CDbCommand command = _connection->getCommandBuilder()->createFindCommand(tableName(), criteria);
 	if (all) {

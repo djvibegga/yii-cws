@@ -29,7 +29,7 @@ void ProductController::init()
 	registerAction("test", reinterpret_cast<TAction>(&ProductController::actionTest));
 }
 
-void ProductController::actionTest(CHttpRequest * const request, CHttpResponse * response)
+void ProductController::actionTest(CHttpRequest * const request, CHttpResponse * response) throw (CException)
 {
 	Jvibetto::log("test message");
 

@@ -12,7 +12,6 @@
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
-#include <sqlapi/SQLAPI.h>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -96,17 +95,21 @@ void CWebApplication::mainLoop() throw(CException)
 	IWebRequestPool * pool = getWebRequestPool();
 	if (pool) {
 		while (true) {
-			request = pool->popRequest();
-			if (request == 0) {
-				usleep(idleTimeout);
-				idleTime += idleTimeout;
-				idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
-			} else {
-				handleRequest();
-				FCGX_Finish_r(request);
-				delete request;
-				request = 0;
+			try {
+				request = pool->popRequest();
+				if (request != 0) {
+					handleRequest();
+					FCGX_Finish_r(request);
+					delete request;
+					request = 0;
+					continue;
+				}
+			} catch (boost::lock_error & e) {
+				Jvibetto::log(e.what(), CLogger::LEVEL_ERROR);
 			}
+			usleep(idleTimeout);
+			idleTime += idleTimeout;
+			idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
 		}
 	}
 }
@@ -121,8 +124,6 @@ void CWebApplication::handleRequest()
 		renderException(e);
 	} catch (const CException & e) {
 		renderException(e);
-	} catch (const SAException & e) {
-		Jvibetto::log(e.ErrText().GetMultiByteChars(), CLogger::LEVEL_ERROR);
 	}
 	PROFILE_END();
 }

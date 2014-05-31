@@ -23,7 +23,7 @@ int main(int argc, char* const argv[])
 	cout << "Config file path: " << configPath << endl;
 	try {
 		TestWebRequestPool pool(configPath, argc, argv);
-		//CDbConnection::glConnection.setClient(SA_MySQL_Client);
+		CDbConnection::glConnection.setClient(SA_MySQL_Client);
 		pool.init();
 		pool.run();
 	} catch (const CException & e) {

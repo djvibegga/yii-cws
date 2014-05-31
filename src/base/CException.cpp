@@ -54,6 +54,7 @@ string CException::getFullMessage() const
 	stringstream ss;
 	ss << "Exception has been thown: "
 	   << _message
+	   << ". Code: " << _code
 	   << ". File: " << (_file == "undefined"
 			? _file.c_str()
 			: boost::filesystem::absolute(boost::filesystem::path(_file.c_str())).normalize().c_str())

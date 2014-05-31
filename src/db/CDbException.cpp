@@ -10,12 +10,9 @@
 CDbException::CDbException(const string &message)
 : CException(message)
 {
-
 }
 
 CDbException::CDbException(const string &message, int code, const string &file, int line)
 : CException(message, (int)code, file, line)
 {
-
 }
-

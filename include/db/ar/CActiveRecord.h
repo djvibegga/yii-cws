@@ -9,6 +9,7 @@
 #define CACTIVERECORD_H_
 
 #include "base/CComponent.h"
+#include "base/CApplication.h"
 #include "db/CDbConnection.h"
 #include "db/CDbCriteria.h"
 #include "db/CDbDataReader.h"
@@ -37,23 +38,26 @@ public:
 	virtual void populateProperty(const string & name, const SAField * value) = 0;
 	void setDbConnection(CDbConnection * connection);
 	CDbConnection * getDbConnection() const;
-	TActiveRecordList findAll(const CDbCriteria & criteria);
-	TActiveRecordPtr find(const CDbCriteria & criteria);
+	TActiveRecordList findAll(const CDbCriteria & criteria) throw (CDbException);
+	TActiveRecordPtr find(const CDbCriteria & criteria) throw (CDbException);
 	TActiveRecordList populateRecords(CDbDataReader & data, bool callAfterFind = true);
 	TActiveRecordPtr populateRecord(const TDbRow & attributes, bool callAfterFind = true);
 	void setScenario(const string & scenario);
 	string getScenario() const;
 
 protected:
-	TActiveRecordList query(const CDbCriteria & criteria, bool all = false);
+	TActiveRecordList query(const CDbCriteria & criteria, bool all = false) throw (CDbException);
 };
+
+typedef boost::shared_ptr<CActiveRecord> TArSharedPtr;
 
 /**
  * Registering declaration of model(), instantiate methods
  */
 #define DECLARE_AR_CLASS(className) \
 private:\
-	static boost::shared_ptr<className> _instance;\
+	static map<long, TArSharedPtr> _instances;\
+	static boost::mutex _instancesMutex;\
 public:\
 	static className * model();\
 	virtual CActiveRecord * instantiate(const TDbRow & attributes) const;
@@ -62,15 +66,21 @@ public:\
  * Registering implementation of model(), instantiate methods
  */
 #define IMPLEMENT_AR_CLASS(className) \
-boost::shared_ptr<className> className::_instance;\
+map<long, TArSharedPtr> className::_instances;\
+boost::mutex className::_instancesMutex;\
 className * className::model()\
 {\
-	if (_instance.get() == 0) {\
+	long threadId = CApplication::getThreadId();\
+	boost::lock_guard<boost::mutex> guard(_instancesMutex);\
+	map<long, TArSharedPtr>::const_iterator found = _instances.find(threadId);\
+	if (found == _instances.end()) {\
 		className * instance = new className();\
 		instance->init();\
-		_instance = boost::shared_ptr<className>(instance);\
+		_instances[threadId] = TArSharedPtr(instance);\
+		return instance;\
+	} else {\
+		return dynamic_cast<className*>(found->second.get());\
 	}\
-	return _instance.get();\
 }\
 CActiveRecord * className::instantiate(const TDbRow & attributes) const\
 {\
