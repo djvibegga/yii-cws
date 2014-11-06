@@ -12,6 +12,7 @@
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
+#include "web/CWebRequestPool.h"
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -25,6 +26,7 @@ CWebApplication::CWebApplication(const string &configPath, int argc, char * cons
 : CApplication(configPath, argc, argv),
   _requestPool(0),
   enableSessions(true),
+  enableAuth(false),
   request(0),
   idleTimeout(100000),
   idleTime(0),
@@ -36,6 +38,7 @@ CWebApplication::CWebApplication(const xml_document & configDocument, int argc, 
 : CApplication(configDocument, argc, argv),
   _requestPool(0),
   enableSessions(true),
+  enableAuth(false),
   request(0),
   idleTimeout(100000),
   idleTime(0),
@@ -59,6 +62,9 @@ void CWebApplication::init() throw(CException)
 	if (enableSessions) {
 		createHttpSession();
 	}
+	if (enableAuth) {
+		createWebUser();
+	}
 }
 
 void CWebApplication::applyConfig(const xml_node & config)
@@ -78,7 +84,7 @@ void CWebApplication::run() throw(CException)
 	mainLoop();
 }
 
-void CWebApplication::renderException(const CException & e) const
+void CWebApplication::renderException(const CException & e)
 {
 	CHttpResponse * response = getResponse();
 #ifdef JV_DEBUG
@@ -92,7 +98,7 @@ void CWebApplication::renderException(const CException & e) const
 
 void CWebApplication::mainLoop() throw(CException)
 {
-	IWebRequestPool * pool = getWebRequestPool();
+	CWebRequestPool * pool = dynamic_cast<CWebRequestPool*>(getPool());
 	if (pool) {
 		while (true) {
 			try {
@@ -173,7 +179,7 @@ CHttpRequest * CWebApplication::getRequest() const
 	return dynamic_cast<CHttpRequest*>(getComponent("request"));
 }
 
-CHttpResponse * CWebApplication::getResponse() const
+CHttpResponse * CWebApplication::getResponse()
 {
 	return dynamic_cast<CHttpResponse*>(getComponent("response"));
 }
@@ -289,14 +295,9 @@ CClientScript * CWebApplication::getClientScript() const
 	return dynamic_cast<CClientScript*>(getComponent("clientScript"));
 }
 
-void CWebApplication::setWebRequestPool(IWebRequestPool * pool)
+CHttpSession * CWebApplication::getSession() const
 {
-	_requestPool = pool;
-}
-
-IWebRequestPool * CWebApplication::getWebRequestPool() const
-{
-	return _requestPool;
+	return dynamic_cast<CHttpSession*>(getComponent("session"));
 }
 
 CHttpRequest * CWebApplication::createHttpRequest()
@@ -318,6 +319,13 @@ CHttpSession * CWebApplication::createHttpSession()
 	CHttpSession * session = new CHttpSession(this);
 	session->init();
 	return session;
+}
+
+CWebUser * CWebApplication::createWebUser()
+{
+	CWebUser * user = new CWebUser(this);
+	user->init();
+	return user;
 }
 
 CUrlManager * CWebApplication::createUrlManager()

@@ -146,3 +146,8 @@ string CStringUtils::fromTimestamp(const string & format, time_t timestamp, bool
 	strftime(buffer, _TIME_STR_BUFFER_LENGTH, format.c_str(), timeinfo);
 	return string(buffer);
 }
+
+int CStringUtils::toInt(const string & str)
+{
+	return atoi(str.c_str());
+}

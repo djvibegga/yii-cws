@@ -8,6 +8,7 @@
 #include "web/CHttpResponse.h"
 #include "web/CWebApplication.h"
 #include "base/CStringUtils.h"
+#include "base/Jvibetto.h"
 #include <fcgi_stdio.h>
 
 
@@ -88,6 +89,16 @@ void CHttpResponse::removeCookie(const CHttpCookie & cookie) throw (CException)
 	_removedCookies[cookie.name] = cookie;
 }
 
+void CHttpResponse::removeCookie(const string & cookieName) throw (CException)
+{
+	if (_startedOutput) {
+		throw CException("Can't remove cookie because output already have started.");
+	}
+	CHttpCookie cookie;
+	cookie.name = cookieName;
+	_removedCookies[cookieName] = cookie;
+}
+
 void CHttpResponse::_putCookieHeaders()
 {
 	string headers;
@@ -122,4 +133,28 @@ void CHttpResponse::_putCookieHeaders()
 		headers.append("\r\n");
 	}
 	echo(headers);
+}
+
+void CHttpResponse::redirect(TRouteStruct & route, bool terminate, unsigned int statusCode)
+{
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	redirect(app->getUrlManager()->createUrl(route), terminate, statusCode);
+}
+
+void CHttpResponse::redirect(const string & url, bool terminate, unsigned int statusCode)
+{
+	string redirectUrl = url;
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	if (url.find("/") == 0 && url.find("//") == string::npos) {
+		redirectUrl = app->getRequest()->getHostInfo() + url;
+	} else {
+		redirectUrl = url;
+	}
+	stringstream ss;
+	ss << statusCode;
+	addHeader("Status", ss.str());
+	addHeader("Location", redirectUrl);
+	if (terminate) {
+		app->end();
+	}
 }

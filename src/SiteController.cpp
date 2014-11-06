@@ -13,11 +13,13 @@
 #include <db/CDbCriteria.h>
 #include <web/CAssetManager.h>
 #include <web/CClientScript.h>
+#include <web/CWebUser.h>
 #include <utils/CMap.h>
 #include "TestWidget.h"
 #include "Goal.h"
 #include "MyView.h"
 #include "MyLayoutView.h"
+#include "MyUserIdentity.h"
 
 SiteController::SiteController(CModule * parent)
 : CController("site", parent)
@@ -36,6 +38,8 @@ void SiteController::init()
 	registerAction("am", ACTION(&SiteController::actionAssetManager));
 	registerAction("session", ACTION(&SiteController::actionSession));
 	registerAction("cookies", ACTION(&SiteController::actionCookies));
+	registerAction("login", ACTION(&SiteController::actionLogin));
+	registerAction("logout", ACTION(&SiteController::actionLogout));
 }
 
 void SiteController::actionIndex(CHttpRequest * const request, CHttpResponse * response) throw (CException)
@@ -99,10 +103,10 @@ void SiteController::actionSession(CHttpRequest * const request, CHttpResponse *
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	TSessionDataMap & sessionData = session->getData();
 	if (sessionData.find("key") == sessionData.end()) {
-		(*session)["key"] = _to_utf8(_("привет"));
+		(*session)["key"] = _("привет");
 		viewData["sessionKey"] = _("unknown");
 	} else {
-		viewData["sessionKey"] = utf8_to_(sessionData["key"]);
+		viewData["sessionKey"] = sessionData["key"];
 	}
 
 	viewData["sessionId"] = session->getSessionId();
@@ -124,4 +128,33 @@ void SiteController::actionCookies(CHttpRequest * const request, CHttpResponse *
 	cookies.remove("lang");
 
 	render("cookies", viewData);
+}
+
+void SiteController::actionLogin(CHttpRequest * const request, CHttpResponse * response) throw (CException)
+{
+	CWebUser * user = dynamic_cast<CWebUser*>(Jvibetto::app()->getComponent("user"));
+
+	if (!user->getIsGuest()) {
+		*response << _("user is already logged");
+		return;
+	}
+
+	MyUserIdentity identity("admin", "admin");
+	if (!identity.authenticate()) {
+		*response << _("failure auth");
+		return;
+	}
+	if (!user->login(identity)) {
+		*response << _("failure login");
+		return;
+	}
+
+	*response << _("Welcome, ") << user->getName() << _("!");
+}
+
+void SiteController::actionLogout(CHttpRequest * const request, CHttpResponse * response) throw (CException)
+{
+	CWebUser * user = dynamic_cast<CWebUser*>(Jvibetto::app()->getComponent("user"));
+	user->logout();
+	*response << _("Bye bye...");
 }

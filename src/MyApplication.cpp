@@ -20,6 +20,7 @@
 #include <web/CUrlManager.h>
 #include <web/CAssetManager.h>
 #include <web/CClientScript.h>
+#include <web/CWebUser.h>
 #include "MyUrlRule.h"
 #include "TestBehavior.h"
 #include "utils/CFile.h"
@@ -27,11 +28,13 @@
 MyApplication::MyApplication(const string &configPath, int argc, char * const argv[])
 : CWebApplication(configPath, argc, argv)
 {
+	enableAuth = true;
 }
 
 MyApplication::MyApplication(const xml_document & configDocument, int argc, char * const argv[])
 : CWebApplication(configDocument, argc, argv)
 {
+	enableAuth = true;
 }
 
 MyApplication::~MyApplication()

@@ -17,7 +17,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/random_generator.hpp>
 
-typedef map<string, string> TSessionDataMap;
+typedef map<string, _string> TSessionDataMap;
 
 class CHttpSession: public CApplicationComponent
 {
@@ -54,14 +54,15 @@ public:
 	virtual void init();
 	void setSessionId(const string & sessionId);
 	string getSessionId() const;
+	string regenerateId(bool deleteOldSession = false);
 	TSessionDataMap & getData();
-	string & operator[](const string & key);
+	_string & operator[](const string & key);
 	virtual void reset();
 	virtual bool open() throw (CException);
 	virtual void close() throw (CException);
 	virtual _string read(const string & sessionId) const;
 	virtual bool write(const string & sessionId, const _string & data) const;
-	virtual void destroy(const string & sessionId) const throw (CException);
+	virtual void destroy(const string & sessionId = "") throw (CException);
 	virtual void gcSessions() const throw (CException);
 
 protected:

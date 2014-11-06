@@ -9,10 +9,10 @@
 #include "web/CWebApplication.h"
 #include "base/Jvibetto.h"
 #include "base/CAsyncTask.h"
+#include "base/CApplicationPool.h"
 #include "utils/CFile.h"
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include "utils/CArchiver.h"
 
 const string CHttpSession::LOG_CATEGORY = "system.web";
 const string CHttpSession::SESSION_ID_DEFAULT_KEY = "sessid";
@@ -109,6 +109,21 @@ string CHttpSession::getSessionId() const
 	return _sessionId;
 }
 
+string CHttpSession::regenerateId(bool deleteOldSession)
+{
+	string sessionId = generateUniqueSessionId();
+	if (deleteOldSession) {
+		string oldSessionId = _sessionId;
+		if (oldSessionId.empty()) {
+			oldSessionId = resolveSessionId();
+		}
+		if (!oldSessionId.empty()) {
+			destroy(oldSessionId);
+		}
+	}
+	return sessionId;
+}
+
 string CHttpSession::resolveSessionId() const
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
@@ -144,7 +159,7 @@ TSessionDataMap & CHttpSession::getData()
 	return _sessionData;
 }
 
-string & CHttpSession::operator[](const string & key)
+_string & CHttpSession::operator[](const string & key)
 {
 	return _sessionData[key];
 }
@@ -157,19 +172,21 @@ void CHttpSession::reset()
 
 bool CHttpSession::open() throw (CException)
 {
-	if (_sessionId.empty()) {
-		_sessionId = resolveSessionId();
-	}
-	if (_sessionId.empty()) {
-		_sessionId = generateUniqueSessionId();
-	} else {
-		_string strData = read(_sessionId);
-		if (!strData.empty()) {
-			return unserializeData(_to_utf8(strData));
+	if (CApplication::getIsWebWorkerInstance()) {
+		if (_sessionId.empty()) {
+			_sessionId = resolveSessionId();
 		}
-	}
-	if (passSessionIdByCookie) {
-		saveSessionIdIntoCookies(_sessionId);
+		if (_sessionId.empty()) {
+			_sessionId = generateUniqueSessionId();
+		} else {
+			_string strData = read(_sessionId);
+			if (!strData.empty()) {
+				return unserializeData(_to_utf8(strData));
+			}
+		}
+		if (passSessionIdByCookie) {
+			saveSessionIdIntoCookies(_sessionId);
+		}
 	}
 	return false;
 }
@@ -191,12 +208,7 @@ bool CHttpSession::serializeData(string & dest)
 	if (_sessionData.empty()) {
 		return false;
 	}
-
-	stringstream os;
-	boost::archive::text_oarchive oa(os);
-	oa << *this;
-	dest = os.str();
-
+	dest = CArchiver<CHttpSession>::save(*this);
 	return true;
 }
 
@@ -205,20 +217,28 @@ bool CHttpSession::unserializeData(const string & src)
 	if (src.empty()) {
 		return false;
 	}
-
-	stringstream is;
-	is << src;
-	boost::archive::text_iarchive ia(is);
-	ia >> *this;
-
+	try {
+		CArchiver<CHttpSession>::load(src, *this);
+	} catch (boost::archive::archive_exception & e) {
+		Jvibetto::log("Invalid or broken session data.", CLogger::LEVEL_ERROR);
+		return false;
+	}
 	return true;
 }
 
 void CHttpSession::saveSessionIdIntoCookies(const string & sessionId)
 {
 	CHttpCookie cookie(sessionIdCookieName, sessionId);
-	CHttpRequest * request = dynamic_cast<CHttpRequest*>(Jvibetto::app()->getComponent("request"));
-	request->getCookies().add(cookie);
+	CHttpResponse * response = dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"));
+	if (!response) {
+		Jvibetto::log(
+			"Could not save session ID into cookies because \"response\" component is missing.",
+			CLogger::LEVEL_ERROR,
+			LOG_CATEGORY
+		);
+		return;
+	}
+	response->addCookie(cookie);
 #ifdef JV_DEBUG
 	stringstream message;
 	message << "Session ID has been saved into cookies. ID: "
@@ -231,10 +251,9 @@ void CHttpSession::ensureGCRunned() throw (CException)
 {
 	_gcMutexLocker.lock();
 	if (!_isGCRunned) {
-		IWebRequestPool * pool = dynamic_cast<CWebApplication*>(getModule())
-			->getWebRequestPool();
+		CApplicationPool * pool = Jvibetto::app()->getPool();
 		if (pool) {
-			CWebApplication * instance = pool->createAppInstance();
+			CWebApplication * instance = dynamic_cast<CWebApplication*>(pool->createAppInstance());
 			CHttpSessionGCRunner * gcRunner = new CHttpSessionGCRunner(instance, gcTimeout);
 			CAsyncTask * gcTask = new CAsyncTask(gcRunner);
 			gcTask->init();
@@ -278,9 +297,22 @@ bool CHttpSession::write(const string & sessionId, const _string & data) const
 	return true;
 }
 
-void CHttpSession::destroy(const string & sessionId) const throw (CException)
+void CHttpSession::destroy(const string & sessionId) throw (CException)
 {
-	boost::filesystem::remove(resolveSessionFilePath(_sessionId).string());
+	string id = sessionId;
+	bool clearCurrentSessId = false;
+	if (id.empty()) {
+		id = resolveSessionId();
+		clearCurrentSessId = true;
+	}
+	boost::filesystem::remove(resolveSessionFilePath(id).string());
+	if (clearCurrentSessId) {
+		_sessionId = "";
+		if (passSessionIdByCookie) {
+			dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"))
+				->removeCookie(sessionIdCookieName);
+		}
+	}
 }
 
 void CHttpSession::gcSessions() const throw (CException)

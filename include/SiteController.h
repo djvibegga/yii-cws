@@ -22,6 +22,8 @@ public:
 	void actionAssetManager(CHttpRequest * const request, CHttpResponse * response) throw (CException);
 	void actionSession(CHttpRequest * const request, CHttpResponse * response) throw (CException);
 	void actionCookies(CHttpRequest * const request, CHttpResponse * response) throw (CException);
+	void actionLogin(CHttpRequest * const request, CHttpResponse * response) throw (CException);
+	void actionLogout(CHttpRequest * const request, CHttpResponse * response) throw (CException);
 };
 
 #endif /* SITECONTROLLER_H_ */

@@ -189,7 +189,6 @@ class IWebRequestPool
 {
 public:
 	virtual ~IWebRequestPool() {};
-	virtual CWebApplication * createAppInstance() const = 0;
 	virtual FCGX_Request * popRequest() throw (boost::lock_error) = 0;
 };
 
@@ -199,6 +198,20 @@ public:
 	virtual ~IRunable() {};
 	virtual void init() throw (CException) = 0;
 	virtual void run() throw (CException) = 0;
+};
+
+
+typedef map<string, _string> TPersistentStateMap;
+
+class IUserIdentity
+{
+public:
+	virtual ~IUserIdentity() {};
+	virtual bool authenticate() = 0;
+	virtual bool getIsAuthenticated() const = 0;
+	virtual string getId() const = 0;
+	virtual _string getName() const = 0;
+	virtual TPersistentStateMap getPersistentStates() const = 0;
 };
 
 #endif /* INTERFACES_H_ */

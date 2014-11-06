@@ -31,9 +31,13 @@ typedef stack<IOutputBuffer*> TOutputStack;
 typedef map<long, CApplication*> TAppInstanceMap;
 
 class CEvent;
+class CApplicationPool;
 
 class CApplication: public CModule, public IRunable
 {
+
+	friend class CApplicationPool;
+
 private:
 	static bool _failHandlerCalled;
 	string _configPath;
@@ -48,6 +52,8 @@ private:
 	boost::filesystem::path _executablePath;
 	CLogRouter * _log;
 	TOutputStack _outputStack;
+	CApplicationPool * _pool;
+	static long _mainThreadId;
 
 public:
 	CApplication(const string & configPath, int argc, char * const argv[]);
@@ -73,7 +79,15 @@ public:
 	virtual boost::filesystem::path resolveBasePath() const;
 	static CApplication * getInstance();
 	static long getThreadId();
+	static long getMainThreadId();
+	static bool getIsWorkerInstance();
+	static bool getIsWebWorkerInstance();
 	TOutputStack & getOutputStack();
+	void end(unsigned int status = 0, bool needExit = true);
+	static long convertThreadIdToLong(boost::thread::id threadId);
+
+	void setPool(CApplicationPool * pool);
+	CApplicationPool * getPool() const;
 
 protected:
 	time_t startTime;

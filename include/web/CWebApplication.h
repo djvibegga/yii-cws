@@ -19,6 +19,7 @@
 #include "web/CAssetManager.h"
 #include "web/CController.h"
 #include "web/CHttpSession.h"
+#include "web/CWebUser.h"
 
 struct SControllerToRun
 {
@@ -40,6 +41,7 @@ public:
 	TRouteStruct catchAllRequest;
 	string defaultControllerRoute;
 	bool enableSessions;
+	bool enableAuth;
 
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	CWebApplication(const xml_document & configDocument, int argc, char * const argv[]);
@@ -47,13 +49,11 @@ public:
 	virtual void init() throw(CException);
 	virtual void run() throw(CException);
 	CHttpRequest * getRequest() const;
-	CHttpResponse * getResponse() const;
+	CHttpResponse * getResponse();
 	CUrlManager * getUrlManager() const;
 	CAssetManager * getAssetManager() const;
 	CClientScript * getClientScript() const;
-
-	void setWebRequestPool(IWebRequestPool * pool);
-	IWebRequestPool * getWebRequestPool() const;
+	CHttpSession * getSession() const;
 
 	virtual bool hasController(const string & name) const;
 	virtual CController * getController(const string & name) const;
@@ -79,11 +79,12 @@ protected:
 	virtual boost::filesystem::path resolveLayoutPath();
 	virtual void runController(const string &route);
 	virtual SControllerToRun resolveController(string route, const IModule * owner);
-	virtual void renderException(const CException & e) const;
+	virtual void renderException(const CException & e);
 
 	virtual CHttpRequest * createHttpRequest();
 	virtual CHttpResponse * createHttpResponse();
 	virtual CHttpSession * createHttpSession();
+	virtual CWebUser * createWebUser();
 	virtual CUrlManager * createUrlManager();
 };
 

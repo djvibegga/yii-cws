@@ -11,6 +11,7 @@
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
+#include "base/CApplicationPool.h"
 #include "web/renderers/CBaseViewRenderer.h"
 #include <sstream>
 #include <iostream>
@@ -24,11 +25,13 @@ using namespace std;
 TAppInstanceMap CApplication::_instances;
 boost::mutex CApplication::_instanceLocker;
 bool CApplication::_failHandlerCalled = false;
+long CApplication::_mainThreadId = 0;
 
 CApplication::CApplication(const string &configPath, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0),
   _log(0),
+  _pool(0),
   startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
@@ -43,6 +46,7 @@ CApplication::CApplication(const xml_document & configDocument, int argc, char *
 : CModule(""),
   _xmlConfig(0),
   _log(0),
+  _pool(0),
   startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
@@ -240,14 +244,38 @@ CApplication * CApplication::getInstance()
 
 long CApplication::getThreadId()
 {
-	stringstream threadId;
-	threadId << boost::this_thread::get_id();
-	return strtol(threadId.str().c_str(), 0, 16);
+	return convertThreadIdToLong(boost::this_thread::get_id());
+}
+
+long CApplication::getMainThreadId()
+{
+	return _mainThreadId;
+}
+
+bool CApplication::getIsWorkerInstance()
+{
+	return getMainThreadId() != getThreadId();
+}
+
+bool CApplication::getIsWebWorkerInstance()
+{
+	return getIsWorkerInstance() && getInstance()->getComponent("request") != 0;
 }
 
 TOutputStack & CApplication::getOutputStack()
 {
 	return _outputStack;
+}
+
+void CApplication::end(unsigned int status, bool needExit)
+{
+	if (hasEventHandler("onEndRequest")) {
+		CEvent event(this);
+		onEndRequest(event);
+	}
+	if (needExit) {
+		exit(status);
+	}
 }
 
 void CApplication::logProfileItems(CEvent & event)
@@ -265,4 +293,21 @@ void CApplication::_programFailCallback(int signum)
 	}
 	signal(signum, SIG_DFL);
 	exit(3);
+}
+
+long CApplication::convertThreadIdToLong(boost::thread::id threadId)
+{
+	stringstream threadIdStr;
+	threadIdStr << threadId;
+	return strtol(threadIdStr.str().c_str(), 0, 16);
+}
+
+void CApplication::setPool(CApplicationPool * pool)
+{
+	_pool = pool;
+}
+
+CApplicationPool * CApplication::getPool() const
+{
+	return _pool;
 }

@@ -6,43 +6,29 @@
  */
 
 #include "web/CWebRequestPool.h"
-#include "base/CAsyncTask.h"
 #include "fcgi_stdio.h"
 
 CWebRequestPool::CWebRequestPool(const string &configPath, int argc, char * const argv[])
-: configPath(configPath),
-  argc(argc),
-  argv(argv),
+: CApplicationPool(configPath, argc, argv),
   listenSocket(0)
 {
-	_xmlConfig = new xml_document();
 }
 
 CWebRequestPool::~CWebRequestPool()
 {
 }
 
-void CWebRequestPool::init() throw(CException)
-{
-	xml_parse_result result = _xmlConfig->load_file(configPath.c_str());
-	if (result.status != status_ok) {
-		stringstream ss;
-		ss << "Can\'t parse application config: '" << configPath << "'.";
-		throw CException(ss.str());
-	}
-}
-
 void CWebRequestPool::run() throw (CException)
 {
 	openSocket();
-	startInstances();
+	CApplicationPool::run();
 	mainLoop();
 }
 
 void CWebRequestPool::openSocket()
 {
 	string port = ":";
-	const xml_node &configRoot = _xmlConfig->root();
+	const xml_node &configRoot = getConfigDocument().root();
 	port.append(configRoot.child("server").attribute("port").value());
 	cout << "Server is trying to start on port: " << port << endl;
 	int listenQueueBacklog = 0;
@@ -77,28 +63,6 @@ void CWebRequestPool::mainLoop() throw (CException)
 	}
 }
 
-void CWebRequestPool::startInstances()
-{
-	unlink("server.pid");
-	const xml_node &configRoot = _xmlConfig->root();
-	int instancesCount = 0;
-	PARSE_XML_CONF_UINT_PROPERTY(
-		configRoot.child("server").child("instance"),
-		instancesCount, "count"
-	);
-	cout << "Starting the application with " << instancesCount << " instances: " << endl;
-	for (int i = 0; i < instancesCount; ++i) {
-		CWebApplication * instance = createAppInstance();
-		instance->setWebRequestPool(this);
-		CAsyncTask * task = new CAsyncTask(instance);
-		task->init();
-		task->run();
-		cout << "The application instance " << (i + 1) << " has runned..." << endl;
-		usleep(100000); //TODO: remove this hardcore. This is temp fix to run miltiple app instances
-	}
-	cout << "The application pool has runned." << endl;
-}
-
 FCGX_Request * CWebRequestPool::popRequest() throw (boost::lock_error)
 {
 	boost::lock_guard<boost::mutex> guard(_queueLocker);
@@ -108,9 +72,4 @@ FCGX_Request * CWebRequestPool::popRequest() throw (boost::lock_error)
 	FCGX_Request * incoming = _requests.front();
 	_requests.pop();
 	return incoming;
-}
-
-const xml_document & CWebRequestPool::getConfigDocument() const
-{
-	return *_xmlConfig;
 }

@@ -39,6 +39,9 @@ public:
     void addHeader(const string & name, const string & value) throw (CException);
     void addCookie(const CHttpCookie & cookie) throw (CException);
     void removeCookie(const CHttpCookie & cookie) throw (CException);
+    void removeCookie(const string & cookieName) throw (CException);
+    void redirect(TRouteStruct & route, bool terminate = true, unsigned int statusCode = 302);
+    void redirect(const string & url, bool terminate = true, unsigned int statusCode = 302);
 
 protected:
     virtual void renderHeaders();

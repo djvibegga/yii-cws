@@ -38,6 +38,7 @@ public:
 	static string urlEncode(const string & src);
 	static string urlDecode(const string & src);
 	static string fromTimestamp(const string & format, time_t timestamp, bool isGmt = false);
+	static int toInt(const string & str);
 
 	static bool lengthComparator(const string & a, const string & b);
 };
