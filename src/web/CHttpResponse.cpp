@@ -115,6 +115,9 @@ void CHttpResponse::_putCookieHeaders()
 		}
 		headers.append(";expires=Thu, 01 Jan 1970 00:00:00 GMT");
 		headers.append("\r\n");
+		if (_newCookies.find(iter->first) != _newCookies.end()) {
+			_newCookies.erase(iter->first);
+		}
 	}
 	for (TCookieMap::const_iterator iter = _newCookies.begin(); iter != _newCookies.end(); ++iter) {
 		headers.append("Set-Cookie:" + iter->first + "=" + iter->second.value + ";path=" + iter->second.path);

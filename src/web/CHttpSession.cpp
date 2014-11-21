@@ -307,7 +307,7 @@ void CHttpSession::destroy(const string & sessionId) throw (CException)
 	}
 	boost::filesystem::remove(resolveSessionFilePath(id).string());
 	if (clearCurrentSessId) {
-		_sessionId = "";
+		reset();
 		if (passSessionIdByCookie) {
 			dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"))
 				->removeCookie(sessionIdCookieName);
