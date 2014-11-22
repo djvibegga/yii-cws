@@ -113,9 +113,9 @@ void CApplication::init() throw(CException)
 	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
 #endif
 
-	CModule::init();
-
 	createViewRenderer();
+
+	CModule::init();
 }
 
 void CApplication::run() throw(CException)

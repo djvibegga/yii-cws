@@ -155,7 +155,7 @@ string CAssetManager::getPublishedUrl(const boost::filesystem::path & path, bool
 {
 	TAssetsPathMap::const_iterator found = _published.find(path.string());
 	boost::filesystem::path canonical = boost::filesystem::canonical(path);
-	if (found == _published.end()) {
+	if (found != _published.end()) {
 		return found->second;
 	} else if (!boost::filesystem::exists(canonical)) {
 		return "";

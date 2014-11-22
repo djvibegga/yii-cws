@@ -5,8 +5,8 @@
  *      Author: djvibegga
  */
 
-#ifndef APPLICATION_H_
-#define APPLICATION_H_
+#ifndef CAPPLICATION_H_
+#define CAPPLICATION_H_
 
 #include "base/CModule.h"
 #include "base/CException.h"
@@ -104,4 +104,4 @@ private:
 	static void _programFailCallback(int signum);
 };
 
-#endif /* APPLICATION_H_ */
+#endif /* CAPPLICATION_H_ */

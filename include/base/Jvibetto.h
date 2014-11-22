@@ -8,7 +8,7 @@
 #ifndef YIIBASE_H_
 #define YIIBASE_H_
 
-#include <base/CApplication.h>
+#include "base/CApplication.h"
 
 typedef map<string, boost::filesystem::path> TPathAliasMap;
 
