@@ -17,6 +17,9 @@ CView::CView(const CBaseController * owner)
   _owner(owner),
   _outputBuffer(0)
 {
+	if (dynamic_cast<const CView*>(owner) != 0) {
+		_owner = 0;
+	}
 }
 
 CView::~CView()

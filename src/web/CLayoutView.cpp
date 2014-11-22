@@ -7,5 +7,4 @@ CLayoutView::CLayoutView(const CBaseController * owner)
 
 void CLayoutView::init()
 {
-	CView::init();
 }
