@@ -27,6 +27,7 @@ private:
 	TActionsMap _actions;
 	boost::filesystem::path _viewPath;
 	TViewPtr _layout;
+	string _actionId;
 
 protected:
 	virtual bool beforeRender(const IView & viewInstance);
@@ -57,6 +58,11 @@ public:
 	virtual _string render(const string & view, const cpptempl::data_map & data, bool ret = false) throw (CException);
 	virtual _string render(IView & viewInstance, bool ret = false) throw (CException);
 	virtual void processOutput(_string & output);
+
+	string getUniqueId() const;
+	string getRoute() const;
+	void setAction(const string & actionId);
+	string getAction() const;
 };
 
 #endif /* CCONTROLLER_H_ */

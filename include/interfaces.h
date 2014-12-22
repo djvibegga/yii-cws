@@ -13,6 +13,7 @@
 #include <vector>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
+#include <boost/locale.hpp>
 #include "defines.h"
 #include "base/CException.h"
 
@@ -33,6 +34,13 @@ struct TRouteStruct
 {
 	TRouteStruct() {}
 	TRouteStruct(const string & path) { this->path = path; }
+	TRouteStruct(const TRouteStruct & other)
+	{
+		this->path = other.path;
+		for (TRequestParams::const_iterator iter = other.params.begin(); iter != other.params.end(); ++iter) {
+			this->params[iter->first] = iter->second;
+		}
+	}
 	string path;
 	TRequestParams params;
 };

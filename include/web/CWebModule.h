@@ -32,8 +32,8 @@ public:
 	virtual bool hasController(const string & name) const;
 	virtual CController * getController(const string & name) const;
 	virtual void setController(const string & name, CController * instance);
-	boost::filesystem::path getLayoutPath() const;
-	void setLayoutPath(const boost::filesystem::path & layoutPath);
+	virtual boost::filesystem::path getLayoutPath() const;
+	virtual void setLayoutPath(const boost::filesystem::path & layoutPath);
 };
 
 #endif /* CWEBMODULE_H_ */

@@ -327,3 +327,8 @@ string CHttpRequest::getPathInfo()
 	}
 	return _pathInfo;
 }
+
+void CHttpRequest::setPathInfo(const string & pathInfo)
+{
+	_pathInfo = pathInfo;
+}

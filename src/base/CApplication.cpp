@@ -13,12 +13,14 @@
 #include "base/Jvibetto.h"
 #include "base/CApplicationPool.h"
 #include "web/renderers/CBaseViewRenderer.h"
+#include "utils/CFile.h"
 #include <sstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <stdlib.h>
 #include <signal.h>
 #include <boost/thread.hpp>
+#include <boost/assign.hpp>
 
 using namespace std;
 
@@ -26,12 +28,14 @@ TAppInstanceMap CApplication::_instances;
 boost::mutex CApplication::_instanceLocker;
 bool CApplication::_failHandlerCalled = false;
 long CApplication::_mainThreadId = 0;
+map<string, std::locale> CApplication::_locales;
 
 CApplication::CApplication(const string &configPath, int argc, char * const argv[])
 : CModule(""),
   _xmlConfig(0),
   _log(0),
   _pool(0),
+  name(""),
   startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
@@ -47,6 +51,7 @@ CApplication::CApplication(const xml_document & configDocument, int argc, char *
   _xmlConfig(0),
   _log(0),
   _pool(0),
+  name(""),
   startTime(0)
 {
 	signal(SIGSEGV, CApplication::_programFailCallback);
@@ -81,6 +86,8 @@ void CApplication::setId(const string &id)
 
 void CApplication::init() throw(CException)
 {
+	setLanguage("en");
+
 	_instanceLocker.lock();
 	_instances[getThreadId()] = this;
 	_instanceLocker.unlock();
@@ -116,6 +123,8 @@ void CApplication::init() throw(CException)
 	createViewRenderer();
 
 	CModule::init();
+
+	initLocales();
 }
 
 void CApplication::run() throw(CException)
@@ -224,6 +233,52 @@ CLogRouter * CApplication::createLogRouter()
 	return log;
 }
 
+void CApplication::applyConfig(const xml_node & config)
+{
+	CModule::applyConfig(config);
+
+	xml_node serverNode = getConfigRoot().child("server");
+
+	PARSE_XML_CONF_STRING_PROPERTY(serverNode, _language, "language");
+	PARSE_XML_CONF_STRING_PROPERTY(serverNode, name, "name");
+
+	if (_language.empty()) {
+		_languages.push_back(_language);
+	}
+	xml_node languages = serverNode.child("languages");
+	if (!languages.empty()) {
+		xml_object_range<xml_named_node_iterator> languagesList = languages.children("language");
+		for (xml_object_range<xml_named_node_iterator>::const_iterator iter = languagesList.begin(); iter != languagesList.end(); ++iter) {
+			_languages.push_back(iter->attribute("name").as_string());
+		}
+	}
+	std::unique(_languages.begin(), _languages.end());
+}
+
+void CApplication::initLocales()
+{
+	boost::locale::generator gen;
+	string path = getBasePath().normalize().string() + "/messages";
+	gen.add_messages_path(path);
+
+	TExtensionList extensions = boost::assign::list_of (".mo");
+	TFileList translations = CFile::find(boost::filesystem::path(path), extensions, TExcludeList(), -1, false);
+
+	vector<string> domains;
+	for (TFileList::const_iterator iter = translations.begin(); iter != translations.end(); ++iter) {
+		domains.push_back(boost::filesystem::basename(*iter));
+	}
+
+	std::unique(domains.begin(), domains.end());
+	for (vector<string>::const_iterator iter = domains.begin(); iter != domains.end(); ++iter) {
+		gen.add_messages_domain(*iter);
+	}
+
+	for (vector<string>::const_iterator iter = _languages.begin(); iter != _languages.end(); ++iter) {
+		_locales[*iter] = gen(*iter + ".UTF-8");
+	}
+}
+
 CLogRouter * CApplication::getLog()
 {
 	return _log;
@@ -265,6 +320,16 @@ bool CApplication::getIsWebWorkerInstance()
 TOutputStack & CApplication::getOutputStack()
 {
 	return _outputStack;
+}
+
+void CApplication::setLanguage(const string & language)
+{
+	_language = language;
+}
+
+string CApplication::getLanguage() const
+{
+	return _language;
 }
 
 void CApplication::end(unsigned int status, bool needExit)
@@ -310,4 +375,18 @@ void CApplication::setPool(CApplicationPool * pool)
 CApplicationPool * CApplication::getPool() const
 {
 	return _pool;
+}
+
+vector<string> CApplication::getLanguages() const
+{
+	return _languages;
+}
+
+std::locale CApplication::getLocaleByLanguage(const string & language) const
+{
+	map<string, std::locale>::const_iterator found = _locales.find(language);
+	if (found != _locales.end()) {
+		return found->second;
+	}
+	return std::locale();
 }

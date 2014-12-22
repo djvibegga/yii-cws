@@ -119,7 +119,7 @@ CDbCommand CDbConnection::createCommand(const string & query)
 	return CDbCommand(this, query);
 }
 
-CDbCommandBuilder * CDbConnection::getCommandBuilder() const
+CDbCommandBuilder * CDbConnection::getCommandBuilder()
 {
 	return _commandBuilder;
 }

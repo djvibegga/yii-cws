@@ -51,6 +51,7 @@ public:
 	virtual bool getIsAjaxRequest();
 	virtual bool getIsFlashRequest();
 	virtual string getPathInfo();
+	void setPathInfo(const string & pathInfo);
 	virtual string getRequestUri();
 	string getScriptUrl();
 	string getBaseUrl(bool absolute = false);

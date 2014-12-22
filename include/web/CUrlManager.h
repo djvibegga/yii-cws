@@ -74,10 +74,14 @@ private:
 	TUrlRulesList _rules;
 	string _scriptName;
 	string _scriptUrl;
+	string _defaultLanguage;
 
 public:
 	static const string FORMAT_GET;
 	static const string FORMAT_PATH;
+	static const string DEFAULT_LANGUAGE_PARAM_NAME;
+	static const string DEFAULT_LANGUAGE_COOKIE_NAME;
+
 	string urlFormat;
 	string urlSuffix;
 	bool showScriptName;
@@ -86,6 +90,11 @@ public:
 	bool matchValue;
 	bool useStrictParsing;
 	bool caseSensitive;
+	string languageParamName;
+	string languageCookieName;
+	bool useLangBasedUrls;
+	bool storeLanguageInCookies;
+	bool appendLanguageWhenItIsDefault;
 
 	CUrlManager(CModule * module = 0);
 	virtual ~CUrlManager();
@@ -107,6 +116,7 @@ protected:
 	virtual string createUrlDefault(TRouteStruct & route, const string & ampersand) const;
 	virtual string resolveScriptName();
 	virtual string trimScriptName(const string & path);
+	virtual string resolveLanguage(TRequestParams & params) const;
 };
 
 #endif /* CURLMANAGER_H_ */

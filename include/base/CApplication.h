@@ -53,9 +53,14 @@ private:
 	CLogRouter * _log;
 	TOutputStack _outputStack;
 	CApplicationPool * _pool;
+	string _language;
+	vector<string> _languages;
 	static long _mainThreadId;
+	static map<string, std::locale> _locales;
 
 public:
+	string name;
+
 	CApplication(const string & configPath, int argc, char * const argv[]);
 	CApplication(const xml_document & configDocument, int argc, char * const argv[]);
 	virtual ~CApplication();
@@ -83,11 +88,15 @@ public:
 	static bool getIsWorkerInstance();
 	static bool getIsWebWorkerInstance();
 	TOutputStack & getOutputStack();
+	void setLanguage(const string & language);
+	string getLanguage() const;
 	void end(unsigned int status = 0, bool needExit = true);
 	static long convertThreadIdToLong(boost::thread::id threadId);
 
 	void setPool(CApplicationPool * pool);
 	CApplicationPool * getPool() const;
+	vector<string> getLanguages() const;
+	std::locale getLocaleByLanguage(const string & language) const;
 
 protected:
 	time_t startTime;
@@ -98,6 +107,8 @@ protected:
 	virtual void processRequest() = 0;
 	virtual IViewRenderer * createViewRenderer();
 	virtual CLogRouter * createLogRouter();
+	virtual void applyConfig(const xml_node & config);
+	virtual void initLocales();
 
 private:
 	void logProfileItems(CEvent & event);

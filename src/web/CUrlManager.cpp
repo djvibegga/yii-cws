@@ -7,6 +7,7 @@
 
 #include "web/CUrlManager.h"
 #include "web/CWebApplication.h"
+#include "web/CHttpRequest.h"
 #include "base/CStringUtils.h"
 #include "base/Jvibetto.h"
 #include "config.h"
@@ -173,6 +174,7 @@ string CUrlRule::createUrl(
 		return !url.empty() ? url + suffix : url;
 	}
 
+	url = CStringUtils::rtrim(url, "/");
 	if (append) {
 		url += "/" + manager->createPathInfo(routeParams, "/", "/") + suffix;
 	} else {
@@ -250,6 +252,8 @@ string CUrlRule::parseUrl(
 
 const string CUrlManager::FORMAT_GET = "get";
 const string CUrlManager::FORMAT_PATH = "path";
+const string CUrlManager::DEFAULT_LANGUAGE_PARAM_NAME = "lang";
+const string CUrlManager::DEFAULT_LANGUAGE_COOKIE_NAME = "lang";
 
 CUrlManager::CUrlManager(CModule * module)
 : CApplicationComponent("urlManager", module),
@@ -260,7 +264,12 @@ CUrlManager::CUrlManager(CModule * module)
   routeVar("r"),
   matchValue(false),
   useStrictParsing(false),
-  caseSensitive(true)
+  caseSensitive(true),
+  languageParamName(DEFAULT_LANGUAGE_PARAM_NAME),
+  languageCookieName(DEFAULT_LANGUAGE_COOKIE_NAME),
+  useLangBasedUrls(true),
+  storeLanguageInCookies(false),
+  appendLanguageWhenItIsDefault(false)
 {
 }
 
@@ -276,13 +285,19 @@ void CUrlManager::init()
 	CApplicationComponent::init();
 	_scriptName = resolveScriptName();
 	initRules();
+
+	_defaultLanguage = Jvibetto::app()->getLanguage();
 }
 
 void CUrlManager::applyConfig(const xml_node & config)
 {
-	if (!config.child("urlFormat").empty()) {
-		urlFormat = config.child("urlFormat").attribute("value").value();
-	}
+	PARSE_XML_CONF_STRING_PROPERTY(config, urlFormat, "urlFormat");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, showScriptName, "showScriptName");
+	PARSE_XML_CONF_STRING_PROPERTY(config, languageParamName, "languageParamName");
+	PARSE_XML_CONF_STRING_PROPERTY(config, languageCookieName, "languageCookieName");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, useLangBasedUrls, "useLangBasedUrls");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, storeLanguageInCookies, "storeLanguageInCookies");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, appendLanguageWhenItIsDefault, "appendLanguageWhenItIsDefault");
 }
 
 void CUrlManager::addRule(CBaseUrlRule * rule)
@@ -307,22 +322,43 @@ string CUrlManager::createUrl(TRouteStruct &route, const string & ampersand) con
 
 	string url;
 	CBaseUrlRule * rule = 0;
+
+	string language = resolveLanguage(route.params);
+
 	for (TUrlRulesList::const_iterator iter = _rules.begin(); iter != _rules.end(); ++iter) {
 		rule = *iter;
 		url = rule->createUrl(this, route, ampersand);
 		if (!url.empty()) {
+			url = CStringUtils::ltrim(url, "/");
+			if (useLangBasedUrls) {
+				url = "/" + language + "/" + url;
+			}
+			if (showScriptName) {
+				url = "/" + getScriptName() + url;
+			}
+			url = CStringUtils::ltrim(url, "/");
 			if (rule->hasHostInfo) {
-				return _baseUrl + (url.empty() ? "/" : url);
+				return _baseUrl + "/" + (url.empty() ? "/" : url);
 			} else {
 				return _baseUrl + "/" + url;
 			}
 		}
 	}
-	url = _baseUrl + "/";
+	url = _baseUrl;
 	if (showScriptName) {
-		url += getScriptName();
+		url += "/" + getScriptName();
 	}
-	return url + "/" + CStringUtils::ltrim(createUrlDefault(route, ampersand), "/");
+
+	if (!useLangBasedUrls) {
+		return url + "/" + CStringUtils::ltrim(createUrlDefault(route, ampersand), "/");
+	}
+
+	if (language != Jvibetto::app()->getLanguage() || appendLanguageWhenItIsDefault) {
+		url += "/" + language;
+	}
+
+	return "/" + (url.empty() ? "" : CStringUtils::trim(url, "/") + "/")
+		+ CStringUtils::ltrim(createUrlDefault(route, ampersand), "/");
 }
 
 string CUrlManager::createUrlDefault(TRouteStruct & route, const string & ampersand) const
@@ -362,6 +398,31 @@ string CUrlManager::trimScriptName(const string &path)
 		return path;
 	}
 	return path.substr(pos + scriptName.length() + 1);
+}
+
+string CUrlManager::resolveLanguage(TRequestParams & params) const
+{
+	if (!useLangBasedUrls) {
+		return _defaultLanguage;
+	}
+	string language = "";
+	TRequestParams::const_iterator paramFound = params.find(languageParamName);
+	if (paramFound != params.end()) {
+		language = paramFound->second;
+	} else if (storeLanguageInCookies) {
+		CCookieCollection & cookies = dynamic_cast<CHttpRequest*>((Jvibetto::app()->getComponent("request")))->getCookies();
+		CCookieCollection::const_iterator cookieFound = cookies.find(languageCookieName);
+		if (cookieFound != cookies.end()) {
+			language = cookieFound->second.value;
+		}
+	}
+	if (language.empty()) {
+		language = _defaultLanguage;
+	}
+	if (params.find(languageParamName) != params.end()) {
+		params.erase(languageParamName);
+	}
+	return language;
 }
 
 string CUrlManager::getScriptName() const
@@ -408,6 +469,36 @@ string CUrlManager::createPathInfo(const TRequestParams & params, const string &
 
 string CUrlManager::parseUrl(CHttpRequest * const request) const
 {
+	if (useLangBasedUrls) {
+		CApplication * app = Jvibetto::app();
+		string rawPathInfo = request->getPathInfo();
+		string language = "";
+		boost::smatch matches;
+		string regexpStr = "(" + CStringUtils::implode("|", app->getLanguages()) + ")/?(.*)";
+#ifdef JV_DEBUG
+		Jvibetto::trace("CUrlManager::parseUrl trying to identify language from query. Regexp: " + regexpStr);
+#endif
+		boost::regex regexp(regexpStr, boost::regex_constants::normal);
+		if (boost::regex_match(rawPathInfo, matches, regexp)) {
+			app->setLanguage(language = matches[1]);
+			if (storeLanguageInCookies) {
+				CHttpCookie cookie(languageCookieName, matches[1]);
+				CHttpResponse * response = dynamic_cast<CHttpResponse*>(app->getComponent("response"));
+				response->addCookie(cookie);
+			}
+			request->setPathInfo(matches[2]);
+		} else if (storeLanguageInCookies) {
+			CCookieCollection & cookies = request->getCookies();
+			CCookieCollection::const_iterator cookieFound = cookies.find(languageCookieName);
+			if (cookieFound != cookies.end()) {
+				app->setLanguage(language = cookieFound->second.value);
+			}
+		}
+		if (!language.empty()) {
+			request->setParam(languageParamName, language);
+		}
+	}
+
 	if (urlFormat == FORMAT_PATH) {
 		string rawPathInfo = request->getPathInfo();
 		string pathInfo = removeUrlSuffix(rawPathInfo, urlSuffix);

@@ -38,6 +38,7 @@ public:
 	virtual void populateProperty(const string & name, const SAField * value) = 0;
 	void setDbConnection(CDbConnection * connection);
 	CDbConnection * getDbConnection() const;
+	TActiveRecordList findAll() throw (CDbException);
 	TActiveRecordList findAll(const CDbCriteria & criteria) throw (CDbException);
 	TActiveRecordPtr find(const CDbCriteria & criteria) throw (CDbException);
 	TActiveRecordList populateRecords(CDbDataReader & data, bool callAfterFind = true);

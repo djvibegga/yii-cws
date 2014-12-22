@@ -28,6 +28,11 @@ public:
 
 	static void setPathOfAlias(const string & alias, const boost::filesystem::path & path);
 	static boost::filesystem::path getPathOfAlias(const string & alias);
+	static _string t(const _string & message);
+	static _string t(const _string & message, char const * category);
 };
+
+#define _t(message) Jvibetto::t(message)
+#define _tc(message, category) Jvibetto::t(message, category)
 
 #endif /* YIIBASE_H_ */

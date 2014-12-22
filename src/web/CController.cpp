@@ -61,7 +61,9 @@ void CController::run(const string &actionId, CHttpRequest * const request, CHtt
 		throw CHttpException(404, "Route not found");
 	}
 	TAction action = iter->second;
+	_actionId = actionId;
 	(this->*action)(request, response);
+	_actionId = "";
 }
 
 string CController::getViewFile(const string & viewName) const throw (CException)
@@ -274,4 +276,29 @@ void CController::processOutput(_string & output)
 //		$this->_pageStates=$this->loadPageStates();
 //	if(!empty($this->_pageStates))
 //		$this->savePageStates($this->_pageStates,$output);*/
+}
+
+string CController::getUniqueId() const
+{
+	CModule * module = getModule();
+	return module != 0 ? module->getId() + "/" + getId() : getId();
+}
+
+string CController::getRoute() const
+{
+	if (_actionId.empty()) {
+		return getUniqueId();
+	} else {
+		return getUniqueId() + "/" + _actionId;
+	}
+}
+
+void CController::setAction(const string & actionId)
+{
+	_actionId = actionId;
+}
+
+string CController::getAction() const
+{
+	return _actionId;
 }

@@ -41,6 +41,12 @@ CDbConnection * CActiveRecord::getDbConnection() const
 	return _connection;
 }
 
+TActiveRecordList CActiveRecord::findAll() throw (CDbException)
+{
+	CDbCriteria criteria;
+	return findAll(criteria);
+}
+
 TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria) throw (CDbException)
 {
 #ifdef JV_DEBUG
@@ -52,7 +58,7 @@ TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria) throw (CD
 TActiveRecordPtr CActiveRecord::find(const CDbCriteria & criteria) throw (CDbException)
 {
 	TActiveRecordList records = query(criteria, false);
-	return records[0];
+	return records.empty() ? TActiveRecordPtr((CActiveRecord*)0) : records[0];
 }
 
 TActiveRecordList CActiveRecord::query(const CDbCriteria & criteria, bool all) throw (CDbException)

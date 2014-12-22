@@ -7,6 +7,7 @@
 
 #include <base/Jvibetto.h>
 #include <base/CStringUtils.h>
+#include <stdarg.h>
 
 TPathAliasMap Jvibetto::_aliases;
 
@@ -64,4 +65,18 @@ void Jvibetto::setPathOfAlias(const string & alias, const boost::filesystem::pat
     } else {
         _aliases[alias] = boost::filesystem::canonical(path);
     }
+}
+
+_string Jvibetto::t(const _string & message)
+{
+	CApplication * app = CApplication::getInstance();
+	const char * category = app->name.c_str();
+	return t(message, category);
+}
+
+_string Jvibetto::t(const _string & message, char const * category)
+{
+	CApplication * app = CApplication::getInstance();
+	std::locale loc = app->getLocaleByLanguage(app->getLanguage());
+	return boost::locale::dgettext(category, message.c_str(), loc);
 }

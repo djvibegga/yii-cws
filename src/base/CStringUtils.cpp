@@ -74,6 +74,9 @@ string CStringUtils::strtr(const string & needle, const TReplacementMap & replac
 
 string CStringUtils::implode(const string &glue, const vector<string> &pieces)
 {
+	if (pieces.empty()) {
+		return "";
+	}
 	string ret = *pieces.begin();
 	for (vector<string>::const_iterator iter = ++pieces.begin(); iter != pieces.end(); ++iter) {
 		ret += glue + *iter;
@@ -83,6 +86,9 @@ string CStringUtils::implode(const string &glue, const vector<string> &pieces)
 
 wstring CStringUtils::implode(const wstring &glue, const vector<wstring> &pieces)
 {
+	if (pieces.empty()) {
+		return L"";
+	}
 	wstring ret = *pieces.begin();
 	for (vector<wstring>::const_iterator iter = ++pieces.begin(); iter != pieces.end(); ++iter) {
 		ret += glue + *iter;
