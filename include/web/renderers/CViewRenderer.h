@@ -10,16 +10,23 @@
 
 #include <base/CApplicationComponent.h>
 #include <base/CException.h>
+#include <ctpp2/CTPP2VMLoader.hpp>
+
+typedef boost::shared_ptr<VMLoader> VMLoaderPtr;
+typedef map<string, VMLoaderPtr> TDynamicTemplateCacheMap;
 
 class CViewRenderer: public CApplicationComponent, public IViewRenderer
 {
+private:
+	TDynamicTemplateCacheMap _templateCache;
+
 public:
     bool useRuntimePath;
     unsigned int filePermission;
     CViewRenderer(CModule * module);
     CViewRenderer(const string &id, CModule * module);
     virtual ~CViewRenderer();
-    _string renderFile(const IRenderingContext * context, const string & sourceFile, const cpptempl::data_map & data, bool ret) throw (CException);
+    _string renderFile(const IRenderingContext * context, const string & sourceFile, CDT & data, bool ret) throw (CException);
 
 protected:
     virtual bool generateViewFile(const string & sourceFile, const string & viewFile) = 0;

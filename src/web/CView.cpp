@@ -87,7 +87,7 @@ string CView::getViewFile(const string & viewName) const throw (CException)
 	return "";
 }
 
-_string CView::render(const string & view, cpptempl::data_map & data, bool ret) throw (CException)
+_string CView::render(const string & view, CDT & data, bool ret) throw (CException)
 {
 	string viewFile = getViewFile(view);
 	if (!viewFile.empty()) {
@@ -119,12 +119,23 @@ _string CView::getContent() const
 	return _outputBuffer->getContent();
 }
 
-void CView::echo(const _string & content)
+void CView::echo(const wstring & content)
 {
 	_outputBuffer->echo(content);
 }
 
-IOutputBuffer & CView::operator<< (const _string &right)
+void CView::echo(const string & content)
+{
+	_outputBuffer->echo(content);
+}
+
+IOutputBuffer & CView::operator<< (const wstring &right)
+{
+	*_outputBuffer << right;
+	return *this;
+}
+
+IOutputBuffer & CView::operator<< (const string &right)
 {
 	*_outputBuffer << right;
 	return *this;

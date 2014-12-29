@@ -30,3 +30,19 @@ void CProfiler::add(const TProfileLogItem & item)
 {
 	_items.push_back(item);
 }
+
+void CProfiler::begin(const string & msg)
+{
+	TProfileLogItem item;
+	gettimeofday(&item.timeBegin, 0);
+	item.message = msg;
+	_stack.push(item);
+}
+
+void CProfiler::end()
+{
+	TProfileLogItem item = _stack.top();
+	gettimeofday(&item.timeEnd, 0);
+	add(item);
+	_stack.pop();
+}

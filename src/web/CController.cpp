@@ -6,6 +6,7 @@
  */
 
 #include "web/CController.h"
+#include "base/CStringUtils.h"
 #include "web/CWebModule.h"
 #include "base/CException.h"
 #include "base/Jvibetto.h"
@@ -138,7 +139,7 @@ string CController::resolveViewFile(
     return boost::filesystem::exists(boost::filesystem::path(viewFile)) ? viewFile : "";
 }
 
-_string CController::renderPartial(const string & view, const cpptempl::data_map & data, bool ret, bool processOutput) throw (CException)
+_string CController::renderPartial(const string & view, CDT & data, bool ret, bool processOutput) throw (CException)
 {
     string viewFile = getViewFile(view);
     if (!viewFile.empty()) {
@@ -153,7 +154,7 @@ _string CController::renderPartial(const string & view, const cpptempl::data_map
                 CHttpResponse * response = dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"));
                 response->echo(output);
             }
-        } catch (cpptempl::TemplateException & e) {
+        } catch (CTPPException & e) {
             throw CException(string("View render exception occured: ") + e.what());
         }
     } else {
@@ -210,7 +211,7 @@ string CController::getLayoutFile(const string & layoutName) throw (CException)
 	);
 }
 
-_string CController::render(const string & view, const cpptempl::data_map & data, bool ret) throw (CException)
+_string CController::render(const string & view, CDT & data, bool ret) throw (CException)
 {
 	CTemplateView viewInstance(getViewFile(view), data, this);
 	return render(viewInstance, ret);
@@ -224,8 +225,8 @@ _string CController::render(IView & viewInstance, bool ret) throw (CException)
 		if (layout != 0) {
 			CTemplateView * templateLayout = dynamic_cast<CTemplateView*>(layout);
 			if (templateLayout != 0) {
-				cpptempl::data_map viewData;
-				viewData["content"] = output;
+				CDT viewData;
+				viewData["content"] = _to_utf8(output);
 				templateLayout->setData(viewData);
 			} else {
 				CLayoutView * nativeLayout = dynamic_cast<CLayoutView*>(layout);

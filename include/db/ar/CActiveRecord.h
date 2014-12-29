@@ -93,10 +93,11 @@ CActiveRecord * className::instantiate(const TDbRow & attributes) const\
  */
 #define AR_CONVERISION_LONG ->asLong()
 #define AR_CONVERISION_ULONG ->asULong()
-#ifdef _UNICODE
-#define AR_CONVERISION_STRING ->asString().GetWideChars()
-#else
 #define AR_CONVERISION_STRING ->asString().GetMultiByteChars()
+#ifdef _UNICODE
+#define AR_CONVERISION_VSTRING ->asString().GetWideChars()
+#else
+#define AR_CONVERISION_VSTRING ->asString().GetMultiByteChars()
 #endif
 #define AR_CONVERISION_DOUBLE ->asDouble()
 
@@ -142,7 +143,8 @@ public:\
  */
 #define AR_ATTRIBUTE_LONG long
 #define AR_ATTRIBUTE_ULONG unsigned long
-#define AR_ATTRIBUTE_STRING _string
+#define AR_ATTRIBUTE_STRING string
+#define AR_ATTRIBUTE_VSTRING _string
 #define AR_ATTRIBUTE_DOUBLE double
 
 #endif /* CACTIVERECORD_H_ */

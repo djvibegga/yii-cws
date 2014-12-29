@@ -19,28 +19,28 @@ struct TProfileLogItem
 };
 
 typedef vector<TProfileLogItem> TProfileLogList;
+typedef stack<TProfileLogItem> TProfileLogBuffer;
 
 class CProfiler: public CComponent
 {
 private:
 	TProfileLogList _items;
+	TProfileLogBuffer _stack;
 	static string _formatItem(const TProfileLogItem & item);
 
 public:
 	void add(const TProfileLogItem & item);
+	void begin(const string & msg);
+	void end();
 	void logItems();
 };
 
 #ifdef JV_DEBUG
 #define PROFILE_BEGIN(msg) \
-	TProfileLogItem item; \
-	gettimeofday(&item.timeBegin, 0); \
-	item.message = msg; \
+	CApplication::getInstance()->getProfiler().begin(msg);
 
 #define PROFILE_END() \
-	gettimeofday(&item.timeEnd, 0);\
-	CApplication::getInstance()->getProfiler().add(item);
-
+	CApplication::getInstance()->getProfiler().end();
 #else
 
 #define PROFILE_BEGIN(message)

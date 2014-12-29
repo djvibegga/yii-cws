@@ -35,7 +35,8 @@ public:
 
     virtual void echo(const wstring & content);
     virtual void echo(const string & content);
-    virtual IOutputBuffer & operator<< (const _string &right);
+    virtual IOutputBuffer & operator<< (const wstring &right);
+    virtual IOutputBuffer & operator<< (const string &right);
     void addHeader(const string & name, const string & value) throw (CException);
     void addCookie(const CHttpCookie & cookie) throw (CException);
     void removeCookie(const CHttpCookie & cookie) throw (CException);

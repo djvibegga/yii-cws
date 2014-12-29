@@ -72,4 +72,17 @@ public:
     SAField & queryScalar(const TCommandParameterMap & params) throw (CDbException);
 };
 
+/**
+ * Data column attributes conversions
+ */
+#define COLUMN_TO_LONG(value) value->asLong()
+#define COLUMN_TO_ULONG(value) value->asULong()
+#define COLUMN_TO_STRING(value) value->asString().GetMultiByteChars()
+#ifdef _UNICODE
+#define COLUMN_TO_VSTRING(value) value->asString().GetWideChars()
+#else
+#define COLUMN_TO_VSTRING(value) value->asString().GetMultiByteChars()
+#endif
+#define COLUMN_TO_DOUBLE(value) value->asDouble()
+
 #endif /* CDBCOMMAND_H_ */

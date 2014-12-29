@@ -49,13 +49,13 @@ public:
 	    const boost::filesystem::path & viewPath,
 	    const boost::filesystem::path & basePath,
 	    const boost::filesystem::path & moduleViewPath) const throw (CException);
-	virtual _string renderPartial(const string & view, const cpptempl::data_map & data, bool ret = false, bool processOutput = false) throw (CException);
+	virtual _string renderPartial(const string & view, CDT & data, bool ret = false, bool processOutput = false) throw (CException);
 	virtual _string renderPartial(IView & viewInstance, bool ret = false, bool processOutput = false) throw (CException);
 	virtual string getLayoutFile(const string & layoutName) throw (CException);
 	virtual TViewPtr getLayout() const;
 	virtual void setLayout(const string & layout);
 	virtual void setLayout(TViewPtr layout);
-	virtual _string render(const string & view, const cpptempl::data_map & data, bool ret = false) throw (CException);
+	virtual _string render(const string & view, CDT & data, bool ret = false) throw (CException);
 	virtual _string render(IView & viewInstance, bool ret = false) throw (CException);
 	virtual void processOutput(_string & output);
 

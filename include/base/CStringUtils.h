@@ -41,6 +41,39 @@ public:
 	static int toInt(const string & str);
 
 	static bool lengthComparator(const string & a, const string & b);
+
+	static inline std::wstring utf8_to_wide(const std::string & text) {
+	#ifndef _MSC_VER
+			return boost::locale::conv::to_utf<wchar_t>(text, "UTF-8");
+	#else
+			// Calculate the required length of the buffer
+			const size_t len_needed = ::MultiByteToWideChar(CP_UTF8, 0, text.c_str(), (UINT)(text.length()) , NULL, 0 );
+			boost::scoped_array<wchar_t> buff(new wchar_t[len_needed+1]) ;
+			const size_t num_copied = ::MultiByteToWideChar(CP_UTF8, 0, text.c_str(), text.size(), buff.get(), len_needed+1) ;
+			return std::wstring(buff.get(), num_copied) ;
+	#endif
+		}
+
+	static inline std::string wide_to_utf8(const std::wstring& text) {
+	#ifndef _MSC_VER
+			return boost::locale::conv::from_utf<>(text, "UTF-8");
+	#else
+			const size_t len_needed = ::WideCharToMultiByte(CP_UTF8, 0, text.c_str(), (UINT)(text.length()) , NULL, 0, NULL, NULL) ;
+			boost::scoped_array<char> buff(new char[len_needed+1]) ;
+			const size_t num_copied = ::WideCharToMultiByte(CP_UTF8, 0, text.c_str(), (UINT)(text.length()) , buff.get(), len_needed+1, NULL, NULL) ;
+			return std::string(buff.get(), num_copied) ;
+	#endif
+		}
 };
+
+#ifdef _UNICODE
+#define _to_utf8(data) CStringUtils::wide_to_utf8(data)
+#define utf8_to_(data) CStringUtils::utf8_to_wide(data)
+#define wide_to_(data) data
+#else
+#define _to_utf8(data) data
+#define utf8_to_(data) data
+#define wide_to_(data) CStringUtils::wide_to_utf8(data)
+#endif
 
 #endif /* CSTRINGUTILS_H_ */

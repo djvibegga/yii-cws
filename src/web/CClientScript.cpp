@@ -426,7 +426,7 @@ void CClientScript::remapScripts()
 
 void CClientScript::renderHead(_string & output)
 {
-	PROFILE_BEGIN("CClientScript::renderHead()");
+	PROFILE_BEGIN("CClientScript::renderHead()")
 	_string html;
 	for (TMetaTagsList::const_iterator iter = metaTags.begin(); iter != metaTags.end(); ++iter) {
 		html += CHtml::metaTag(iter->at(_("content")), _(""), _(""), *iter) + _("\n");
@@ -461,7 +461,7 @@ void CClientScript::renderHead(_string & output)
 		} else {
 			output = boost::regex_replace(
 				output,
-				boost::wregex(_("(</head\\s*>)")),
+				_regex(_("(</head\\s*>)")),
 				_("<#head#>$1")
 			);
 			_string replacement = _("<#head#>");
@@ -496,7 +496,7 @@ void CClientScript::renderBodyBegin(_string & output)
 		} else {
 			output = boost::regex_replace(
 				output,
-				boost::wregex(_("(<body\\b[^>]*>)")),
+				_regex(_("(<body\\b[^>]*>)")),
 				_("$1<#begin#>")
 			);
 			_string replacement = _("<#begin#>");
@@ -513,7 +513,7 @@ void CClientScript::renderBodyEnd(_string & output)
 	bool isFullPage = output.find(_("</body")) != ::_string::npos;
 	output = boost::regex_replace(
 		output,
-		boost::wregex(_("(</body\\s*>)")),
+		_regex(_("(</body\\s*>)")),
 		_("<#end#>$1")
 	);
 	_string html;

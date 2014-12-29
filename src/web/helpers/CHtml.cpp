@@ -6,7 +6,7 @@
  */
 
 #include "web/helpers/CHtml.h"
-#include "base/cpptempl.h"
+#include "base/CStringUtils.h"
 #include <boost/assign.hpp>
 
 const TTagAttributesMap CHtml::_specialAttributes = boost::assign::map_list_of

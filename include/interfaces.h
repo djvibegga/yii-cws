@@ -140,15 +140,19 @@ public:
 	virtual IModule * getModule(const string &name) const = 0;
 };
 
-#include <base/cpptempl.h>
+#include <ctpp2/CDT.hpp>
+
+using namespace CTPP;
 
 class IOutputBuffer
 {
 public:
 	virtual ~IOutputBuffer() {};
 	virtual _string getContent() const = 0;
-	virtual void echo(const _string & content) = 0;
-	virtual IOutputBuffer & operator<< (const _string &right) = 0;
+	virtual void echo(const wstring & content) = 0;
+	virtual void echo(const string & content) = 0;
+	virtual IOutputBuffer & operator<< (const wstring &right) = 0;
+	virtual IOutputBuffer & operator<< (const string &right) = 0;
 };
 
 class IView;
@@ -169,7 +173,7 @@ class IRenderingContext
 {
 public:
     virtual ~IRenderingContext() {}
-    virtual _string renderInternal(const string & viewFile, const cpptempl::data_map & data, bool ret = false) const = 0;
+    virtual _string renderInternal(const string & viewFile, CDT & data, bool ret = false) const = 0;
     virtual _string renderInternal(IView & viewInstance, bool ret = false) const = 0;
 };
 
@@ -177,9 +181,10 @@ class IViewRenderer
 {
 public:
     string fileExtension;
-    IViewRenderer() : fileExtension(".tpl") {}
+    IViewRenderer() : fileExtension(".html") {}
     virtual ~IViewRenderer() {}
-    virtual _string renderFile(const IRenderingContext * context, const string & file, const cpptempl::data_map & data, bool ret) = 0;
+    virtual string getViewFile(const string & sourceFile) = 0;
+    virtual _string renderFile(const IRenderingContext * context, const string & file, CDT & data, bool ret) = 0;
 };
 
 class IHasLayout

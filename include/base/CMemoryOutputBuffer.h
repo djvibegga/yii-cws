@@ -18,8 +18,10 @@ private:
 public:
 	virtual ~CMemoryOutputBuffer();
 	virtual _string getContent() const;
-	virtual void echo(const _string & content);
-	virtual IOutputBuffer & operator<< (const _string &right);
+	virtual void echo(const wstring & content);
+	virtual void echo(const string & content);
+	virtual IOutputBuffer & operator<< (const wstring &right);
+	virtual IOutputBuffer & operator<< (const string &right);
 };
 
 #endif /* CMEMORYOUTPUTBUFFER_H_ */

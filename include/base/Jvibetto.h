@@ -9,6 +9,7 @@
 #define YIIBASE_H_
 
 #include "base/CApplication.h"
+#include "base/CStringUtils.h"
 
 typedef map<string, boost::filesystem::path> TPathAliasMap;
 

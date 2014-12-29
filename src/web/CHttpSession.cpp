@@ -10,6 +10,7 @@
 #include "base/Jvibetto.h"
 #include "base/CAsyncTask.h"
 #include "base/CApplicationPool.h"
+#include "base/CStringUtils.h"
 #include "utils/CFile.h"
 #include <boost/uuid/uuid_io.hpp>
 #include "utils/CArchiver.h"

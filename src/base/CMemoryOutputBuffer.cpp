@@ -6,6 +6,7 @@
  */
 
 #include "base/CMemoryOutputBuffer.h"
+#include "base/CStringUtils.h"
 
 CMemoryOutputBuffer::~CMemoryOutputBuffer()
 {
@@ -16,13 +17,24 @@ _string CMemoryOutputBuffer::getContent() const
 	return _content;
 }
 
-void CMemoryOutputBuffer::echo(const _string & content)
+void CMemoryOutputBuffer::echo(const wstring & content)
 {
-	_content += content;
+	_content += wide_to_(content);
 }
 
-IOutputBuffer & CMemoryOutputBuffer::operator<< (const _string &right)
+void CMemoryOutputBuffer::echo(const string & content)
 {
-	_content += right;
+	_content += utf8_to_(content);
+}
+
+IOutputBuffer & CMemoryOutputBuffer::operator<< (const wstring &right)
+{
+	_content += wide_to_(right);
+	return *this;
+}
+
+IOutputBuffer & CMemoryOutputBuffer::operator<< (const string &right)
+{
+	_content += utf8_to_(right);
 	return *this;
 }

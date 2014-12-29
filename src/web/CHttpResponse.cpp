@@ -32,7 +32,7 @@ _string CHttpResponse::getContent() const
 
 void CHttpResponse::echo(const wstring & content)
 {
-	echo(cpptempl::wide_to_utf8(content));
+	echo(CStringUtils::wide_to_utf8(content));
 }
 
 void CHttpResponse::echo(const string & content)
@@ -45,7 +45,13 @@ void CHttpResponse::echo(const string & content)
 	FCGX_FPrintF(_app->request->out, content.c_str());
 }
 
-IOutputBuffer & CHttpResponse::operator<< (const _string &right)
+IOutputBuffer & CHttpResponse::operator<< (const wstring &right)
+{
+	echo(right);
+	return *this;
+}
+
+IOutputBuffer & CHttpResponse::operator<< (const string &right)
 {
 	echo(right);
 	return *this;

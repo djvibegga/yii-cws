@@ -13,6 +13,8 @@
 #include "base/CProfiler.h"
 #include "logging/CLogger.h"
 #include "logging/CLogRouter.h"
+#include "base/CTemplateEngine.h"
+
 #include <string>
 #include <stack>
 #include "pugiconfig.hpp"
@@ -92,6 +94,7 @@ public:
 	string getLanguage() const;
 	void end(unsigned int status = 0, bool needExit = true);
 	static long convertThreadIdToLong(boost::thread::id threadId);
+	CTemplateEngine * getTemplateEngine() const;
 
 	void setPool(CApplicationPool * pool);
 	CApplicationPool * getPool() const;
@@ -105,6 +108,7 @@ protected:
 	virtual void endRequest();
 	virtual void onProgramError();
 	virtual void processRequest() = 0;
+	virtual CTemplateEngine * createTemplateEngine();
 	virtual IViewRenderer * createViewRenderer();
 	virtual CLogRouter * createLogRouter();
 	virtual void applyConfig(const xml_node & config);

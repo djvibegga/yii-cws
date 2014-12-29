@@ -33,10 +33,12 @@ public:
 	virtual boost::filesystem::path getLocalViewPath() const;
 	virtual boost::filesystem::path getViewPath(bool checkTheme = false) const;
 	virtual string getViewFile(const string & viewName) const throw (CException);
-	virtual _string render(const string & view, cpptempl::data_map & data, bool ret = false) throw (CException);
+	virtual _string render(const string & view, CDT & data, bool ret = false) throw (CException);
 	virtual _string getContent() const;
-	virtual void echo(const _string & content);
-	virtual IOutputBuffer & operator<< (const _string &right);
+	virtual void echo(const wstring & content);
+	virtual void echo(const string & content);
+	virtual IOutputBuffer & operator<< (const wstring &right);
+	virtual IOutputBuffer & operator<< (const string &right);
 	void setLayout(const string & layout);
 	void setLayout(TViewPtr layout);
 	TViewPtr getLayout() const;

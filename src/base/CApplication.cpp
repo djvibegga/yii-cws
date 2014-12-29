@@ -120,6 +120,7 @@ void CApplication::init() throw(CException)
 	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
 #endif
 
+	createTemplateEngine();
 	createViewRenderer();
 
 	CModule::init();
@@ -217,6 +218,13 @@ boost::filesystem::path CApplication::getExecutablePath() const
 IViewRenderer * CApplication::getViewRenderer() const
 {
     return dynamic_cast<IViewRenderer*>(getComponent("viewRenderer"));
+}
+
+CTemplateEngine * CApplication::createTemplateEngine()
+{
+	CTemplateEngine * engine = new CTemplateEngine(this);
+	engine->init();
+	return engine;
 }
 
 IViewRenderer * CApplication::createViewRenderer()
@@ -365,6 +373,11 @@ long CApplication::convertThreadIdToLong(boost::thread::id threadId)
 	stringstream threadIdStr;
 	threadIdStr << threadId;
 	return strtol(threadIdStr.str().c_str(), 0, 16);
+}
+
+CTemplateEngine * CApplication::getTemplateEngine() const
+{
+	return dynamic_cast<CTemplateEngine*>(getComponent("templateEngine"));
 }
 
 void CApplication::setPool(CApplicationPool * pool)
