@@ -31,7 +31,7 @@ public:
     CHttpResponse(CWebApplication * app);
     ~CHttpResponse();
 
-    virtual _string getContent() const;
+    virtual string getContent() const;
 
     virtual void echo(const wstring & content);
     virtual void echo(const string & content);

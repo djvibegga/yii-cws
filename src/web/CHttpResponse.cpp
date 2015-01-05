@@ -25,9 +25,9 @@ CHttpResponse::~CHttpResponse()
 
 }
 
-_string CHttpResponse::getContent() const
+string CHttpResponse::getContent() const
 {
-	return _("");
+	return "";
 }
 
 void CHttpResponse::echo(const wstring & content)

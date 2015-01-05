@@ -34,7 +34,7 @@ CViewRenderer::~CViewRenderer()
 {
 }
 
-_string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, CDT & data, bool ret) throw (CException)
+string CViewRenderer::renderFile(const IRenderingContext * context, const string & sourceFile, CDT & data, bool ret) throw (CException)
 {
     boost::filesystem::path sourcePath(sourceFile);
     if (!boost::filesystem::exists(sourcePath)) {
@@ -75,10 +75,10 @@ _string CViewRenderer::renderFile(const IRenderingContext * context, const strin
 	PROFILE_END()
 
 	if (ret) {
-		return utf8_to_(os.str());
+		return os.str();
 	} else {
 		Jvibetto::app()->getOutputStack().top()->echo(os.str());
-		return _("");
+		return "";
 	}
 }
 

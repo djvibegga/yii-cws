@@ -11,7 +11,7 @@
 #include <map>
 #include "defines.h"
 
-typedef map<_string, _string> TTagAttributesMap;
+typedef map<string, string> TTagAttributesMap;
 
 class CHtml
 {
@@ -19,32 +19,32 @@ private:
 	static const TTagAttributesMap _specialAttributes;
 
 public:
-	static _string tag(
-			const _string & tag,
+	static string tag(
+			const string & tag,
 			const TTagAttributesMap & htmlOptions,
-			const _string & content,
+			const string & content,
 			bool closeTag = true);
-	static _string tag(
-		const _string & tag,
+	static string tag(
+		const string & tag,
 		const TTagAttributesMap & htmlOptions = TTagAttributesMap(),
 		bool closeTag = true);
-	static _string metaTag(
-		const _string & content,
-		const _string name = _(""),
-		const _string httpEquiv = _(""),
+	static string metaTag(
+		const string & content,
+		const string name = "",
+		const string httpEquiv = "",
 		const TTagAttributesMap & options = TTagAttributesMap());
-	static _string linkTag(
-		const _string & relation = _(""),
-		const _string & type = _(""),
-		const _string & href = _(""),
-		const _string & media = _(""),
+	static string linkTag(
+		const string & relation = "",
+		const string & type = "",
+		const string & href = "",
+		const string & media = "",
 		const TTagAttributesMap & options = TTagAttributesMap());
-	static _string css(const _string & text, const _string & media = _(""));
-	static _string cssFile(const string & url, const _string & media = _(""));
-	static _string script(const _string & text, const _string & type = _("text/javascript"));
-	static _string scriptFile(const string & url, const _string & type = _("text/javascript"));
-	static _string renderAttributes(const TTagAttributesMap & htmlOptions);
-	static _string encode(const _string & text);
+	static string css(const string & text, const string & media = "");
+	static string cssFile(const string & url, const string & media = "");
+	static string script(const string & text, const string & type = "text/javascript");
+	static string scriptFile(const string & url, const string & type = "text/javascript");
+	static string renderAttributes(const TTagAttributesMap & htmlOptions);
+	static string encode(const string & text);
 };
 
 #endif /* CHTML_H_ */

@@ -139,12 +139,12 @@ string CController::resolveViewFile(
     return boost::filesystem::exists(boost::filesystem::path(viewFile)) ? viewFile : "";
 }
 
-_string CController::renderPartial(const string & view, CDT & data, bool ret, bool processOutput) throw (CException)
+string CController::renderPartial(const string & view, CDT & data, bool ret, bool processOutput) throw (CException)
 {
     string viewFile = getViewFile(view);
     if (!viewFile.empty()) {
         try {
-            _string output = renderFile(viewFile, data, true);
+            string output = renderFile(viewFile, data, true);
             if (processOutput) {
                 this->processOutput(output);
             }
@@ -160,12 +160,12 @@ _string CController::renderPartial(const string & view, CDT & data, bool ret, bo
     } else {
         throw CException("Controller cannot find the requested view \"{" + view + "\".");
     }
-    return _("");
+    return "";
 }
 
-_string CController::renderPartial(IView & viewInstance, bool ret, bool processOutput) throw (CException)
+string CController::renderPartial(IView & viewInstance, bool ret, bool processOutput) throw (CException)
 {
-	_string output = renderInternal(viewInstance, true);
+	string output = renderInternal(viewInstance, true);
 	if (processOutput) {
 		this->processOutput(output);
 	}
@@ -174,7 +174,7 @@ _string CController::renderPartial(IView & viewInstance, bool ret, bool processO
 	} else {
 		Jvibetto::app()->getOutputStack().top()->echo(output);
 	}
-	return _("");
+	return "";
 }
 
 string CController::getLayoutFile(const string & layoutName) throw (CException)
@@ -211,22 +211,22 @@ string CController::getLayoutFile(const string & layoutName) throw (CException)
 	);
 }
 
-_string CController::render(const string & view, CDT & data, bool ret) throw (CException)
+string CController::render(const string & view, CDT & data, bool ret) throw (CException)
 {
 	CTemplateView viewInstance(getViewFile(view), data, this);
 	return render(viewInstance, ret);
 }
 
-_string CController::render(IView & viewInstance, bool ret) throw (CException)
+string CController::render(IView & viewInstance, bool ret) throw (CException)
 {
 	if (beforeRender(viewInstance)) {
-		_string output = renderPartial(viewInstance, true, false);
+		string output = renderPartial(viewInstance, true, false);
 		IView * layout = viewInstance.getLayout().get();
 		if (layout != 0) {
 			CTemplateView * templateLayout = dynamic_cast<CTemplateView*>(layout);
 			if (templateLayout != 0) {
 				CDT viewData;
-				viewData["content"] = _to_utf8(output);
+				viewData["content"] = output;
 				templateLayout->setData(viewData);
 			} else {
 				CLayoutView * nativeLayout = dynamic_cast<CLayoutView*>(layout);
@@ -247,7 +247,7 @@ _string CController::render(IView & viewInstance, bool ret) throw (CException)
 			Jvibetto::app()->getOutputStack().top()->echo(output);
 		}
 	}
-	return _("");
+	return "";
 }
 
 bool CController::beforeRender(const IView & viewInstance)
@@ -255,11 +255,11 @@ bool CController::beforeRender(const IView & viewInstance)
 	return true;
 }
 
-void CController::afterRender(const IView & viewInstance, _string &output)
+void CController::afterRender(const IView & viewInstance, string &output)
 {
 }
 
-void CController::processOutput(_string & output)
+void CController::processOutput(string & output)
 {
 	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
 	if (cs) {

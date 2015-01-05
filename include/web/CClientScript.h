@@ -32,17 +32,17 @@ typedef map<string, string> TScriptMap;
 
 struct CssBlock
 {
-	_string media;
-	_string code;
+	string media;
+	string code;
 };
 typedef CssBlock TCssBlock;
 
-typedef insert_ordered_map<string, _string> TInlineJavascriptCodeMap;
+typedef insert_ordered_map<string, string> TInlineJavascriptCodeMap;
 typedef map<int, TInlineJavascriptCodeMap> TInlineJavascriptMap;
 typedef insert_ordered_map<string, TCssBlock> TInlineCssMap;
-typedef insert_ordered_map<string, _string> TClientFileMap;
+typedef insert_ordered_map<string, string> TClientFileMap;
 typedef map<int, TClientFileMap> TJavascriptFileMap;
-typedef insert_ordered_map<string, _string> TCssFileMap;
+typedef insert_ordered_map<string, string> TCssFileMap;
 typedef vector<TTagAttributesMap> TMetaTagsList;
 typedef vector<TTagAttributesMap> TLinkTagsList;
 
@@ -81,25 +81,25 @@ public:
 	virtual void renderCoreScripts();
 	CClientScript & registerPackage(const string & name);
 	CClientScript & registerScriptFile(const string & url, int position = POS_HEAD);
-	CClientScript & registerScript(const string & id, const _string & script, int position = POS_READY);
-	CClientScript & registerCssFile(const string & url, const _string & media = _(""));
-	CClientScript & registerCss(const string & id, const _string & css, const _string & media = _(""));
+	CClientScript & registerScript(const string & id, const string & script, int position = POS_READY);
+	CClientScript & registerCssFile(const string & url, const string & media = "");
+	CClientScript & registerCss(const string & id, const string & css, const string & media = "");
 	CClientScript & registerMetaTag(
-		const _string & content,
-		const _string & name = _(""),
-		const _string & httpEquiv = _(""),
+		const string & content,
+		const string & name = "",
+		const string & httpEquiv = "",
 		const TTagAttributesMap & options = TTagAttributesMap());
 	CClientScript & registerLinkTag(
-		const _string & relation = _(""),
-		const _string & type = _(""),
-		const _string & href = _(""),
-		const _string & media = _(""),
+		const string & relation = "",
+		const string & type = "",
+		const string & href = "",
+		const string & media = "",
 		const TTagAttributesMap & options = TTagAttributesMap());
 
-	void render(_string & output);
-	virtual void renderHead(_string & output);
-	virtual void renderBodyBegin(_string & output);
-	virtual void renderBodyEnd(_string & output);
+	void render(string & output);
+	virtual void renderHead(string & output);
+	virtual void renderBodyBegin(string & output);
+	virtual void renderBodyEnd(string & output);
 
 	bool isCssFileRegistered(const string & url) const;
 	bool isCssRegistered(const string & id) const;
@@ -122,7 +122,7 @@ protected:
 	virtual string resolveCoreScriptUrl() const;
 	virtual void unifyScripts();
 	virtual void remapScripts();
-	virtual _string renderScriptBatch(const TInlineJavascriptCodeMap & scripts);
+	virtual string renderScriptBatch(const TInlineJavascriptCodeMap & scripts);
 };
 
 #endif /* CCLIENTSCRIPT_H_ */

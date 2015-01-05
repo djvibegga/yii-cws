@@ -12,29 +12,29 @@ CMemoryOutputBuffer::~CMemoryOutputBuffer()
 {
 }
 
-_string CMemoryOutputBuffer::getContent() const
+string CMemoryOutputBuffer::getContent() const
 {
 	return _content;
 }
 
 void CMemoryOutputBuffer::echo(const wstring & content)
 {
-	_content += wide_to_(content);
+	_content += CStringUtils::wide_to_utf8(content);
 }
 
 void CMemoryOutputBuffer::echo(const string & content)
 {
-	_content += utf8_to_(content);
+	_content += content;
 }
 
 IOutputBuffer & CMemoryOutputBuffer::operator<< (const wstring &right)
 {
-	_content += wide_to_(right);
+	_content += CStringUtils::wide_to_utf8(right);
 	return *this;
 }
 
 IOutputBuffer & CMemoryOutputBuffer::operator<< (const string &right)
 {
-	_content += utf8_to_(right);
+	_content += right;
 	return *this;
 }

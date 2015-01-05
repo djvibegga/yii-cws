@@ -10,174 +10,174 @@
 #include <boost/assign.hpp>
 
 const TTagAttributesMap CHtml::_specialAttributes = boost::assign::map_list_of
-(_("async"), _("1"))
-(_("autofocus"), _("1"))
-(_("autoplay"), _("1"))
-(_("checked"), _("1"))
-(_("controls"), _("1"))
-(_("declare"), _("1"))
-(_("default"), _("1"))
-(_("defer"), _("1"))
-(_("disabled"), _("1"))
-(_("formnovalidate"), _("1"))
-(_("hidden"), _("1"))
-(_("ismap"), _("1"))
-(_("loop"), _("1"))
-(_("multiple"), _("1"))
-(_("muted"), _("1"))
-(_("nohref"), _("1"))
-(_("noresize"), _("1"))
-(_("novalidate"), _("1"))
-(_("open"), _("1"))
-(_("readonly"), _("1"))
-(_("required"), _("1"))
-(_("reversed"), _("1"))
-(_("scoped"), _("1"))
-(_("seamless"), _("1"))
-(_("selected"), _("1"))
-(_("typemustmatch"), _("1"));
+("async", "1")
+("autofocus", "1")
+("autoplay", "1")
+("checked", "1")
+("controls", "1")
+("declare", "1")
+("default", "1")
+("defer", "1")
+("disabled", "1")
+("formnovalidate", "1")
+("hidden", "1")
+("ismap", "1")
+("loop", "1")
+("multiple", "1")
+("muted", "1")
+("nohref", "1")
+("noresize", "1")
+("novalidate", "1")
+("open", "1")
+("readonly", "1")
+("required", "1")
+("reversed", "1")
+("scoped", "1")
+("seamless", "1")
+("selected", "1")
+("typemustmatch", "1");
 
-_string CHtml::tag(
-	const _string & tag,
+string CHtml::tag(
+	const string & tag,
 	const TTagAttributesMap & htmlOptions,
-	const _string & content,
+	const string & content,
 	bool closeTag)
 {
-	_string html = _("<") + tag + renderAttributes(htmlOptions) + _(">");
+	string html = "<" + tag + renderAttributes(htmlOptions) + ">";
 	return closeTag
-		  ? html + content + _("</") + tag + _(">")
+		  ? html + content + "</" + tag + ">"
 		  : html + content;
 }
 
-_string CHtml::tag(
-	const _string & tag,
+string CHtml::tag(
+	const string & tag,
 	const TTagAttributesMap & htmlOptions,
 	bool closeTag)
 {
-	_string html = _("<") + tag + renderAttributes(htmlOptions);
-	return closeTag ? html + _(" />") : html + _(">");
+	string html = "<" + tag + renderAttributes(htmlOptions);
+	return closeTag ? html + " />" : html + ">";
 }
 
-_string CHtml::metaTag(
-	const _string & content,
-	const _string name,
-	const _string httpEquiv,
+string CHtml::metaTag(
+	const string & content,
+	const string name,
+	const string httpEquiv,
 	const TTagAttributesMap & options)
 {
 	TTagAttributesMap opts = options;
 	if (!name.empty()) {
-		opts[_("name")] = name;
+		opts["name"] = name;
 	}
 	if (!httpEquiv.empty()) {
-		opts[_("http-equiv")] = httpEquiv;
+		opts["http-equiv"] = httpEquiv;
 	}
-	opts[_("content")] = content;
-	return tag(_("meta"), opts);
+	opts["content"] = content;
+	return tag("meta", opts);
 }
 
-_string CHtml::linkTag(
-	const _string & relation,
-	const _string & type,
-	const _string & href,
-	const _string & media,
+string CHtml::linkTag(
+	const string & relation,
+	const string & type,
+	const string & href,
+	const string & media,
 	const TTagAttributesMap & options)
 {
 	TTagAttributesMap opts = options;
 	if (!relation.empty()) {
-		opts[_("rel")] = relation;
+		opts["rel"] = relation;
 	}
 	if (!type.empty()) {
-		opts[_("type")] = type;
+		opts["type"] = type;
 	}
 	if (!href.empty()) {
-		opts[_("href")] = href;
+		opts["href"] = href;
 	}
 	if (!media.empty()) {
-		opts[_("media")] = media;
+		opts["media"] = media;
 	}
-	return tag(_("link"), opts);
+	return tag("link", opts);
 }
 
-_string CHtml::css(const _string & text, const _string & media)
+string CHtml::css(const string & text, const string & media)
 {
-	_string mediaAttr;
+	string mediaAttr;
 	if (!media.empty()) {
-		mediaAttr = _(" media=\"") + media + _("\"");
+		mediaAttr = " media=\"" + media + "\"";
 	}
-	return _("<style type=\"text/css\"")
+	return "<style type=\"text/css\""
 		  + mediaAttr
-		  + _(">\n/*<![CDATA[*/\n") + text + _("\n/*]]>*/\n</style>");
+		  + ">\n/*<![CDATA[*/\n" + text + "\n/*]]>*/\n</style>";
 }
 
-_string CHtml::cssFile(const string & url, const _string & media)
+string CHtml::cssFile(const string & url, const string & media)
 {
-	return linkTag(_("stylesheet"), _("text/css"), utf8_to_(url), media);
+	return linkTag("stylesheet", "text/css", url, media);
 }
 
-_string CHtml::script(const _string & text, const _string & type)
+string CHtml::script(const string & text, const string & type)
 {
 	TTagAttributesMap htmlOptions;
-	htmlOptions[_("type")] = type;
+	htmlOptions["type"] = type;
 	return tag(
-		_("script"), htmlOptions,
-		_("\n/*<![CDATA[*/\n") + text + _("\n/*]]>*/\n"),
+		"script", htmlOptions,
+		"\n/*<![CDATA[*/\n" + text + "\n/*]]>*/\n",
 		true
 	);
 }
 
-_string CHtml::scriptFile(const string & url, const _string & type)
+string CHtml::scriptFile(const string & url, const string & type)
 {
 	TTagAttributesMap htmlOptions;
-	htmlOptions[_("type")] = type;
-	htmlOptions[_("src")] = utf8_to_(url);
-	return tag(_("script"), htmlOptions, _(""), true);
+	htmlOptions["type"] = type;
+	htmlOptions["src"] = url;
+	return tag("script", htmlOptions, "", true);
 }
 
-_string CHtml::renderAttributes(const TTagAttributesMap & htmlOptions)
+string CHtml::renderAttributes(const TTagAttributesMap & htmlOptions)
 {
 	TTagAttributesMap options = htmlOptions;
 	if (options.empty()) {
-		return _("");
+		return "";
 	}
-	_string html;
+	string html;
 	bool raw = false;
-	TTagAttributesMap::const_iterator encodeFound = options.find(_("encode"));
+	TTagAttributesMap::const_iterator encodeFound = options.find("encode");
 	if (encodeFound != options.end()) {
-		raw = options[_("encode")] != _("1");
-		options.erase(_("encode"));
+		raw = options["encode"] != "1";
+		options.erase("encode");
 	}
 
 	TTagAttributesMap::const_iterator foundSpecial;
 	for (TTagAttributesMap::const_iterator iter = options.begin(); iter != options.end(); ++iter) {
 		TTagAttributesMap::const_iterator specialFound = _specialAttributes.find(iter->first);
 		if (specialFound == _specialAttributes.end()) {
-			html += _(" ") + iter->first
-				 + _("=\"") + (raw ? iter->second : encode(iter->second))
-				 + _("\"");
+			html += " " + iter->first
+				 + "=\"" + (raw ? iter->second : encode(iter->second))
+				 + "\"";
 		} else {
-			html += _(" ") + iter->first
-				 + _("=\"") + iter->first + _("\"");
+			html += " " + iter->first
+				 + "=\"" + iter->first + "\"";
 		}
 	}
 
 	return html;
 }
 
-_string CHtml::encode(const _string & text)
+string CHtml::encode(const string & text)
 {
-	 _string buffer;
+	 string buffer;
 	 buffer.reserve(text.size());
 	 for(size_t pos = 0; pos != text.size(); ++pos) {
 		switch(text[pos]) {
-		case _('&'):  buffer.append(_("&amp;"));
+		case '&':  buffer.append("&amp;");
 			break;
-		case _('\"'): buffer.append(_("&quot;"));
+		case '\"': buffer.append("&quot;");
 			break;
-		case _('\''): buffer.append(_("&apos;"));
+		case '\'': buffer.append("&apos;");
 			break;
-		case _('<'):  buffer.append(_("&lt;"));
+		case '<':  buffer.append("&lt;");
 			break;
-		case _('>'):  buffer.append(_("&gt;"));
+		case '>':  buffer.append("&gt;");
 			break;
 		default:
 			buffer.append(&text[pos], 1);

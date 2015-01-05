@@ -148,7 +148,7 @@ class IOutputBuffer
 {
 public:
 	virtual ~IOutputBuffer() {};
-	virtual _string getContent() const = 0;
+	virtual string getContent() const = 0;
 	virtual void echo(const wstring & content) = 0;
 	virtual void echo(const string & content) = 0;
 	virtual IOutputBuffer & operator<< (const wstring &right) = 0;
@@ -173,8 +173,8 @@ class IRenderingContext
 {
 public:
     virtual ~IRenderingContext() {}
-    virtual _string renderInternal(const string & viewFile, CDT & data, bool ret = false) const = 0;
-    virtual _string renderInternal(IView & viewInstance, bool ret = false) const = 0;
+    virtual string renderInternal(const string & viewFile, CDT & data, bool ret = false) const = 0;
+    virtual string renderInternal(IView & viewInstance, bool ret = false) const = 0;
 };
 
 class IViewRenderer
@@ -184,7 +184,7 @@ public:
     IViewRenderer() : fileExtension(".html") {}
     virtual ~IViewRenderer() {}
     virtual string getViewFile(const string & sourceFile) = 0;
-    virtual _string renderFile(const IRenderingContext * context, const string & file, CDT & data, bool ret) = 0;
+    virtual string renderFile(const IRenderingContext * context, const string & file, CDT & data, bool ret) = 0;
 };
 
 class IHasLayout

@@ -87,7 +87,7 @@ string CView::getViewFile(const string & viewName) const throw (CException)
 	return "";
 }
 
-_string CView::render(const string & view, CDT & data, bool ret) throw (CException)
+string CView::render(const string & view, CDT & data, bool ret) throw (CException)
 {
 	string viewFile = getViewFile(view);
 	if (!viewFile.empty()) {
@@ -114,7 +114,7 @@ void CView::init()
 	_layout = resolveLayout();
 }
 
-_string CView::getContent() const
+string CView::getContent() const
 {
 	return _outputBuffer->getContent();
 }

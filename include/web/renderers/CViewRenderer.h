@@ -26,7 +26,7 @@ public:
     CViewRenderer(CModule * module);
     CViewRenderer(const string &id, CModule * module);
     virtual ~CViewRenderer();
-    _string renderFile(const IRenderingContext * context, const string & sourceFile, CDT & data, bool ret) throw (CException);
+    string renderFile(const IRenderingContext * context, const string & sourceFile, CDT & data, bool ret) throw (CException);
 
 protected:
     virtual bool generateViewFile(const string & sourceFile, const string & viewFile) = 0;

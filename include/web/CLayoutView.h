@@ -13,7 +13,7 @@
 class CLayoutView: public CView
 {
 public:
-	_string content;
+	string content;
 	CLayoutView(const CBaseController * owner = 0);
 	virtual void init();
 };

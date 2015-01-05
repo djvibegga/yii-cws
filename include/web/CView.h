@@ -33,8 +33,8 @@ public:
 	virtual boost::filesystem::path getLocalViewPath() const;
 	virtual boost::filesystem::path getViewPath(bool checkTheme = false) const;
 	virtual string getViewFile(const string & viewName) const throw (CException);
-	virtual _string render(const string & view, CDT & data, bool ret = false) throw (CException);
-	virtual _string getContent() const;
+	virtual string render(const string & view, CDT & data, bool ret = false) throw (CException);
+	virtual string getContent() const;
 	virtual void echo(const wstring & content);
 	virtual void echo(const string & content);
 	virtual IOutputBuffer & operator<< (const wstring &right);
