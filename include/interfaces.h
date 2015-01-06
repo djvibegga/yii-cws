@@ -195,15 +195,8 @@ public:
 	virtual void setLayoutPath(const boost::filesystem::path & path) = 0;
 };
 
-struct FCGX_Request;
 class CWebApplication;
-
-class IWebRequestPool
-{
-public:
-	virtual ~IWebRequestPool() {};
-	virtual FCGX_Request * popRequest() throw (boost::lock_error) = 0;
-};
+class FCGX_Request;
 
 class IRunable
 {

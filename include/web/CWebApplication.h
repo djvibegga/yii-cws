@@ -21,11 +21,15 @@
 #include "web/CHttpSession.h"
 #include "web/CWebUser.h"
 
+class CWebApplication;
+
 struct SControllerToRun
 {
 	string actionId;
 	CController * controller;
 };
+
+class CWebRequestPool;
 
 class CWebApplication: public CApplication, public IHasLayout
 {
@@ -33,9 +37,10 @@ class CWebApplication: public CApplication, public IHasLayout
 	friend class CHttpResponse;
 
 private:
-	IWebRequestPool * _requestPool;
+	CWebRequestPool * _requestPool;
 	TControllerMap _controllerMap;
 	boost::filesystem::path _layoutPath;
+	static boost::mutex _queueLocker;
 
 public:
 	TRouteStruct catchAllRequest;

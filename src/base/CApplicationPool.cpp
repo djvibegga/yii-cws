@@ -11,7 +11,8 @@
 CApplicationPool::CApplicationPool(const string &configPath, int argc, char * const argv[])
 : configPath(configPath),
   argc(argc),
-  argv(argv)
+  argv(argv),
+  _isActive(false)
 {
 	_xmlConfig = new xml_document();
 }
@@ -34,6 +35,8 @@ void CApplicationPool::init() throw (CException)
 
 void CApplicationPool::run() throw (CException)
 {
+	_isActive = true;
+
 	if (boost::filesystem::exists("server.pid")) {
 		throw CException("Application pool already has been started.");
 	}
@@ -60,4 +63,9 @@ void CApplicationPool::run() throw (CException)
 const xml_document & CApplicationPool::getConfigDocument() const
 {
 	return *_xmlConfig;
+}
+
+bool CApplicationPool::getIsActive() const
+{
+	return _isActive;
 }

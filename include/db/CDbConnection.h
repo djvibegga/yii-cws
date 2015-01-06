@@ -39,11 +39,11 @@ public:
 	virtual void init();
 	SAConnection * getConnection() const;
 	void setActive(bool value);
-	bool setActive() const;
+	bool getActive() const;
 	virtual void applyConfig(const xml_node & config);
 	CDbCommand createCommand(const string & query);
 	void setCommandBuilder(CDbCommandBuilder * builder);
-	CDbCommandBuilder * getCommandBuilder();
+	CDbCommandBuilder * getCommandBuilder() const;
 
 	static void threadInit() throw (CException);
 	static void threadEnd() throw (CException);

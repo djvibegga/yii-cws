@@ -21,6 +21,7 @@ class CHttpRequest: public CApplicationComponent
 {
 private:
 	TRequestParams _params;
+	bool _paramsRead;
 	string _method;
 	string _body;
 	string _pathInfo;

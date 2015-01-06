@@ -15,24 +15,22 @@
 #include <boost/thread/mutex.hpp>
 #include <queue>
 
-class CWebRequestPool: public CApplicationPool, public IWebRequestPool
+class CWebRequestPool: public CApplicationPool
 {
-private:
-	boost::mutex _queueLocker;
-	queue<FCGX_Request*> _requests;
-
 protected:
 	int listenSocket;
+	useconds_t idleTimeout;
 
 public:
 	CWebRequestPool(const string &configPath, int argc, char * const argv[]);
 	virtual ~CWebRequestPool();
-	void run() throw (CException);
-	virtual FCGX_Request * popRequest() throw (boost::lock_error);
+	virtual void init() throw (CException);
+	virtual void run() throw (CException);
+	int getListenSocket() const;
 
 protected:
-	virtual void mainLoop() throw (CException);
 	virtual void openSocket();
+	virtual void mainLoop();
 };
 
 #endif /* CWEBREQUESTLICATIONPOOL_H_ */

@@ -299,9 +299,8 @@ void CApplication::onProgramError()
 
 CApplication * CApplication::getInstance()
 {
-	_instanceLocker.lock();
+	boost::lock_guard<boost::mutex> guard(_instanceLocker);
 	CApplication * instance = _instances[getThreadId()];
-	_instanceLocker.unlock();
 	return instance;
 }
 

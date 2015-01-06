@@ -22,6 +22,8 @@
 using namespace boost;
 using namespace std;
 
+boost::mutex CWebApplication::_queueLocker;
+
 CWebApplication::CWebApplication(const string &configPath, int argc, char * const argv[])
 : CApplication(configPath, argc, argv),
   _requestPool(0),
@@ -100,23 +102,30 @@ void CWebApplication::mainLoop() throw(CException)
 {
 	CWebRequestPool * pool = dynamic_cast<CWebRequestPool*>(getPool());
 	if (pool) {
-		while (true) {
-			try {
-				request = pool->popRequest();
-				if (request != 0) {
+		int acceptCode = 0;
+		FCGX_Init();
+		request = new FCGX_Request();
+		if (FCGX_InitRequest(request, pool->getListenSocket(), 0)) {
+			throw CException("Can\'t initialize FCGX Request.");
+		}
+		while (pool->getIsActive()) {
+			_queueLocker.lock();
+			acceptCode = FCGX_Accept_r(request);
+			_queueLocker.unlock();
+			if (acceptCode == 0) {
+				try {
 					handleRequest();
 					FCGX_Finish_r(request);
-					delete request;
-					request = 0;
 					continue;
+				} catch (boost::lock_error & e) {
+					Jvibetto::log(e.what(), CLogger::LEVEL_ERROR);
 				}
-			} catch (boost::lock_error & e) {
-				Jvibetto::log(e.what(), CLogger::LEVEL_ERROR);
 			}
 			usleep(idleTimeout);
 			idleTime += idleTimeout;
 			idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
 		}
+		delete request;
 	}
 }
 
@@ -239,7 +248,7 @@ void CWebApplication::runController(const string &route)
 		CController * controller = ca.controller;
 		CController * oldController = dynamic_cast<CController*>(getComponent("controller"));
 		setComponent("controller", controller);
-		controller->run(ca.actionId, getRequest(), this->getResponse());
+		controller->run(ca.actionId, getRequest(), getResponse());
 		setComponent("controller", oldController);
 	}
 	PROFILE_END();

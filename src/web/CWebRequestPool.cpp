@@ -10,7 +10,8 @@
 
 CWebRequestPool::CWebRequestPool(const string &configPath, int argc, char * const argv[])
 : CApplicationPool(configPath, argc, argv),
-  listenSocket(0)
+  listenSocket(0),
+  idleTimeout(100000)
 {
 }
 
@@ -18,11 +19,27 @@ CWebRequestPool::~CWebRequestPool()
 {
 }
 
+void CWebRequestPool::init() throw (CException)
+{
+	CApplicationPool::init();
+
+	const xml_node &configRoot = getConfigDocument().root();
+	PARSE_XML_CONF_UINT_PROPERTY(
+		configRoot.child("server").child("instance"),
+		idleTimeout, "idleTimeout"
+	);
+}
+
 void CWebRequestPool::run() throw (CException)
 {
 	openSocket();
 	CApplicationPool::run();
 	mainLoop();
+}
+
+int CWebRequestPool::getListenSocket() const
+{
+	return listenSocket;
 }
 
 void CWebRequestPool::openSocket()
@@ -48,28 +65,9 @@ void CWebRequestPool::openSocket()
 	}
 }
 
-void CWebRequestPool::mainLoop() throw (CException)
+void CWebRequestPool::mainLoop()
 {
-	while (true) {
-		FCGX_Request * request = new FCGX_Request();
-		if (FCGX_InitRequest(request, listenSocket, 0)) {
-			throw CException("Can\'t initialize FCGX Request.");
-		}
-		if (FCGX_Accept_r(request) == 0) {
-			_queueLocker.lock();
-			_requests.push(request);
-			_queueLocker.unlock();
-		}
+	while (getIsActive()) {
+		usleep(idleTimeout);
 	}
-}
-
-FCGX_Request * CWebRequestPool::popRequest() throw (boost::lock_error)
-{
-	boost::lock_guard<boost::mutex> guard(_queueLocker);
-	if (_requests.empty()) {
-		return 0;
-	}
-	FCGX_Request * incoming = _requests.front();
-	_requests.pop();
-	return incoming;
 }

@@ -19,6 +19,7 @@ public:
 	virtual void init() throw (CException);
 	virtual void run() throw (CException);
 	const xml_document & getConfigDocument() const;
+	bool getIsActive() const;
 
 	virtual CApplication * createAppInstance() const = 0;
 
@@ -29,6 +30,7 @@ protected:
 
 private:
 	xml_document * _xmlConfig;
+	bool _isActive;
 };
 
 #endif /* CAPPLICATIONPOOL_H_ */

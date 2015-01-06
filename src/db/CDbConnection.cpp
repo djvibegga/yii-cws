@@ -108,7 +108,7 @@ void CDbConnection::setActive(bool value)
 	_isActive = value;
 }
 
-bool CDbConnection::setActive() const
+bool CDbConnection::getActive() const
 {
 	return _isActive;
 }
@@ -119,7 +119,7 @@ CDbCommand CDbConnection::createCommand(const string & query)
 	return CDbCommand(this, query);
 }
 
-CDbCommandBuilder * CDbConnection::getCommandBuilder()
+CDbCommandBuilder * CDbConnection::getCommandBuilder() const
 {
 	return _commandBuilder;
 }
@@ -131,7 +131,6 @@ void CDbConnection::setCommandBuilder(CDbCommandBuilder * builder)
 
 void CDbConnection::threadInit() throw (CException)
 {
-	//mysql_thread_init();
 	if (glConnection.Client() == SA_MySQL_Client) {
 		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
 		if (nativeAPI) {
@@ -144,7 +143,6 @@ void CDbConnection::threadInit() throw (CException)
 
 void CDbConnection::threadEnd() throw (CException)
 {
-	//mysql_thread_end();
 	if (glConnection.Client() == SA_MySQL_Client) {
 		myAPI * nativeAPI = (myAPI*)glConnection.NativeAPI();
 		if (nativeAPI) {

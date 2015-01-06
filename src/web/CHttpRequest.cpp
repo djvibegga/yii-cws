@@ -21,6 +21,7 @@ using namespace std;
 
 CHttpRequest::CHttpRequest(CWebApplication * app)
 : CApplicationComponent("request", app),
+  _paramsRead(false),
   _port(0),
   _securePort(0),
   _cookies(*this)
@@ -57,7 +58,7 @@ bool CHttpRequest::hasEnvVar(const char * name) const
 string CHttpRequest::getEnvVar(const char * name) const
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	return FCGX_GetParam(name, app->request->envp);
+	return (const char *)FCGX_GetParam(name, app->request->envp);
 }
 
 string CHttpRequest::getEnvVar(const string &name) const
@@ -95,7 +96,7 @@ bool CHttpRequest::hasParam(const string &name) const
 
 TRequestParams CHttpRequest::getParams()
 {
-	if (_params.empty()) {
+	if (!_paramsRead) {
 		string query;
 		if (getEnvVar("REQUEST_METHOD") == "POST") {
 			query = getRequestBody();
@@ -103,6 +104,7 @@ TRequestParams CHttpRequest::getParams()
 			query = getEnvVar("QUERY_STRING");
 		}
 		_params = parseQueryString(query);
+		_paramsRead = true;
 	}
 	return _params;
 }
