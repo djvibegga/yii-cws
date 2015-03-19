@@ -19,6 +19,9 @@ typedef map<string, bool> TWebUserAccessMap;
 
 class CWebUserState
 {
+private:
+	friend class boost::serialization::access;
+
 public:
 	string id;
 	_string name;
@@ -61,6 +64,7 @@ public:
 	CWebUser(CModule * module);
 	CWebUser(const string &id, CModule * module);
 	virtual void init();
+	virtual void load();
 	bool getIsGuest() const;
 	bool hasState(const string & key) const;
 	_string getState(const string & key, const _string defaultValue = _("")) const;
@@ -97,6 +101,7 @@ protected:
 	TPersistentStateMap saveIdentityStates();
 	void loadIdentityStates(const TPersistentStateMap & states);
 	void updateAuthStatus();
+	virtual void applyConfig(const xml_node & config);
 };
 
 

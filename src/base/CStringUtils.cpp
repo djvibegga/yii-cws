@@ -103,7 +103,7 @@ vector<string> CStringUtils::explode(const string &separator, const string & nee
     std::string::size_type pos = needle.find(separator);
 	vector<string> ret;
 	string buff = needle;
-	while (pos != ::string::npos && (ret.size() < limit || limit == 0)) {
+	while (pos != ::string::npos && (ret.size() < limit - 1 || limit == 0)) {
 		ret.push_back(buff.substr(0, pos));
 		buff = buff.substr(pos + 1);
 		pos = buff.find(separator);

@@ -426,6 +426,11 @@ CStatePersister & CApplication::getStatePersister()
 	return _persister;
 }
 
+CSecurityManager * CApplication::getSecurityManager()
+{
+	return dynamic_cast<CSecurityManager*>(getComponent("securityManager"));
+}
+
 _string CApplication::getGlobalState(const string & key, const _string & defaultValue)
 {
 	loadGlobalStates();

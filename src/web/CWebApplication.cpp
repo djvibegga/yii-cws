@@ -68,7 +68,8 @@ void CWebApplication::init() throw(CException)
 void CWebApplication::applyConfig(const xml_node & config)
 {
 	CApplication::applyConfig(config);
-
+	PARSE_XML_CONF_BOOL_PROPERTY(config, enableSessions, "enableSessions");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, enableAuth, "enableAuth");
 	_layoutPath = resolveLayoutPath();
 }
 
@@ -166,6 +167,9 @@ void CWebApplication::beginRequest()
 		if (session->autoOpen) {
 			session->open();
 		}
+	}
+	if (enableAuth) {
+		(dynamic_cast<CWebUser*>(getComponent("user")))->load();
 	}
 }
 

@@ -108,6 +108,7 @@ public:
 	string createUrl(TRouteStruct & route, const string & ampersand = "&") const;
 
 	CStatePersister & getStatePersister();
+	CSecurityManager * getSecurityManager();
 	virtual _string getGlobalState(const string & key, const _string & defaultValue = _(""));
 	virtual void setGlobalState(const string & key, const _string & value, const _string & defaultValue = _(""));
 	virtual CStatesMap loadGlobalStates();

@@ -57,7 +57,10 @@ void CWebUser::init()
 	if (!CApplication::getIsWebWorkerInstance()) {
 		return;
 	}
+}
 
+void CWebUser::load()
+{
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	if (session) {
 		session->open();
@@ -68,6 +71,14 @@ void CWebUser::init()
 		renewCookie();
 	}
 	updateAuthStatus();
+}
+
+void CWebUser::applyConfig(const xml_node & config)
+{
+	PARSE_XML_CONF_BOOL_PROPERTY(config, allowAutoLogin, "allowAutoLogin");
+	PARSE_XML_CONF_BOOL_PROPERTY(config, autoRenewCookie, "autoRenewCookie");
+	PARSE_XML_CONF_UINT_PROPERTY(config, authTimeout, "authTimeout");
+	PARSE_XML_CONF_UINT_PROPERTY(config, absoluteAuthTimeout, "absoluteAuthTimeout");
 }
 
 bool CWebUser::getIsGuest() const
@@ -308,13 +319,18 @@ void CWebUser::restoreFromCookie()
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
 	CHttpRequest * request = app->getRequest();
 	CHttpCookie cookie = request->getCookies()[getStateKeyPrefix()];
+
 	if (cookie.value.empty()) {
 		return;
 	}
 
-	//if($cookie && !empty($cookie->value) && is_string($cookie->value) && ($data=$app->getSecurityManager()->validateData($cookie->value))!==false)
+	string validatedValue = app->getSecurityManager()->validateData(CStringUtils::base64Decode(cookie.value));
+	if (validatedValue.empty()) {
+		return;
+	}
+
 	CWebUserState data;
-	CArchiver<CWebUserState>::load(cookie.value, data);
+	CArchiver<CWebUserState>::load(validatedValue, data);
 	if (data.id.empty()) {
 		return;
 	}
@@ -356,8 +372,7 @@ void CWebUser::saveToCookie(time_t duration)
 	data.name = getName();
 	data.duration = duration;
 	data.states = saveIdentityStates();
-	cookie.value = CArchiver<CWebUserState>::save(data);
-//	$cookie->value=$app->getSecurityManager()->hashData(serialize($data));
+	cookie.value = CStringUtils::base64Encode(app->getSecurityManager()->hashData(CArchiver<CWebUserState>::save(data)));
 	app->getResponse()->addCookie(cookie);
 }
 
