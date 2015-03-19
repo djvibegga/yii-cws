@@ -95,6 +95,7 @@ protected:
 	void afterLogout();
 	void restoreFromCookie();
 	void renewCookie();
+	CWebUserState parseStateFromCookie(const CHttpCookie & cookie);
 	void saveToCookie(time_t duration);
 	CHttpCookie createIdentityCookie(const string & name) const;
 	void changeIdentity(const string & id, const _string & name, TPersistentStateMap & states);

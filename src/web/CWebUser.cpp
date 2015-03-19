@@ -317,20 +317,9 @@ void CWebUser::afterLogout()
 void CWebUser::restoreFromCookie()
 {
 	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
-	CHttpRequest * request = app->getRequest();
-	CHttpCookie cookie = request->getCookies()[getStateKeyPrefix()];
+	CHttpCookie cookie = app->getRequest()->getCookies()[getStateKeyPrefix()];
+	CWebUserState data = parseStateFromCookie(cookie);
 
-	if (cookie.value.empty()) {
-		return;
-	}
-
-	string validatedValue = app->getSecurityManager()->validateData(CStringUtils::base64Decode(cookie.value));
-	if (validatedValue.empty()) {
-		return;
-	}
-
-	CWebUserState data;
-	CArchiver<CWebUserState>::load(validatedValue, data);
 	if (data.id.empty()) {
 		return;
 	}
@@ -347,18 +336,33 @@ void CWebUser::restoreFromCookie()
 
 void CWebUser::renewCookie()
 {
-//	$request=Yii::app()->getRequest();
-//	$cookies=$request->getCookies();
-//	$cookie=$cookies->itemAt($this->getStateKeyPrefix());
-//	if($cookie && !empty($cookie->value) && ($data=Yii::app()->getSecurityManager()->validateData($cookie->value))!==false)
-//	{
-//		$data=@unserialize($data);
-//		if(is_array($data) && isset($data[0],$data[1],$data[2],$data[3]))
-//		{
-//			$cookie->expire=time()+$data[2];
-//			$cookies->add($cookie->name,$cookie);
-//		}
-//	}
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CHttpCookie cookie = app->getRequest()->getCookies()[getStateKeyPrefix()];
+	CWebUserState data = parseStateFromCookie(cookie);
+
+	if (!data.duration) {
+		return;
+	}
+
+	cookie.expire = time(0) + data.duration;
+	app->getResponse()->addCookie(cookie);
+}
+
+CWebUserState CWebUser::parseStateFromCookie(const CHttpCookie & cookie)
+{
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebUserState state;
+
+	if (cookie.value.empty()) {
+		return state;
+	}
+	string validatedValue = app->getSecurityManager()->validateData(CStringUtils::base64Decode(cookie.value));
+	if (validatedValue.empty()) {
+		return state;
+	}
+
+	CArchiver<CWebUserState>::load(validatedValue, state);
+	return state;
 }
 
 void CWebUser::saveToCookie(time_t duration)
