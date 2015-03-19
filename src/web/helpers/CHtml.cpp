@@ -6,7 +6,9 @@
  */
 
 #include "web/helpers/CHtml.h"
+#include "base/Jvibetto.h"
 #include "base/CStringUtils.h"
+#include "web/CController.h"
 #include <boost/assign.hpp>
 
 const TTagAttributesMap CHtml::_specialAttributes = boost::assign::map_list_of
@@ -185,4 +187,23 @@ string CHtml::encode(const string & text)
 		}
 	}
 	return buffer;
+}
+
+string CHtml::normalizeUrl(TRouteStruct & url)
+{
+	if (url.path.empty()) {
+		return normalizeUrl("");
+	} else {
+		CController * controller = dynamic_cast<CController*>(Jvibetto::app()->getComponent("controller"));
+		if (controller) {
+			return controller->createUrl(url);
+		} else {
+			return Jvibetto::app()->createUrl(url);
+		}
+	}
+}
+
+string CHtml::normalizeUrl(const string & url)
+{
+	return url.empty() ? (dynamic_cast<CHttpRequest*>(Jvibetto::app()->getComponent("request")))->getRequestUri() : url;
 }

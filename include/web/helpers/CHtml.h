@@ -10,6 +10,7 @@
 
 #include <map>
 #include "defines.h"
+#include "interfaces.h"
 
 typedef map<string, string> TTagAttributesMap;
 
@@ -45,6 +46,8 @@ public:
 	static string scriptFile(const string & url, const string & type = "text/javascript");
 	static string renderAttributes(const TTagAttributesMap & htmlOptions);
 	static string encode(const string & text);
+	static string normalizeUrl(TRouteStruct & url);
+	static string normalizeUrl(const string & url);
 };
 
 #endif /* CHTML_H_ */

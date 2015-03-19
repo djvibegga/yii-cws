@@ -63,6 +63,7 @@ public:
 	string getRoute() const;
 	void setAction(const string & actionId);
 	string getAction() const;
+	string createUrl(TRouteStruct & route, const string & ampersand = "&") const;
 };
 
 #endif /* CCONTROLLER_H_ */

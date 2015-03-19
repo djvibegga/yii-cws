@@ -303,3 +303,18 @@ string CController::getAction() const
 {
 	return _actionId;
 }
+
+string CController::createUrl(TRouteStruct & route, const string & ampersand) const
+{
+	if (route.path.empty()) {
+		route.path = getId() + "/" + getAction();
+	} else if (route.path.find("/") == ::string::npos) {
+		route.path = getId() + "/" + route.path;
+	}
+	CModule * module = getModule();
+	if (module != 0 && route.path[0] != '/') {
+		route.path = module->getId() + "/" + route.path;
+	}
+	route.path = CStringUtils::trim(route.path, "/");
+	return Jvibetto::app()->createUrl(route, ampersand);
+}

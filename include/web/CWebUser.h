@@ -48,10 +48,10 @@ public:
 	static const string STATE_AUTH_TIMEOUT;
 	static const string STATE_RETURN_URL;
 	static const string STATES_VAR;
+	static const string FLASH_KEY_PREFIX;
 
 	bool allowAutoLogin;
 	bool autoRenewCookie;
-	bool autoUpdateFlash;
 	_string guestName;
 	TRouteStruct loginUrl;
 	string identityCookie;
@@ -63,7 +63,7 @@ public:
 	virtual void init();
 	bool getIsGuest() const;
 	bool hasState(const string & key) const;
-	_string getState(const string & key) const;
+	_string getState(const string & key, const _string defaultValue = _("")) const;
 	TSessionDataMap findStates(const string & key) const;
 	void setState(const string & key, const _string & value);
 	void setState(const string & key, int value);
@@ -79,10 +79,9 @@ public:
 	string getReturnUrl(const string & defaultUrl = "") const;
 	void setReturnUrl(const string & value);
 	void loginRequired() throw (CHttpException);
-	TPersistentStateMap getFlashes(bool remove);
-	string getFlash(const string & key, const string & defaultValue = "", bool remove = true) const;
-	void setFlash(const string & key, const string & value);
-	bool hasFlash(const string & key) const;
+	_string getFlash(const string & key, const _string & defaultValue = _(""), bool remove = true);
+	void setFlash(const string & key, const _string & value);
+	bool hasFlash(const string & key);
 
 protected:
 	string resolveStateKeyPrefix();
@@ -97,7 +96,6 @@ protected:
 	void changeIdentity(const string & id, const _string & name, TPersistentStateMap & states);
 	TPersistentStateMap saveIdentityStates();
 	void loadIdentityStates(const TPersistentStateMap & states);
-	void updateFlash();
 	void updateAuthStatus();
 };
 

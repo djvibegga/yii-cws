@@ -40,7 +40,6 @@ private:
 	CWebRequestPool * _requestPool;
 	TControllerMap _controllerMap;
 	boost::filesystem::path _layoutPath;
-	static boost::mutex _queueLocker;
 
 public:
 	TRouteStruct catchAllRequest;
@@ -70,7 +69,6 @@ public:
 
 protected:
 	FCGX_Request * request;
-	useconds_t idleTimeout;
 	useconds_t idleTime;
 	double idleMedian;
 

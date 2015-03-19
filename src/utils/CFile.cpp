@@ -184,12 +184,11 @@ string CFile::getContents(const string & path) throw (CException)
 
 void CFile::putContents(const string & path, const string & content) throw (CException)
 {
-	_IO_FILE * file = fopen(path.c_str(), "w");
-	if (!file) {
+	fstream fs;
+	fs.open(path.c_str(), fstream::out);
+	if (!fs.is_open()) {
 		throw CException("Can\'t open file for writing: '" + path + "'.");
 	}
-	flockfile(file);
-	fprintf(file, "%s", content.c_str());
-	funlockfile(file);
-	fclose(file);
+	fs << content;
+	fs.close();
 }

@@ -8,8 +8,11 @@
 #include "utils/CHash.h"
 #include <cryptopp/md5.h>
 #include <crypto++/hex.h>
+#include <cryptopp/sha.h>
 #include <crypto++/filters.h>
 #include "boost/crc.hpp"
+
+AutoSeededRandomPool CHash::_prng;
 
 unsigned int CHash::crc32(const string & input)
 {
@@ -31,4 +34,26 @@ string CHash::md5(const string & input)
 	encoder.MessageEnd();
 
 	return output;
+}
+
+string CHash::sha1(const string & input)
+{
+	CryptoPP::SHA1 hash;
+	byte digest[ CryptoPP::SHA1::DIGESTSIZE ];
+	hash.CalculateDigest(digest, (byte*)input.c_str(), input.length());
+
+	CryptoPP::HexEncoder encoder;
+	string output;
+	encoder.Attach(new CryptoPP::StringSink(output));
+	encoder.Put(digest, sizeof(digest));
+	encoder.MessageEnd();
+
+	return output;
+}
+
+string CHash::createInitializationVector(unsigned int length)
+{
+	byte iv[length];
+	_prng.GenerateBlock((byte*)iv, length);
+	return string(reinterpret_cast<const char*>(iv), length);
 }

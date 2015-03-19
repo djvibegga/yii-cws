@@ -8,8 +8,10 @@
 #include "base/CStringUtils.h"
 #include <curl/curl.h>
 #include <algorithm>
+#include <cryptopp/base64.h>
 
 using namespace std;
+using namespace CryptoPP;
 
 const unsigned int CStringUtils::_TIME_STR_BUFFER_LENGTH = 80;
 
@@ -156,4 +158,41 @@ string CStringUtils::fromTimestamp(const string & format, time_t timestamp, bool
 int CStringUtils::toInt(const string & str)
 {
 	return atoi(str.c_str());
+}
+
+string CStringUtils::fromInt(int from)
+{
+	stringstream ss;
+	ss << from;
+	return ss.str();
+}
+
+string CStringUtils::fromDouble(double from)
+{
+	stringstream ss;
+	ss << from;
+	return ss.str();
+}
+
+string CStringUtils::base64Encode(const string & str)
+{
+	string ret;
+	StringSource ss(str, true,
+		new CryptoPP::Base64Encoder(
+			new StringSink(ret),
+			false // do not append a newline
+		)
+	);
+	return ret;
+}
+
+string CStringUtils::base64Decode(const string & str)
+{
+	string ret;
+	StringSource ss(str, true,
+		new CryptoPP::Base64Decoder(
+			new StringSink(ret)
+		)
+	);
+	return ret;
 }

@@ -12,6 +12,7 @@
 #include "base/CProfiler.h"
 #include "base/Jvibetto.h"
 #include "base/CApplicationPool.h"
+#include "web/CUrlManager.h"
 #include "web/renderers/CBaseViewRenderer.h"
 #include "utils/CFile.h"
 #include <sstream>
@@ -35,6 +36,7 @@ CApplication::CApplication(const string &configPath, int argc, char * const argv
   _xmlConfig(0),
   _log(0),
   _pool(0),
+  _stateChanged(false),
   name(""),
   startTime(0)
 {
@@ -51,6 +53,7 @@ CApplication::CApplication(const xml_document & configDocument, int argc, char *
   _xmlConfig(0),
   _log(0),
   _pool(0),
+  _stateChanged(false),
   name(""),
   startTime(0)
 {
@@ -120,8 +123,10 @@ void CApplication::init() throw(CException)
 	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
 #endif
 
+	_persister.init();
 	createTemplateEngine();
 	createViewRenderer();
+	createSecurityManager();
 
 	CModule::init();
 
@@ -239,6 +244,13 @@ CLogRouter * CApplication::createLogRouter()
 	CLogRouter * log = new CLogRouter(this);
 	log->init();
 	return log;
+}
+
+CSecurityManager * CApplication::createSecurityManager()
+{
+	CSecurityManager * manager = new CSecurityManager(this);
+	manager->init();
+	return manager;
 }
 
 void CApplication::applyConfig(const xml_node & config)
@@ -401,4 +413,58 @@ std::locale CApplication::getLocaleByLanguage(const string & language) const
 		return found->second;
 	}
 	return std::locale();
+}
+
+string CApplication::createUrl(TRouteStruct & route, const string & ampersand) const
+{
+	CUrlManager * urlManager = dynamic_cast<CUrlManager*>(getComponent("urlManager"));
+	return urlManager->createUrl(route, ampersand);
+}
+
+CStatePersister & CApplication::getStatePersister()
+{
+	return _persister;
+}
+
+_string CApplication::getGlobalState(const string & key, const _string & defaultValue)
+{
+	loadGlobalStates();
+	CStatesMap::iterator found = _globalState.find(key);
+	return found == _globalState.end() ? defaultValue : found->second;
+}
+
+void CApplication::setGlobalState(const string & key, const _string & value, const _string & defaultValue)
+{
+	bool stateChanged = _stateChanged;
+	if (value == defaultValue) {
+		_globalState.erase(key);
+	} else {
+		_globalState[key] = value;
+	}
+	_stateChanged = true;
+	//TODO: use "endRequest" event for saving global state
+	/*if (stateChanged != _stateChanged) {
+		$this->attachEventHandler("onEndRequest", array($this,'saveGlobalState'));
+	}*/
+	saveGlobalState();
+}
+
+CStatesMap CApplication::loadGlobalStates()
+{
+	CStatePersister & persister = getStatePersister();
+	_globalState = persister.load();
+	_stateChanged = false;
+	//TODO: detach "endRequest" event handler. Saving global state callback should be off
+	//detachEventHandler('onEndRequest', array($this,'saveGlobalState'));
+	return _globalState;
+}
+
+void CApplication::saveGlobalState()
+{
+	if (_stateChanged) {
+		_stateChanged = false;
+		//TODO: detach "endRequest" event handler. Saving global state callback should be off
+		//$this->detachEventHandler('onEndRequest',array($this,'saveGlobalState'));
+		getStatePersister().save(_globalState);
+	}
 }

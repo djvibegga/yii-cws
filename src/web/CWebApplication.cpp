@@ -22,15 +22,12 @@
 using namespace boost;
 using namespace std;
 
-boost::mutex CWebApplication::_queueLocker;
-
 CWebApplication::CWebApplication(const string &configPath, int argc, char * const argv[])
 : CApplication(configPath, argc, argv),
   _requestPool(0),
   enableSessions(true),
   enableAuth(false),
   request(0),
-  idleTimeout(100000),
   idleTime(0),
   idleMedian(0)
 {
@@ -42,7 +39,6 @@ CWebApplication::CWebApplication(const xml_document & configDocument, int argc, 
   enableSessions(true),
   enableAuth(false),
   request(0),
-  idleTimeout(100000),
   idleTime(0),
   idleMedian(0)
 {
@@ -73,10 +69,6 @@ void CWebApplication::applyConfig(const xml_node & config)
 {
 	CApplication::applyConfig(config);
 
-	PARSE_XML_CONF_UINT_PROPERTY(
-		getConfigRoot().child("server").child("instance"),
-		idleTimeout, "idleTimeout"
-	);
 	_layoutPath = resolveLayoutPath();
 }
 
@@ -109,21 +101,31 @@ void CWebApplication::mainLoop() throw(CException)
 			throw CException("Can\'t initialize FCGX Request.");
 		}
 		while (pool->getIsActive()) {
-			_queueLocker.lock();
-			acceptCode = FCGX_Accept_r(request);
-			_queueLocker.unlock();
-			if (acceptCode == 0) {
-				try {
-					handleRequest();
-					FCGX_Finish_r(request);
-					continue;
-				} catch (boost::lock_error & e) {
-					Jvibetto::log(e.what(), CLogger::LEVEL_ERROR);
-				}
+#ifdef JV_DEBUG
+			useconds_t idleTimeout = 0;
+#endif
+			try {
+#ifdef JV_DEBUG
+				idleTimeout = time(0);
+				acceptCode = FCGX_Accept_r(request);
+				idleTimeout = time(0) - idleTimeout;
+#else
+				acceptCode = FCGX_Accept_r(request);
+#endif
+			} catch (boost::lock_error & e) {
+				Jvibetto::log(
+					string("CWebApplication::mainLoop() unable to accept request, because: ") + e.what(),
+					CLogger::LEVEL_ERROR
+				);
 			}
-			usleep(idleTimeout);
+			if (acceptCode == 0) {
+				handleRequest();
+				FCGX_Finish_r(request);
+			}
+#ifdef JV_DEBUG
 			idleTime += idleTimeout;
 			idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
+#endif
 		}
 		delete request;
 	}
@@ -135,11 +137,22 @@ void CWebApplication::handleRequest()
 	try {
 		CApplication::handleRequest();
 	} catch (const CHttpException & e) {
+		getResponse()->addHeader("Status", CStringUtils::fromInt(e.getStatus()));
 		FCGX_SetExitStatus(e.getStatus(), request->out);
 		renderException(e);
 	} catch (const CException & e) {
 		renderException(e);
 	}
+
+	TOutputStack stack = getOutputStack();
+	while (!stack.empty()) {
+		stack.pop();
+	}
+	delete getComponent("response");
+	setComponent("response", 0);
+	delete getComponent("request");
+	setComponent("request", 0);
+
 	PROFILE_END();
 }
 
@@ -172,14 +185,9 @@ void CWebApplication::processRequest()
 
 void CWebApplication::endRequest()
 {
-	while (!getOutputStack().empty()) {
-		getOutputStack().pop();
-	}
 	if (enableSessions) {
 		dynamic_cast<CHttpSession*>(getComponent("session"))->close();
 	}
-	delete getComponent("request");
-	delete getComponent("response");
 	CApplication::endRequest();
 }
 

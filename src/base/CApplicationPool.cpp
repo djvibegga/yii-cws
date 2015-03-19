@@ -55,7 +55,7 @@ void CApplicationPool::run() throw (CException)
 		task->init();
 		task->run();
 		cout << "The application instance " << (i + 1) << " has runned..." << endl;
-		usleep(100000); //TODO: remove this hardcore. This is temp fix to run miltiple app instances
+		usleep(10000); //TODO: remove this hardcore. This is temp fix to run miltiple app instances
 	}
 	cout << "The application pool has runned." << endl;
 }

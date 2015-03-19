@@ -11,9 +11,11 @@
 #include "base/CModule.h"
 #include "base/CException.h"
 #include "base/CProfiler.h"
+#include "base/CSecurityManager.h"
 #include "logging/CLogger.h"
 #include "logging/CLogRouter.h"
 #include "base/CTemplateEngine.h"
+#include "base/CStatePersister.h"
 
 #include <string>
 #include <stack>
@@ -59,6 +61,9 @@ private:
 	vector<string> _languages;
 	static long _mainThreadId;
 	static map<string, std::locale> _locales;
+	CStatesMap _globalState;
+	bool _stateChanged;
+	CStatePersister _persister;
 
 public:
 	string name;
@@ -100,6 +105,13 @@ public:
 	CApplicationPool * getPool() const;
 	vector<string> getLanguages() const;
 	std::locale getLocaleByLanguage(const string & language) const;
+	string createUrl(TRouteStruct & route, const string & ampersand = "&") const;
+
+	CStatePersister & getStatePersister();
+	virtual _string getGlobalState(const string & key, const _string & defaultValue = _(""));
+	virtual void setGlobalState(const string & key, const _string & value, const _string & defaultValue = _(""));
+	virtual CStatesMap loadGlobalStates();
+	virtual void saveGlobalState();
 
 protected:
 	time_t startTime;
@@ -111,6 +123,7 @@ protected:
 	virtual CTemplateEngine * createTemplateEngine();
 	virtual IViewRenderer * createViewRenderer();
 	virtual CLogRouter * createLogRouter();
+	virtual CSecurityManager * createSecurityManager();
 	virtual void applyConfig(const xml_node & config);
 	virtual void initLocales();
 

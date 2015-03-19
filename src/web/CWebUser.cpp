@@ -19,12 +19,12 @@ const string CWebUser::STATE_NAME = "__name";
 const string CWebUser::STATE_AUTH_TIMEOUT  = "__authTimeout";
 const string CWebUser::STATE_RETURN_URL = "__returnUrl";
 const string CWebUser::STATES_VAR = "__states";
+const string CWebUser::FLASH_KEY_PREFIX = "__flashes";
 
 CWebUser::CWebUser(CModule * module)
 : CApplicationComponent("user", module),
   allowAutoLogin(false),
   autoRenewCookie(false),
-  autoUpdateFlash(true),
   guestName(_("guest")),
   identityCookie("identity"),
   authTimeout(DEFAULT_AUTH_TIMEOUT),
@@ -38,7 +38,6 @@ CWebUser::CWebUser(const string &id, CModule * module)
 : CApplicationComponent(id, module),
   allowAutoLogin(false),
   autoRenewCookie(false),
-  autoUpdateFlash(true),
   guestName(_("guest")),
   identityCookie("identity"),
   authTimeout(DEFAULT_AUTH_TIMEOUT),
@@ -68,9 +67,6 @@ void CWebUser::init()
 	} else if (autoRenewCookie && allowAutoLogin) {
 		renewCookie();
 	}
-	if (autoUpdateFlash) {
-		updateFlash();
-	}
 	updateAuthStatus();
 }
 
@@ -79,13 +75,13 @@ bool CWebUser::getIsGuest() const
 	return getState(STATE_ID).empty();
 }
 
-_string CWebUser::getState(const string & key) const
+_string CWebUser::getState(const string & key, const _string defaultValue) const
 {
 	string dataKey = getStateKeyPrefix() + key;
 	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
 	TSessionDataMap sessionData = session->getData();
 	TSessionDataMap::const_iterator found = sessionData.find(dataKey);
-	return found == sessionData.end() ? _("") : found->second;
+	return found == sessionData.end() ? defaultValue : found->second;
 }
 
 TSessionDataMap CWebUser::findStates(const string & key) const
@@ -249,15 +245,17 @@ void CWebUser::logout(bool destroySession)
 
 string CWebUser::getReturnUrl(const string & defaultUrl) const
 {
-//	if($defaultUrl===null)
-//	{
-//		$defaultReturnUrl=Yii::app()->getUrlManager()->showScriptName ? Yii::app()->getRequest()->getScriptUrl() : Yii::app()->getRequest()->getBaseUrl().'/';
-//	}
-//	else
-//	{
-//		$defaultReturnUrl=CHtml::normalizeUrl($defaultUrl);
-//	}
-//	return $this->getState('__returnUrl',$defaultReturnUrl);
+	string defaultReturnUrl = "";
+    if (defaultUrl.empty()) {
+    	CUrlManager * urlManager = dynamic_cast<CUrlManager*>(Jvibetto::app()->getComponent("urlManager"));
+    	CHttpRequest * request = dynamic_cast<CHttpRequest*>(Jvibetto::app()->getComponent("request"));
+    	string defaultReturnUrl = urlManager->showScriptName
+    		? request->getScriptUrl()
+    		: request->getBaseUrl() + "/";
+    } else {
+    	defaultReturnUrl = CHtml::normalizeUrl(defaultUrl);
+    }
+    return _to_utf8(getState("__returnUrl", utf8_to_(defaultReturnUrl)));
 }
 
 void CWebUser::setReturnUrl(const string & value)
@@ -367,66 +365,26 @@ CHttpCookie CWebUser::createIdentityCookie(const string & name) const
 {
 	CHttpCookie cookie;
 	cookie.name = name;
-//	if(is_array($this->identityCookie))
-//	{
-//		foreach($this->identityCookie as $name=>$value)
-//			$cookie->$name=$value;
-//	}
 	return cookie;
 }
 
-TPersistentStateMap CWebUser::getFlashes(bool remove = true)
+_string CWebUser::getFlash(const string & key, const _string & defaultValue, bool remove)
 {
-//	$flashes=array();
-//	$prefix=$this->getStateKeyPrefix().self::FLASH_KEY_PREFIX;
-//	$keys=array_keys($_SESSION);
-//	$n=strlen($prefix);
-//	foreach($keys as $key)
-//	{
-//		if(!strncmp($key,$prefix,$n))
-//		{
-//			$flashes[substr($key,$n)]=$_SESSION[$key];
-//			if($delete)
-//				unset($_SESSION[$key]);
-//		}
-//	}
-//	if($delete)
-//		$this->setState(self::FLASH_COUNTERS,array());
-//	return $flashes;
+	_string value = getState(FLASH_KEY_PREFIX + key, defaultValue);
+	if (remove) {
+		setFlash(key, _(""));
+	}
+	return value;
 }
 
-/**
- * Returns a flash message.
- * A flash message is available only in the current and the next requests.
- * @param string $key key identifying the flash message
- * @param mixed $defaultValue value to be returned if the flash message is not available.
- * @param boolean $delete whether to delete this flash message after accessing it.
- * Defaults to true.
- * @return mixed the message message
- */
-string CWebUser::getFlash(const string & key, const string & defaultValue, bool remove) const
+void CWebUser::setFlash(const string & key, const _string & value)
 {
-//	$value=$this->getState(self::FLASH_KEY_PREFIX.$key,$defaultValue);
-//	if($delete)
-//		$this->setFlash($key,null);
-//	return $value;
+	setState(FLASH_KEY_PREFIX + key, value);
 }
 
-void CWebUser::setFlash(const string & key, const string & value)
+bool CWebUser::hasFlash(const string & key)
 {
-//	$this->setState(self::FLASH_KEY_PREFIX.$key,$value,$defaultValue);
-//	$counters=$this->getState(self::FLASH_COUNTERS,array());
-//	if($value===$defaultValue)
-//		unset($counters[$key]);
-//	else
-//		$counters[$key]=0;
-//	$this->setState(self::FLASH_COUNTERS,$counters,array());
-}
-
-
-bool CWebUser::hasFlash(const string & key) const
-{
-	return !getFlash(key, "", false).empty();
+	return !getFlash(key, _(""), false).empty();
 }
 
 void CWebUser::changeIdentity(const string & id, const _string & name, TPersistentStateMap & states)
@@ -448,22 +406,4 @@ void CWebUser::loadIdentityStates(const TPersistentStateMap & states)
 	for (TPersistentStateMap::const_iterator iter = states.begin(); iter != states.end(); ++iter) {
 		setState(iter->first, iter->second);
 	}
-}
-
-void CWebUser::updateFlash()
-{
-//	$counters=$this->getState(self::FLASH_COUNTERS);
-//	if(!is_array($counters))
-//		return;
-//	foreach($counters as $key=>$count)
-//	{
-//		if($count)
-//		{
-//			unset($counters[$key]);
-//			$this->setState(self::FLASH_KEY_PREFIX.$key,null);
-//		}
-//		else
-//			$counters[$key]++;
-//	}
-//	$this->setState(self::FLASH_COUNTERS,$counters,array());
 }
