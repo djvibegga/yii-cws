@@ -51,6 +51,7 @@ public:
 	CHttpSession(CWebApplication * app);
 	CHttpSession(const string &id, CWebApplication * app);
 	CHttpSession(const CHttpSession & other);
+	virtual string getClassName() const;
 	virtual void init();
 	void setSessionId(const string & sessionId);
 	string getSessionId() const;

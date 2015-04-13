@@ -75,6 +75,11 @@ CHttpSession::CHttpSession(const CHttpSession & other)
 {
 }
 
+string CHttpSession::getClassName() const
+{
+	return "CHttpSession";
+}
+
 void CHttpSession::init()
 {
 	CApplicationComponent::init();

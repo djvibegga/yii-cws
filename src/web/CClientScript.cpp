@@ -26,7 +26,6 @@ CClientScript::CClientScript(CModule * module)
   enableJavaScript(true),
   hasScripts(false)
 {
-
 }
 
 CClientScript::CClientScript(const string &id, CModule * module)
@@ -34,7 +33,11 @@ CClientScript::CClientScript(const string &id, CModule * module)
   enableJavaScript(true),
     hasScripts(false)
 {
+}
 
+string CClientScript::getClassName() const
+{
+	return "CClientScript";
 }
 
 void CClientScript::init()

@@ -167,6 +167,25 @@ string CStringUtils::fromInt(int from)
 	return ss.str();
 }
 
+string CStringUtils::fromBool(bool from)
+{
+	return from ? "true" : "false";
+}
+
+string CStringUtils::fromLong(long from)
+{
+	stringstream ss;
+	ss << from;
+	return ss.str();
+}
+
+string CStringUtils::fromULong(unsigned long from)
+{
+	stringstream ss;
+	ss << from;
+	return ss.str();
+}
+
 string CStringUtils::fromDouble(double from)
 {
 	stringstream ss;

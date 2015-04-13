@@ -55,6 +55,7 @@ public:
 	bool append;
 
 	CUrlRule(const string & routeExp, const string & patternExp);
+	virtual string getClassName() const;
 	virtual ~CUrlRule();
 	virtual string createUrl(
 		const CUrlManager * const manager,
@@ -97,6 +98,7 @@ public:
 	bool appendLanguageWhenItIsDefault;
 
 	CUrlManager(CModule * module = 0);
+	virtual string getClassName() const;
 	virtual ~CUrlManager();
 	virtual void init();
 	virtual void addRule(CBaseUrlRule * rule);

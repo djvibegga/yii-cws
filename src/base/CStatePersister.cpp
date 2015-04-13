@@ -16,6 +16,11 @@ CStatePersister::CStatePersister()
 {
 }
 
+string CStatePersister::getClassName() const
+{
+	return "CStatePersister";
+}
+
 void CStatePersister::init()
 {
 	if (stateFile.empty()) {

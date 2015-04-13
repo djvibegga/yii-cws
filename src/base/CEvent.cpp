@@ -13,3 +13,8 @@ CEvent::CEvent(CComponent * const sender, const map<string, void*> &params)
 	this->params = params;
 	handled = false;
 }
+
+string CEvent::getClassName() const
+{
+	return "CEvent";
+}

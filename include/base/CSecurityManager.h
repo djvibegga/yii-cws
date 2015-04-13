@@ -23,6 +23,7 @@ public:
 
 	CSecurityManager(CModule * module);
 	CSecurityManager(const string &id, CModule * module);
+	virtual string getClassName() const;
 	virtual void init();
 	string encrypt(const string & data, const string & key = "");
 	string decrypt(const string & data, const string & key = "");

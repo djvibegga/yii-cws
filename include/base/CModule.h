@@ -34,6 +34,7 @@ public:
 
 	CModule(const string &id);
 	CModule(const string &id, CModule * parent);
+	virtual string getClassName() const;
 	virtual ~CModule();
 	virtual void init();
 	virtual void setId(const string &id);

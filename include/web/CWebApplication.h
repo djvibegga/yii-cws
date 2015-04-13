@@ -49,6 +49,7 @@ public:
 
 	CWebApplication(const string &configPath, int argc, char * const argv[]);
 	CWebApplication(const xml_document & configDocument, int argc, char * const argv[]);
+	virtual string getClassName() const;
 	~CWebApplication();
 	virtual void init() throw(CException);
 	virtual void run() throw(CException);

@@ -10,7 +10,11 @@
 
 CConsoleLogRoute::CConsoleLogRoute()
 {
+}
 
+string CConsoleLogRoute::getClassName() const
+{
+	return "CConsoleLogRoute";
 }
 
 CConsoleLogRoute::~CConsoleLogRoute()

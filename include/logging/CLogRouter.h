@@ -21,6 +21,7 @@ private:
 public:
 	CLogRouter(CModule * module);
 	CLogRouter(const string & id, CModule * module);
+	virtual string getClassName() const;
 	virtual ~CLogRouter();
 	virtual void init();
 	void addRoute(CLogRoute * route);

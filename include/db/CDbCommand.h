@@ -11,6 +11,8 @@
 #include "db/CDbConnection.h"
 #include "db/CDbException.h"
 
+#include <boost/shared_ptr.hpp>
+
 class CDbDataReader;
 
 typedef const void* TDbValue;
@@ -23,34 +25,71 @@ enum ESQLType
 
 class CDbCommandParameter
 {
+public:
+	virtual ~CDbCommandParameter() {}
+	virtual string dump() const = 0;
+	virtual void bind(SACommand * command) const = 0;
+};
+
+typedef boost::shared_ptr<CDbCommandParameter> TDbCommandParameterPtr;
+
+class CDbCommandParameterValue: public CDbCommandParameter
+{
+private:
 	friend class CDbDataReader;
 
 public:
 	string name;
 	ESQLType type;
 	TDbValue value;
-	CDbCommandParameter();
-	CDbCommandParameter(const string & name, ESQLType type, TDbValue value);
-	string dump() const;
-	void bind(SACommand * command) const;
+
+	CDbCommandParameterValue();
+	CDbCommandParameterValue(const string & name, ESQLType type, TDbValue value);
+	virtual string dump() const;
+	virtual void bind(SACommand * command) const;
 };
 
-typedef map<string, CDbCommandParameter> TCommandParameterMap;
+class CCommandParameterMap: public map<string, TDbCommandParameterPtr>
+{
+public:
+	void set(const string & name, const char * value);
+	void set(const string & name, const wchar_t * value);
+	void set(const string & name, const string & value);
+	void set(const string & name, const wstring & value);
+	void set(const string & name, const long & value);
+	void set(const string & name, const double & value);
+	void set(const string & name, const unsigned long & value);
+	void set(const string & name, const TDbCommandParameterPtr & value);
+	CCommandParameterMap & mergeWith(const CCommandParameterMap & other);
+};
+
+class CDbCommandParameterExpression: public CDbCommandParameter
+{
+public:
+	string expression;
+	CCommandParameterMap params;
+
+	CDbCommandParameterExpression(const string & expression);
+	CDbCommandParameterExpression(const string & expression, const CCommandParameterMap & params);
+	virtual string dump() const;
+	virtual void bind(SACommand * command) const;
+};
 
 class CDbCommand: public CComponent
 {
 private:
 	const CDbConnection * _connection;
 	string _text;
-	TCommandParameterMap _params;
+	CCommandParameterMap _params;
 	SACommand * _saCommand;
 
-	string _makeParametersDump(const TCommandParameterMap & params);
-	CDbDataReader _queryInternal(const TCommandParameterMap & params) throw (CDbException);
+	string _makeParametersDump(const CCommandParameterMap & params);
+	CDbDataReader _queryInternal(const CCommandParameterMap & params) throw (CDbException);
 
 public:
 	CDbCommand(const CDbConnection * const connection);
 	CDbCommand(const CDbConnection * const connection, const string & query);
+	virtual string getClassName() const;
 	virtual ~CDbCommand();
 	void setText(const string & query);
 	string getText() const;
@@ -60,16 +99,16 @@ public:
     CDbCommand & bindParam(const string & name, const long & value);
     CDbCommand & bindParam(const string & name, const double & value);
     CDbCommand & bindParam(const string & name, const unsigned long & value);
-    CDbCommand & bindParam(const string & name, const CDbCommandParameter & value);
-    CDbCommand & mergeParametersWith(const TCommandParameterMap & other);
+    CDbCommand & bindParam(const string & name, const TDbCommandParameterPtr & value);
+    CDbCommand & mergeParametersWith(const CCommandParameterMap & other);
     long unsigned int execute() throw (CDbException);
-    long unsigned int execute(const TCommandParameterMap & params) throw (CDbException);
+    long unsigned int execute(const CCommandParameterMap & params) throw (CDbException);
     CDbDataReader queryAll() throw (CDbException);
-    CDbDataReader queryAll(const TCommandParameterMap & params) throw (CDbException);
+    CDbDataReader queryAll(const CCommandParameterMap & params) throw (CDbException);
     TDbRow queryRow() throw (CDbException);
-    TDbRow queryRow(const TCommandParameterMap & params) throw (CDbException);
+    TDbRow queryRow(const CCommandParameterMap & params) throw (CDbException);
     SAField & queryScalar() throw (CDbException);
-    SAField & queryScalar(const TCommandParameterMap & params) throw (CDbException);
+    SAField & queryScalar(const CCommandParameterMap & params) throw (CDbException);
 };
 
 /**

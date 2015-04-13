@@ -36,6 +36,11 @@ CAssetManager::CAssetManager(const string &id, CModule * module)
 	excludeFiles.push_back(".gitignore");
 }
 
+string CAssetManager::getClassName() const
+{
+	return "CAssetManager";
+}
+
 void CAssetManager::init()
 {
 	CApplicationComponent::init();

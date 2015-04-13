@@ -19,6 +19,11 @@ CLogRouter::CLogRouter(const string & id, CModule * module)
 {
 }
 
+string CLogRouter::getClassName() const
+{
+	return "CLogRouter";
+}
+
 CLogRouter::~CLogRouter()
 {
 	for (TLogRouteList::iterator iter = _routes.begin(); iter != _routes.end(); ++iter) {

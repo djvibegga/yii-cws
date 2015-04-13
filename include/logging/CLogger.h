@@ -51,6 +51,7 @@ public:
 	bool autoDump;
 
 	CLogger();
+	virtual string getClassName() const;
 	void log(const string & message, const string & level = "info", const string & category = "application");
 	TLogElementList getLogs(const TLogLevelList & levels);
 	TLogElementList getLogs(const TLogLevelList & levels, const TLogCategoryList & categories);

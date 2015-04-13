@@ -29,7 +29,7 @@ public:
 	vector<string> select;
 	bool distinct;
 	string condition;
-	TCommandParameterMap params;
+	CCommandParameterMap params;
     int limit;
 	int offset;
 	string order;
@@ -68,7 +68,7 @@ public:
 		const string & column, double & value,
 		const string & comparison = "", const string & op = "AND"
 	);
-	CDbCriteria & addBetweenCondition(const string & column, const long & valueStart, const long & valueEnd, const string & op = "AND");
+	CDbCriteria & addBetweenCondition(const string & column, long & valueStart, long & valueEnd, const string & op = "AND");
 };
 
 #endif /* CDBCRITERIA_H_ */

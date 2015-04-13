@@ -29,6 +29,7 @@ private:
 	static string _formatItem(const TProfileLogItem & item);
 
 public:
+	virtual string getClassName() const;
 	void add(const TProfileLogItem & item);
 	void begin(const string & msg);
 	void end();

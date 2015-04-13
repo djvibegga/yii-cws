@@ -12,6 +12,11 @@ CComponent::~CComponent()
 {
 }
 
+string CComponent::getClassName() const
+{
+	return "CComponent";
+}
+
 CComponent & CComponent::attachEventHandler(const string & event, IEventHandler * object, TEventHandler method)
 {
 	SEventHandler callee;

@@ -46,7 +46,11 @@ CWebApplication::CWebApplication(const xml_document & configDocument, int argc, 
 
 CWebApplication::~CWebApplication()
 {
+}
 
+string CWebApplication::getClassName() const
+{
+	return "CWebApplication";
 }
 
 void CWebApplication::registerComponents()

@@ -26,12 +26,15 @@ CHttpRequest::CHttpRequest(CWebApplication * app)
   _securePort(0),
   _cookies(*this)
 {
+}
 
+string CHttpRequest::getClassName() const
+{
+	return "CHttpRequest";
 }
 
 CHttpRequest::~CHttpRequest()
 {
-
 }
 
 void CHttpRequest::init()

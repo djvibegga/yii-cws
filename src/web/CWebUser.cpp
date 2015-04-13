@@ -31,7 +31,6 @@ CWebUser::CWebUser(CModule * module)
   absoluteAuthTimeout(DEFAULT_AUTH_TIMEOUT),
   loginRequiredAjaxResponse(_("session has expired"))
 {
-
 }
 
 CWebUser::CWebUser(const string &id, CModule * module)
@@ -44,7 +43,11 @@ CWebUser::CWebUser(const string &id, CModule * module)
   absoluteAuthTimeout(DEFAULT_AUTH_TIMEOUT),
   loginRequiredAjaxResponse(_("session has expired"))
 {
+}
 
+string CWebUser::getClassName() const
+{
+	return "CWebUser";
 }
 
 void CWebUser::init()

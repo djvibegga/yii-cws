@@ -18,6 +18,11 @@ CFileLogRoute::CFileLogRoute(const string & logFile)
 {
 }
 
+string CFileLogRoute::getClassName() const
+{
+	return "CFileLogRoute";
+}
+
 CFileLogRoute::~CFileLogRoute()
 {
 }

@@ -24,6 +24,11 @@ CTemplateView::CTemplateView(const string & viewFile, const CBaseController * ow
 {
 }
 
+string CTemplateView::getClassName() const
+{
+	return "CTemplateView";
+}
+
 CTemplateView::~CTemplateView()
 {
 }

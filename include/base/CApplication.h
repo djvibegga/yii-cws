@@ -70,6 +70,7 @@ public:
 
 	CApplication(const string & configPath, int argc, char * const argv[]);
 	CApplication(const xml_document & configDocument, int argc, char * const argv[]);
+	virtual string getClassName() const;
 	virtual ~CApplication();
 	virtual string getId() const;
 	virtual void setId(const string &id);

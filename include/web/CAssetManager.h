@@ -30,6 +30,7 @@ public:
 
 	CAssetManager(CModule * module);
 	CAssetManager(const string &id, CModule * module);
+	virtual string getClassName() const;
 	virtual void init();
 
 	boost::filesystem::path getBasePath() const;

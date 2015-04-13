@@ -15,6 +15,11 @@ CDbDataReader::CDbDataReader(SACommand * command)
 	_saCommand = command;
 }
 
+string CDbDataReader::getClassName() const
+{
+	return "CDbDataReader";
+}
+
 CDbDataReader::~CDbDataReader()
 {
 }

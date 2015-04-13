@@ -35,6 +35,7 @@ protected:
 
 public:
 	CController(const string & id, CModule * module = 0);
+	virtual string getClassName() const;
 	virtual ~CController();
 	virtual void init();
 	void registerAction(const string &name, TAction action);

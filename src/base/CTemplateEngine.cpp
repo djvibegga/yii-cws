@@ -11,6 +11,11 @@ CTemplateEngine::CTemplateEngine(CModule * module)
 {
 }
 
+string CTemplateEngine::getClassName() const
+{
+	return "CTemplateEngine";
+}
+
 CTemplateEngine::~CTemplateEngine()
 {
 	if (_vm != 0) {

@@ -68,6 +68,7 @@ public:
 	string cacheID;
 
 	CStatePersister();
+	virtual string getClassName() const;
 	virtual void init();
 	virtual CStatesMap load();
 	virtual void save(CStatesMap & states);

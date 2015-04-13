@@ -36,6 +36,11 @@ CModule::~CModule()
 	unregisterComponents();
 }
 
+string CModule::getClassName() const
+{
+	return "CModule";
+}
+
 void CModule::init()
 {
     if (_basePath.empty()) {

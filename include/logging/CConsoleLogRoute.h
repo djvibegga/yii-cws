@@ -14,6 +14,7 @@ class CConsoleLogRoute: public CLogRoute
 {
 public:
 	CConsoleLogRoute();
+	virtual string getClassName() const;
 	virtual ~CConsoleLogRoute();
 	virtual void init() throw (CException);
 

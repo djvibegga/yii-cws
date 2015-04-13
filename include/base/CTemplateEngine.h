@@ -29,6 +29,7 @@ public:
 	unsigned int maxSteps;
 
 	CTemplateEngine(CModule * module);
+	virtual string getClassName() const;
 	virtual ~CTemplateEngine();
 	virtual void init();
 	VM * getVM() const;

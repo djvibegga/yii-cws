@@ -55,6 +55,7 @@ public:
 
 	CClientScript(CModule * module);
 	CClientScript(const string &id, CModule * module);
+	virtual string getClassName() const;
 	virtual void init();
 
 	void setCoreScriptUrl(const string & url);

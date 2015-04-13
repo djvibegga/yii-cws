@@ -63,6 +63,7 @@ public:
 	_string loginRequiredAjaxResponse;
 	CWebUser(CModule * module);
 	CWebUser(const string &id, CModule * module);
+	virtual string getClassName() const;
 	virtual void init();
 	virtual void load();
 	bool getIsGuest() const;

@@ -22,6 +22,11 @@ CWebModule::~CWebModule()
 {
 }
 
+string CWebModule::getClassName() const
+{
+	return "CWebModule";
+}
+
 void CWebModule::init()
 {
 	_layoutPath = resolveLayoutPath();

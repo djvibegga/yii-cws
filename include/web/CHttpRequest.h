@@ -35,6 +35,7 @@ private:
 
 public:
 	CHttpRequest(CWebApplication * app);
+	virtual string getClassName() const;
 	virtual ~CHttpRequest();
 	virtual void init();
 

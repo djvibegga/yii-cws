@@ -18,6 +18,11 @@ CBaseViewRenderer::CBaseViewRenderer(const string &id, CModule * module)
 {
 }
 
+string CBaseViewRenderer::getClassName() const
+{
+	return "CBaseViewRenderer";
+}
+
 bool CBaseViewRenderer::generateViewFile(const string & sourceFile, const string & viewFile)
 {
 	string command = "ctpp2c " + sourceFile + " " + viewFile;

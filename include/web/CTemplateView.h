@@ -19,6 +19,7 @@ private:
 public:
 	CTemplateView(const string & viewFile, CDT & data, const CBaseController * owner = 0);
 	CTemplateView(const string & viewFile, const CBaseController * owner = 0);
+	virtual string getClassName() const;
 	virtual ~CTemplateView();
 	void setData(CDT & data);
 	CDT & getData();

@@ -27,13 +27,16 @@ const string CSecurityManager::STATE_ENCRYPTION_KEY = "CSecurityManager.encrypti
 CSecurityManager::CSecurityManager(CModule * module)
 : CApplicationComponent("securityManager", module)
 {
-
 }
 
 CSecurityManager::CSecurityManager(const string &id, CModule * module)
 : CApplicationComponent(id, module)
 {
+}
 
+string CSecurityManager::getClassName() const
+{
+	return "CSecurityManager";
 }
 
 void CSecurityManager::init()

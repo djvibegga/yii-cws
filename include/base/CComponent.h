@@ -26,6 +26,7 @@ private:
 public:
 	CComponent();
 	virtual ~CComponent();
+	virtual string getClassName() const = 0;
 	CComponent & attachEventHandler(const string & event, IEventHandler * object, TEventHandler method);
 	CComponent & attachEventHandler(const string & event, const SEventHandler & callee);
 	virtual void raiseEvent(const string &name, CEvent &event);

@@ -11,20 +11,20 @@
 #include "base/Jvibetto.h"
 #include "base/CProfiler.h"
 
-CDbCommandParameter::CDbCommandParameter()
+CDbCommandParameterValue::CDbCommandParameterValue()
  : type(SQL_STRING),
    value(0)
 {
 }
 
-CDbCommandParameter::CDbCommandParameter(const string & name, ESQLType type, TDbValue value)
+CDbCommandParameterValue::CDbCommandParameterValue(const string & name, ESQLType type, TDbValue value)
 : name(name),
   type(type),
   value(value)
 {
 }
 
-string CDbCommandParameter::dump() const
+string CDbCommandParameterValue::dump() const
 {
 	stringstream ss;
 	switch (type) {
@@ -46,23 +46,93 @@ string CDbCommandParameter::dump() const
 	return ss.str();
 }
 
-void CDbCommandParameter::bind(SACommand * command) const
+void CDbCommandParameterValue::bind(SACommand * command) const
 {
+	string paramName = name[0] == ':' ? name.substr(1) : name;
 	switch (type) {
 	case SQL_STRING:
-		command->Param(name.c_str()).setAsString() = (const char*)value;
+		command->Param(paramName.c_str()).setAsString() = (const char*)value;
 		break;
 	case SQL_INT:
-		command->Param(name.c_str()).setAsLong() = *((long*)value);
+		command->Param(paramName.c_str()).setAsLong() = *((long*)value);
 		break;
 	case SQL_UNSIGNED_INT:
-		command->Param(name.c_str()).setAsULong() = *((unsigned long*)value);
+		command->Param(paramName.c_str()).setAsULong() = *((unsigned long*)value);
 		break;
 	case SQL_DOUBLE:
-		command->Param(name.c_str()).setAsDouble() = *((double*)value);
+		command->Param(paramName.c_str()).setAsDouble() = *((double*)value);
 		break;
 	}
 }
+
+void CCommandParameterMap::set(const string & name, const char * value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value));
+}
+
+void CCommandParameterMap::set(const string & name, const wchar_t * value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value));
+}
+
+void CCommandParameterMap::set(const string & name, const string & value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value.c_str()));
+}
+
+void CCommandParameterMap::set(const string & name, const wstring & value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value.c_str()));
+}
+
+void CCommandParameterMap::set(const string & name, const long & value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_INT, (TDbValue)&value));
+}
+
+void CCommandParameterMap::set(const string & name, const double & value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_DOUBLE, (TDbValue)&value));
+}
+
+void CCommandParameterMap::set(const string & name, const unsigned long & value)
+{
+	this->operator [](name) = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_UNSIGNED_INT, (TDbValue)&value));
+}
+
+void CCommandParameterMap::set(const string & name, const TDbCommandParameterPtr & value)
+{
+	this->operator [](name) = value;
+}
+
+CCommandParameterMap & CCommandParameterMap::mergeWith(const CCommandParameterMap & other)
+{
+	for (CCommandParameterMap::const_iterator iter = other.begin(); iter != other.end(); ++iter) {
+		this->operator [](iter->first) = iter->second;
+	}
+	return *this;
+}
+
+CDbCommandParameterExpression::CDbCommandParameterExpression(const string & expression)
+: expression(expression)
+{
+}
+
+CDbCommandParameterExpression::CDbCommandParameterExpression(const string & expression, const CCommandParameterMap & params)
+: expression(expression),
+  params(params)
+{
+}
+
+string CDbCommandParameterExpression::dump() const
+{
+	return expression;
+}
+
+void CDbCommandParameterExpression::bind(SACommand * command) const
+{
+}
+
 
 CDbCommand::CDbCommand(const CDbConnection * const connection, const string & query)
 : _connection(connection),
@@ -76,6 +146,11 @@ CDbCommand::CDbCommand(const CDbConnection * const connection)
   _text(""),
   _saCommand(0)
 {
+}
+
+string CDbCommand::getClassName() const
+{
+	return "CDbCommand";
 }
 
 CDbCommand::~CDbCommand()
@@ -102,29 +177,29 @@ const CDbConnection * CDbCommand::getConnection() const
 
 CDbCommand & CDbCommand::bindParam(const string & name, const char * value)
 {
-	_params[name] = CDbCommandParameter(name, SQL_STRING, (TDbValue)value);
+	_params[name] = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value));
 	return *this;
 }
 
 CDbCommand & CDbCommand::bindParam(const string & name, const string & value)
 {
-	_params[name] = CDbCommandParameter(name, SQL_STRING, (TDbValue)value.c_str());
+	_params[name] = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_STRING, (TDbValue)value.c_str()));
 	return *this;
 }
 
 CDbCommand & CDbCommand::bindParam(const string & name, const long & value)
 {
-	_params[name] = CDbCommandParameter(name, SQL_INT, (TDbValue)&value);
+	_params[name] = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_INT, (TDbValue)&value));
 	return *this;
 }
 
 CDbCommand & CDbCommand::bindParam(const string & name, const unsigned long &value)
 {
-	_params[name] = CDbCommandParameter(name, SQL_UNSIGNED_INT, (TDbValue)&value);
+	_params[name] = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_UNSIGNED_INT, (TDbValue)&value));
 	return *this;
 }
 
-CDbCommand & CDbCommand::bindParam(const string & name, const CDbCommandParameter & value)
+CDbCommand & CDbCommand::bindParam(const string & name, const TDbCommandParameterPtr & value)
 {
 	_params[name] = value;
 	return *this;
@@ -132,26 +207,26 @@ CDbCommand & CDbCommand::bindParam(const string & name, const CDbCommandParamete
 
 CDbCommand & CDbCommand::bindParam(const string & name, const double & value)
 {
-	_params[name] = CDbCommandParameter(name, SQL_DOUBLE, (TDbValue)&value);
+	_params[name] = TDbCommandParameterPtr(new CDbCommandParameterValue(name, SQL_DOUBLE, (TDbValue)&value));
 	return *this;
 }
 
-CDbCommand & CDbCommand::mergeParametersWith(const TCommandParameterMap & other)
+CDbCommand & CDbCommand::mergeParametersWith(const CCommandParameterMap & other)
 {
-	for (TCommandParameterMap::const_iterator iter = other.begin(); iter != other.end(); ++iter) {
+	for (CCommandParameterMap::const_iterator iter = other.begin(); iter != other.end(); ++iter) {
 		_params[iter->first] = iter->second;
 	}
 	return *this;
 }
 
-string CDbCommand::_makeParametersDump(const TCommandParameterMap & params)
+string CDbCommand::_makeParametersDump(const CCommandParameterMap & params)
 {
 #ifdef JV_DB_PARAM_LOGGING
 	string ret;
 	if (!params.empty()) {
 		vector<string> parametersList;
-		for (TCommandParameterMap::const_iterator iter = params.begin(); iter != params.end(); ++iter) {
-			parametersList.push_back(iter->first + "=" + iter->second.dump());
+		for (CCommandParameterMap::const_iterator iter = params.begin(); iter != params.end(); ++iter) {
+			parametersList.push_back(iter->first + "=" + iter->second.get()->dump());
 		}
 		ret = ". Bound with " + CStringUtils::implode(", ", parametersList);
 	}
@@ -163,10 +238,10 @@ string CDbCommand::_makeParametersDump(const TCommandParameterMap & params)
 
 long unsigned int CDbCommand::execute() throw (CDbException)
 {
-	return execute(TCommandParameterMap());
+	return execute(CCommandParameterMap());
 }
 
-long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw (CDbException)
+long unsigned int CDbCommand::execute(const CCommandParameterMap & params) throw (CDbException)
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
@@ -177,8 +252,8 @@ long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw
 		SAConnection * connection = _connection->getConnection();
 		_saCommand = new SACommand(connection);
 		_saCommand->setCommandText(_text.c_str());
-		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
-			iter->second.bind(_saCommand);
+		for (CCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
+			iter->second.get()->bind(_saCommand);
 		}
 		PROFILE_BEGIN("Executing SQL: " + _text + parametersDump);
 		_saCommand->Execute();
@@ -204,7 +279,7 @@ long unsigned int CDbCommand::execute(const TCommandParameterMap & params) throw
 	return 0;
 }
 
-CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) throw (CDbException)
+CDbDataReader CDbCommand::_queryInternal(const CCommandParameterMap & params) throw (CDbException)
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
@@ -218,8 +293,8 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 		if (connection->Client() == SA_MySQL_Client) {
 			_saCommand->setOption("UseStatement") = "TRUE";
 		}
-		for (TCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
-			iter->second.bind(_saCommand);
+		for (CCommandParameterMap::const_iterator iter = _params.begin(); iter != _params.end(); ++iter) {
+			iter->second.get()->bind(_saCommand);
 		}
 		PROFILE_BEGIN("Executing SQL: " + _text + parametersDump);
 		_saCommand->Execute();
@@ -248,34 +323,36 @@ CDbDataReader CDbCommand::_queryInternal(const TCommandParameterMap & params) th
 
 CDbDataReader CDbCommand::queryAll() throw (CDbException)
 {
-	return queryAll(TCommandParameterMap());
+	return queryAll(CCommandParameterMap());
 }
 
-CDbDataReader CDbCommand::queryAll(const TCommandParameterMap & params) throw (CDbException)
+CDbDataReader CDbCommand::queryAll(const CCommandParameterMap & params) throw (CDbException)
 {
 	return _queryInternal(params);
 }
 
 TDbRow CDbCommand::queryRow() throw (CDbException)
 {
-	return queryRow(TCommandParameterMap());
+	return queryRow(CCommandParameterMap());
 }
 
-TDbRow CDbCommand::queryRow(const TCommandParameterMap & params) throw (CDbException)
+TDbRow CDbCommand::queryRow(const CCommandParameterMap & params) throw (CDbException)
 {
 	CDbDataReader reader = _queryInternal(params);
-	reader.nextResult();
+	if (!reader.nextResult()) {
+		return TDbRow();
+	}
 	return reader.readRow();
 }
 
 SAField & CDbCommand::queryScalar() throw (CDbException)
 {
-	return queryScalar(TCommandParameterMap());
+	return queryScalar(CCommandParameterMap());
 }
 
-SAField & CDbCommand::queryScalar(const TCommandParameterMap & params) throw (CDbException)
+SAField & CDbCommand::queryScalar(const CCommandParameterMap & params) throw (CDbException)
 {
 	CDbDataReader reader = _queryInternal(params);
 	reader.nextResult();
-	return reader.readColumn(0);
+	return reader.readColumn(1);
 }

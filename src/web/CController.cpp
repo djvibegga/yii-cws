@@ -25,7 +25,11 @@ CController::CController(const string & id, CModule * module)
 
 CController::~CController()
 {
+}
 
+string CController::getClassName() const
+{
+	return "CController";
 }
 
 void CController::init()

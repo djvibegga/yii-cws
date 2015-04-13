@@ -32,6 +32,7 @@ public:
 		unsigned int expire = 0
 		);
 	CHttpCookie(const CHttpCookie & other);
+	virtual string getClassName() const;
 	CHttpCookie & operator=(const CHttpCookie & other);
 };
 

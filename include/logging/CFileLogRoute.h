@@ -21,6 +21,7 @@ private:
 
 public:
 	CFileLogRoute(const string & logFile = "application.log");
+	virtual string getClassName() const;
 	virtual ~CFileLogRoute();
 	boost::filesystem::path getLogPath() const;
 	void setLogPath(const string & value) throw (CException);

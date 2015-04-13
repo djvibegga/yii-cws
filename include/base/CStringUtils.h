@@ -40,6 +40,9 @@ public:
 	static string fromTimestamp(const string & format, time_t timestamp, bool isGmt = false);
 	static int toInt(const string & str);
 	static string fromInt(int from);
+	static string fromBool(bool from);
+	static string fromLong(long from);
+	static string fromULong(unsigned long from);
 	static string fromDouble(double from);
 	static string base64Encode(const string & str);
 	static string base64Decode(const string & str);

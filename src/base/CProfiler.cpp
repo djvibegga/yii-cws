@@ -26,6 +26,11 @@ void CProfiler::logItems()
 	_items.clear();
 }
 
+string CProfiler::getClassName() const
+{
+	return "CProfiler";
+}
+
 void CProfiler::add(const TProfileLogItem & item)
 {
 	_items.push_back(item);

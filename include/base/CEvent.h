@@ -17,6 +17,7 @@ public:
 
 	CEvent(CComponent * const sender);
 	CEvent(CComponent * const sender, const TEventParams &params);
+	virtual string getClassName() const;
 };
 
 #endif

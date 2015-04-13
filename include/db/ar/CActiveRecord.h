@@ -13,17 +13,47 @@
 #include "db/CDbConnection.h"
 #include "db/CDbCriteria.h"
 #include "db/CDbDataReader.h"
+#include "db/schema/CDbCommandBuilder.h"
 
 class CActiveRecord;
 
 typedef boost::shared_ptr<CActiveRecord> TActiveRecordPtr;
 typedef vector<TActiveRecordPtr> TActiveRecordList;
 
+class CAttributeCollection
+{
+private:
+	map<string, string> _strValues;
+	map<string, wstring> _wstrValues;
+	map<string, unsigned long> _ulongValues;
+	map<string, long> _longValues;
+	map<string, double> _doubleValues;
+
+public:
+	void setValue(const string & key, const string & value);
+	void setValue(const string & key, const wstring & value);
+	void setValue(const string & key, unsigned long value);
+	void setValue(const string & key, long value);
+	void setValue(const string & key, double value);
+
+	bool has(const string & key) const;
+	string getStringValue(const string & key) const;
+	wstring getWStringValue(const string & key) const;
+	unsigned long getULongValue(const string & key) const;
+	long getLongValue(const string & key) const;
+	double getDoubleValue(const string & key) const;
+	CCommandParameterMap convertToCommandParameterMap(const vector<string> & ignoredNames = vector<string>()) const;
+};
+
 class CActiveRecord: public CComponent
 {
 private:
 	CDbConnection * _connection;
 	string _scenario;
+	bool _isNew;
+	CTablePrimaryKey _pk;
+	string _alias;
+	CDbCriteria _criteria;
 
 public:
 	static const string LOG_CATEGORY;
@@ -35,19 +65,69 @@ public:
 	void init();
 	virtual CActiveRecord * instantiate(const TDbRow & attributes) const = 0;
 	virtual string tableName() const = 0;
+	virtual bool validate(const vector<string> & attributeNames = vector<string>());
 	virtual void populateProperty(const string & name, const SAField * value) = 0;
 	void setDbConnection(CDbConnection * connection);
 	CDbConnection * getDbConnection() const;
+	CDbCommandBuilder * getCommandBuilder() const;
+	CDbTableSchema getTableSchema() const;
 	TActiveRecordList findAll() throw (CDbException);
 	TActiveRecordList findAll(const CDbCriteria & criteria) throw (CDbException);
 	TActiveRecordPtr find(const CDbCriteria & criteria) throw (CDbException);
+	TActiveRecordPtr findByPk(CTablePrimaryKey & pk) throw (CDbException);
 	TActiveRecordList populateRecords(CDbDataReader & data, bool callAfterFind = true);
 	TActiveRecordPtr populateRecord(const TDbRow & attributes, bool callAfterFind = true);
 	void setScenario(const string & scenario);
 	string getScenario() const;
+	bool getIsNewRecord() const;
+	void setIsNewRecord(bool value);
+	bool save(bool runValidation = true) throw (CDbException);
+	bool save(bool runValidation, const vector<string> & attributes) throw (CDbException);
+	bool saveAttributes(const vector<string> & attributes) throw (CDbException);
+	bool insert(const vector<string> & attributes) throw (CDbException);
+	bool update(const vector<string> & attributes) throw (CDbException);
+	bool saveCounters(const TUpdateCountersData & counters) throw (CDbException);
+	bool remove() throw (CDbException);
+	bool refresh() throw (CDbException);
+	unsigned long count() throw (CDbException);
+	unsigned long count(const CDbCriteria & criteria) throw (CDbException);
+	bool exists() throw (CDbException);
+	bool exists(CDbCriteria & criteria) throw (CDbException);
+	bool updateByPk(CTablePrimaryKey & pk, const CCommandParameterMap & attributes) throw (CDbException);
+	unsigned long updateAll(const CCommandParameterMap & attributes, const CDbCriteria & criteria) throw (CDbException);
+	unsigned long updateCounters(const TUpdateCountersData & counters, const CDbCriteria & criteria) throw (CDbException);
+	bool removeByPk(CTablePrimaryKey & pk) throw (CDbException);
+	unsigned long removeAll(const CDbCriteria & criteria) throw (CDbException);
+	CTablePrimaryKey getPrimaryKey() const;
+	void setPrimaryKey(const CTablePrimaryKey & value);
+	string getTableAlias(bool quote = false, bool checkScopes = true);
+	void setTableAlias(const string & alias);
+	CDbCriteria & getDbCriteria();
+
+	virtual void beforeFind();
+	virtual void afterFind();
+
+	virtual bool isAttributeNeeded(const string & name, const vector<string> & names) const;
+	virtual CAttributeCollection getAttributes(const vector<string> & names = vector<string>()) const = 0;
+	virtual void setAttributes(const CAttributeCollection & attributes) = 0;
 
 protected:
 	TActiveRecordList query(const CDbCriteria & criteria, bool all = false) throw (CDbException);
+	void onBeforeSave(CEvent & event);
+	void onAfterSave(CEvent & event);
+	void onBeforeDelete(CEvent & event);
+	void onAfterDelete(CEvent & event);
+	void onBeforeFind(CEvent & event);
+	void onAfterFind(CEvent & event);
+	void onBeforeCount(CEvent & event);
+
+	virtual bool beforeSave();
+	virtual void afterSave();
+	virtual bool beforeDelete();
+	virtual void afterDelete();
+	virtual void beforeCount();
+
+	virtual CTablePrimaryKey fetchPrimaryKey() const = 0;
 };
 
 typedef boost::shared_ptr<CActiveRecord> TArSharedPtr;
@@ -61,14 +141,24 @@ private:\
 	static boost::mutex _instancesMutex;\
 public:\
 	static className * model();\
+	virtual string getClassName() const;\
+	virtual string tableName() const;\
 	virtual CActiveRecord * instantiate(const TDbRow & attributes) const;
 
 /**
  * Registering implementation of model(), instantiate methods
  */
-#define IMPLEMENT_AR_CLASS(className) \
+#define IMPLEMENT_AR_CLASS(className, tblName) \
 map<long, TArSharedPtr> className::_instances;\
 boost::mutex className::_instancesMutex;\
+string className::getClassName() const\
+{\
+	return #className;\
+}\
+string className::tableName() const\
+{\
+	return tblName;\
+}\
 className * className::model()\
 {\
 	long threadId = CApplication::getThreadId();\
@@ -76,6 +166,7 @@ className * className::model()\
 	map<long, TArSharedPtr>::const_iterator found = _instances.find(threadId);\
 	if (found == _instances.end()) {\
 		className * instance = new className();\
+		instance->setIsNewRecord(false);\
 		instance->init();\
 		_instances[threadId] = TArSharedPtr(instance);\
 		return instance;\
@@ -146,5 +237,33 @@ public:\
 #define AR_ATTRIBUTE_STRING string
 #define AR_ATTRIBUTE_VSTRING _string
 #define AR_ATTRIBUTE_DOUBLE double
+
+/**
+ * Registering declaration of "fetchPrimaryKey" method
+ */
+#define DECLARE_PRIMARY_KEY_RESOLVER() \
+protected:\
+	CTablePrimaryKey fetchPrimaryKey() const;\
+
+/**
+ * Registering implementation begin of "fetchPrimaryKey" method
+ */
+#define BEGIN_PRIMARY_KEY_RESOLVER(className) \
+	CTablePrimaryKey className::fetchPrimaryKey() const\
+	{\
+		CTablePrimaryKey key;\
+
+/**
+ * Fetch a property value into primary key structure.
+ */
+#define PRIMARY_KEY_ADD_PROPERTY(attribute, property) \
+	key.setValue(attribute, this->property);\
+
+/**
+ * Registering implementation end of "fetchPrimaryKey" method
+ */
+#define END_PRIMARY_KEY_RESOLVER() \
+		return key;\
+	}
 
 #endif /* CACTIVERECORD_H_ */

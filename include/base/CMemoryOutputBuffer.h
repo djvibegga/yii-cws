@@ -10,7 +10,7 @@
 
 #include "base/CComponent.h"
 
-class CMemoryOutputBuffer: public CComponent, public IOutputBuffer
+class CMemoryOutputBuffer: public IOutputBuffer
 {
 private:
 	string _content;

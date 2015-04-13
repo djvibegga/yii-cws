@@ -52,6 +52,11 @@ CHttpCookie::CHttpCookie(const CHttpCookie & other)
 {
 }
 
+string CHttpCookie::getClassName() const
+{
+	return "CHttpCookie";
+}
+
 CHttpCookie & CHttpCookie::operator=(const CHttpCookie & other)
 {
 	name = other.name;

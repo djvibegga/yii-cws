@@ -26,6 +26,7 @@ public:
 
 	CWebModule(const string &id);
 	CWebModule(const string &id, CModule * parent);
+	virtual string getClassName() const;
 	virtual ~CWebModule();
 	virtual void init();
 

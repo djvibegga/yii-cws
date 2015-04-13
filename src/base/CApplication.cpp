@@ -72,6 +72,11 @@ CApplication::~CApplication()
 	}
 }
 
+string CApplication::getClassName() const
+{
+	return "CApplication";
+}
+
 TArgumentsList CApplication::getArguments() const
 {
 	return _arguments;

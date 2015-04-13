@@ -31,8 +31,8 @@ CDbCriteria::~CDbCriteria()
 string CDbCriteria::_addColumnCondition(const string & column, const string & comparison, const string & op)
 {
 	stringstream paramName;
-	paramName << PARAM_PREFIX << paramCount;
-	addCondition(column + (comparison.empty() ? "=" : comparison) + ":" + paramName.str(), op);
+	paramName << ":" << PARAM_PREFIX << paramCount;
+	addCondition(column + (comparison.empty() ? "=" : comparison) + paramName.str(), op);
 	++paramCount;
 	return paramName.str();
 }
@@ -61,10 +61,10 @@ CDbCriteria & CDbCriteria::addSearchCondition(
 	}
 	stringstream cond;
 	stringstream paramName;
-	paramName << PARAM_PREFIX << paramCount;
-	cond << column << " " << like << " (:" << paramName.str() + ")";
+	paramName << ":" << PARAM_PREFIX << paramCount;
+	cond << column << " " << like << " (" << paramName.str() + ")";
 	++paramCount;
-	params[":" + paramName.str()] = CDbCommandParameter(paramName.str(), SQL_STRING, keyword.c_str());
+	params[paramName.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName.str(), SQL_STRING, keyword.c_str()));
 	return addCondition(cond.str(), op);
 }
 
@@ -80,19 +80,19 @@ CDbCriteria & CDbCriteria::addInCondition(const string & column, const vector<st
 			cond << column << " IS NULL OR " << column << " = ''";
 		} else {
 			stringstream paramName;
-			paramName << PARAM_PREFIX << paramCount;
-			cond << column << "=" << ":" << paramName.str();
+			paramName << ":" << PARAM_PREFIX << paramCount;
+			cond << column << "=" << paramName.str();
 			++paramCount;
-			params[":" + paramName.str()] = CDbCommandParameter(paramName.str(), SQL_STRING, value.c_str());
+			params[paramName.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName.str(), SQL_STRING, value.c_str()));
 		}
 	} else {
 		vector<string> params;
 		for (vector<string>::const_iterator iter = values.begin(); iter != values.end(); ++iter) {
 			stringstream paramName;
-			paramName << PARAM_PREFIX << paramCount;
+			paramName << ":" << PARAM_PREFIX << paramCount;
 			params.push_back(paramName.str());
 			++paramCount;
-			this->params[":" + paramName.str()] = CDbCommandParameter(paramName.str(), SQL_STRING, iter->c_str());
+			this->params[paramName.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName.str(), SQL_STRING, iter->c_str()));
 		}
 		cond << column << " IN (" << CStringUtils::implode(", ", params) << ")";
 	}
@@ -108,19 +108,19 @@ CDbCriteria & CDbCriteria::addNotInCondition(const string & column, const vector
 			cond << column << " IS NOT NULL";
 		} else {
 			stringstream paramName;
-			paramName << PARAM_PREFIX << paramCount;
+			paramName << ":" << PARAM_PREFIX << paramCount;
 			cond << column << "=" << ":" << paramName.str();
 			++paramCount;
-			params[":" + paramName.str()] = CDbCommandParameter(paramName.str(), SQL_STRING, value.c_str());
+			params[paramName.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName.str(), SQL_STRING, value.c_str()));
 		}
 	} else {
 		vector<string> params;
 		for (vector<string>::const_iterator iter = values.begin(); iter != values.end(); ++iter) {
 			stringstream paramName;
-			paramName << PARAM_PREFIX << paramCount;
+			paramName << ":" << PARAM_PREFIX << paramCount;
 			params.push_back(paramName.str());
 			++paramCount;
-			this->params[":" + paramName.str()] = CDbCommandParameter(paramName.str(), SQL_STRING, iter->c_str());
+			this->params[paramName.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName.str(), SQL_STRING, iter->c_str()));
 		}
 		cond << column << " NOT IN (" << CStringUtils::implode(", ", params) << ")";
 	}
@@ -143,7 +143,7 @@ CDbCriteria & CDbCriteria::compare(
 	}
 
 	string paramName = _addColumnCondition(column, comparison, op);
-	params[":" + paramName] = CDbCommandParameter(paramName, SQL_STRING, value.c_str());
+	params[paramName] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName, SQL_STRING, value.c_str()));
 	return *this;
 }
 
@@ -152,7 +152,7 @@ CDbCriteria & CDbCriteria::compare(
 )
 {
 	string paramName = _addColumnCondition(column, comparison, op);
-	params[":" + paramName] = CDbCommandParameter(paramName, SQL_INT, &value);
+	params[paramName] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName, SQL_INT, &value));
 	return *this;
 }
 
@@ -162,7 +162,7 @@ CDbCriteria & CDbCriteria::compare(
 )
 {
 	string paramName = _addColumnCondition(column, comparison, op);
-	params[":" + paramName] = CDbCommandParameter(paramName, SQL_UNSIGNED_INT, &value);
+	params[paramName] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName, SQL_UNSIGNED_INT, &value));
 	return *this;
 }
 
@@ -172,19 +172,19 @@ CDbCriteria & CDbCriteria::compare(
 )
 {
 	string paramName = _addColumnCondition(column, comparison, op);
-	params[":" + paramName] = CDbCommandParameter(paramName, SQL_DOUBLE, &value);
+	params[paramName] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramName, SQL_DOUBLE, &value));
 	return *this;
 }
 
-CDbCriteria & CDbCriteria::addBetweenCondition(const string & column, const long & valueStart, const long & valueEnd, const string & op)
+CDbCriteria & CDbCriteria::addBetweenCondition(const string & column, long & valueStart, long & valueEnd, const string & op)
 {
 	stringstream paramStart, paramEnd, cond;
-	paramStart << PARAM_PREFIX << paramCount;
-	paramEnd << PARAM_PREFIX << paramCount + 1;
+	paramStart << ":" << PARAM_PREFIX << paramCount;
+	paramEnd << ":" << PARAM_PREFIX << paramCount + 1;
 	paramCount += 2;
-	params[":" + paramStart.str()] = CDbCommandParameter(paramStart.str(), SQL_INT, &valueStart);
-	params[":" + paramEnd.str()] = CDbCommandParameter(paramEnd.str(), SQL_INT, &valueEnd);
-	cond << column << " BETWEEN :" << paramStart.str() << " AND :" << paramEnd.str();
+	params[paramStart.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramStart.str(), SQL_INT, &valueStart));
+	params[paramEnd.str()] = TDbCommandParameterPtr(new CDbCommandParameterValue(paramEnd.str(), SQL_INT, &valueEnd));
+	cond << column << " BETWEEN " << paramStart.str() << " AND " << paramEnd.str();
 
 	return addCondition(cond.str(), op);
 }

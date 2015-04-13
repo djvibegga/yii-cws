@@ -29,6 +29,11 @@ CDbConnection::CDbConnection(CModule * module, string dsn, string username, stri
 	this->password = password;
 }
 
+string CDbConnection::getClassName() const
+{
+	return "CDbConnection";
+}
+
 CDbConnection::~CDbConnection()
 {
 	if (_commandBuilder == 0) {
@@ -63,7 +68,7 @@ bool CDbConnection::open() throw(CException)
 	_isActive = true;
 
 	if (_commandBuilder == 0) {
-		_commandBuilder = new CDbCommandBuilder(this, CDbSchema());
+		_commandBuilder = new CDbCommandBuilder(this, _schema);
 	}
 
 	return true;
@@ -83,6 +88,7 @@ void CDbConnection::close()
 void CDbConnection::init()
 {
 	CApplicationComponent::init();
+	initSchema(_schema);
 }
 
 SAConnection * CDbConnection::getConnection() const
@@ -124,6 +130,11 @@ CDbCommandBuilder * CDbConnection::getCommandBuilder() const
 	return _commandBuilder;
 }
 
+const CDbSchema & CDbConnection::getSchema()
+{
+	return _schema;
+}
+
 void CDbConnection::setCommandBuilder(CDbCommandBuilder * builder)
 {
 	_commandBuilder = builder;
@@ -151,4 +162,10 @@ void CDbConnection::threadEnd() throw (CException)
 		}
 	}
 	throw CException("Can\'t notify about thread is terminated via native API.");
+}
+
+unsigned long CDbConnection::getLastInsertId(const string & tableName)
+{
+	CDbCommand command = createCommand("SELECT LAST_INSERT_ID()");
+	return command.queryScalar().asULong();
 }

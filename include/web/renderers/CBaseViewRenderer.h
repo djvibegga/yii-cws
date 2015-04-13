@@ -1,7 +1,7 @@
 /*
  * CBaseViewRenderer.h
  *
- *  Created on: 27 íîßá. 2013 ã.
+ *  Created on: 27 ï¿½ï¿½ï¿½ï¿½. 2013 ï¿½.
  *      Author: djvibegga
  */
 
@@ -15,6 +15,7 @@ class CBaseViewRenderer: public CViewRenderer
 public:
     CBaseViewRenderer(CModule * module);
     CBaseViewRenderer(const string &id, CModule * module);
+    virtual string getClassName() const;
 
 protected:
     virtual bool generateViewFile(const string & sourceFile, const string & viewFile);

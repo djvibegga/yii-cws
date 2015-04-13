@@ -25,6 +25,11 @@ CLogger::CLogger()
 {
 }
 
+string CLogger::getClassName() const
+{
+	return "CLogger";
+}
+
 TLogCategoryList CLogger::_lowerList(const vector<string> & list)
 {
 	vector<string> ret;

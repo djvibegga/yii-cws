@@ -29,6 +29,7 @@ private:
 
 public:
     CHttpResponse(CWebApplication * app);
+    virtual string getClassName() const;
     ~CHttpResponse();
 
     virtual string getContent() const;

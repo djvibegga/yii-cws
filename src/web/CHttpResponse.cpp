@@ -20,9 +20,13 @@ CHttpResponse::CHttpResponse(CWebApplication * app)
 {
 }
 
+string CHttpResponse::getClassName() const
+{
+	return "CHttpResponse";
+}
+
 CHttpResponse::~CHttpResponse()
 {
-
 }
 
 string CHttpResponse::getContent() const

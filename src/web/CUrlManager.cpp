@@ -92,6 +92,11 @@ CUrlRule::CUrlRule(const string & routeExp, const string & patternExp)
 #endif
 }
 
+string CUrlRule::getClassName() const
+{
+	return "CUrlRule";
+}
+
 CUrlRule::~CUrlRule()
 {
 }
@@ -271,6 +276,11 @@ CUrlManager::CUrlManager(CModule * module)
   storeLanguageInCookies(false),
   appendLanguageWhenItIsDefault(false)
 {
+}
+
+string CUrlManager::getClassName() const
+{
+	return "CUrlManager";
 }
 
 CUrlManager::~CUrlManager()

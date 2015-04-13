@@ -24,6 +24,7 @@ private:
 
 public:
 	CDbDataReader(SACommand * command);
+	virtual string getClassName() const;
 	~CDbDataReader();
 	bool nextResult();
 	SAField & readColumn(int columnNum);
