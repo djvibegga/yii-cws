@@ -8,7 +8,7 @@
 #include "base/CModule.h"
 #include "base/CApplication.h"
 #include "base/CApplicationComponent.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 
 using namespace std;
 
@@ -49,7 +49,7 @@ void CModule::init()
     if (_viewPath.empty()) {
         setViewPath(resolveViewPath());
     }
-	xml_node config = Jvibetto::app()->getConfigByNamePath(resolveNamePath());
+	xml_node config = Cws::app()->getConfigByNamePath(resolveNamePath());
 	applyConfig(config);
 	registerComponents();
 }
@@ -126,7 +126,7 @@ void CModule::unregisterComponents()
 TNamesPath CModule::resolveNamePath() const
 {
 	const IModule * current = this;
-	CApplication * app = Jvibetto::app();
+	CApplication * app = Cws::app();
 	TNamesPath ret;
 	while (current != app) {
 		ret.push_back(current->getId());

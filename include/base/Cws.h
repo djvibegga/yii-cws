@@ -1,5 +1,5 @@
 /*
- * Jvibetto.h
+ * Cws.h
  *
  *  Created on: Oct 16, 2013
  *      Author: djvibegga
@@ -13,7 +13,7 @@
 
 typedef map<string, boost::filesystem::path> TPathAliasMap;
 
-class Jvibetto
+class Cws
 {
 private:
     static TPathAliasMap _aliases;
@@ -33,7 +33,7 @@ public:
 	static _string t(const _string & message, char const * category);
 };
 
-#define _t(message) Jvibetto::t(message)
-#define _tc(message, category) Jvibetto::t(message, category)
+#define _t(message) Cws::t(message)
+#define _tc(message, category) Cws::t(message, category)
 
 #endif /* YIIBASE_H_ */

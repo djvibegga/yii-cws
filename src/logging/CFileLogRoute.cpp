@@ -6,7 +6,7 @@
  */
 
 #include "logging/CFileLogRoute.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include <boost/filesystem.hpp>
 #include <stdio.h>
 
@@ -30,7 +30,7 @@ CFileLogRoute::~CFileLogRoute()
 void CFileLogRoute::init() throw (CException)
 {
 	if (getLogPath().empty()) {
-		setLogPath(string(Jvibetto::app()->getRuntimePath().c_str()));
+		setLogPath(string(Cws::app()->getRuntimePath().c_str()));
 	}
 }
 

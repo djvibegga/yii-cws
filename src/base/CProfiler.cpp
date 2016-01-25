@@ -6,7 +6,7 @@
  */
 
 #include "base/CProfiler.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include <sstream>
 
 string CProfiler::_formatItem(const TProfileLogItem & item)
@@ -21,7 +21,7 @@ string CProfiler::_formatItem(const TProfileLogItem & item)
 void CProfiler::logItems()
 {
 	for (TProfileLogList::const_iterator iter = _items.begin(); iter != _items.end(); ++iter) {
-		Jvibetto::log(_formatItem(*iter), CLogger::LEVEL_PROFILE);
+		Cws::log(_formatItem(*iter), CLogger::LEVEL_PROFILE);
 	}
 	_items.clear();
 }

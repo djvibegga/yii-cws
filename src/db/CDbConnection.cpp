@@ -2,7 +2,7 @@
 #include "db/schema/CDbCommandBuilder.h"
 #include "db/CDbConnection.h"
 #include <boost/regex.hpp>
-#include <base/Jvibetto.h>
+#include <base/Cws.h>
 #include <sqlapi/myAPI.h>
 
 SAConnection CDbConnection::glConnection;
@@ -62,7 +62,7 @@ bool CDbConnection::open() throw(CException)
 	try {
 		_saConnection->Connect((host + ":" + port + "@" + dbname).c_str(), username.c_str(), password.c_str(), SA_MySQL_Client);
 	} catch (SAException & e) {
-	    Jvibetto::log(e.ErrText().GetMultiByteChars(), CLogger::LEVEL_ERROR);
+	    Cws::log(e.ErrText().GetMultiByteChars(), CLogger::LEVEL_ERROR);
 		return false;
 	}
 	_isActive = true;

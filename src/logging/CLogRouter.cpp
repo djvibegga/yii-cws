@@ -6,7 +6,7 @@
  */
 
 #include "logging/CLogRouter.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CEvent.h"
 
 CLogRouter::CLogRouter(CModule * module)
@@ -34,9 +34,9 @@ CLogRouter::~CLogRouter()
 void CLogRouter::init()
 {
 	CApplicationComponent::init();
-	Jvibetto::getLogger()
+	Cws::getLogger()
 		.attachEventHandler("onFlush", this, reinterpret_cast<TEventHandler>(&CLogRouter::collectLogs));
-	Jvibetto::app()
+	Cws::app()
 		->attachEventHandler("onEndRequest", this, reinterpret_cast<TEventHandler>(&CLogRouter::processLogs));
 }
 
@@ -47,7 +47,7 @@ void CLogRouter::addRoute(CLogRoute * route)
 
 void CLogRouter::collectLogs(CEvent & event)
 {
-	CLogger & logger = Jvibetto::getLogger();
+	CLogger & logger = Cws::getLogger();
 	bool dumpLogs = event.params.find("dumpLogs") != event.params.end() &&
 		*((bool*)event.params["dumpLogs"]);
 	for (TLogRouteList::iterator iter = _routes.begin(); iter != _routes.end(); ++iter) {
@@ -59,7 +59,7 @@ void CLogRouter::collectLogs(CEvent & event)
 
 void CLogRouter::processLogs(CEvent & event)
 {
-	CLogger & logger = Jvibetto::getLogger();
+	CLogger & logger = Cws::getLogger();
 	for (TLogRouteList::iterator iter = _routes.begin(); iter != _routes.end(); ++iter) {
 		if ((*iter)->enabled) {
 			(*iter)->collectLogs(logger, true);

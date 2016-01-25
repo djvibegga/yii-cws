@@ -6,7 +6,7 @@
  */
 
 #include <web/CWebModule.h>
-#include <base/Jvibetto.h>
+#include <base/Cws.h>
 
 CWebModule::CWebModule(const string &id)
 : CModule(id)
@@ -54,7 +54,7 @@ void CWebModule::setController(const string & name, CController * instance)
 
 boost::filesystem::path CWebModule::resolveBasePath() const
 {
-    string resolved = Jvibetto::app()->getBasePath().string() + "/modules/" + getId();
+    string resolved = Cws::app()->getBasePath().string() + "/modules/" + getId();
     return boost::filesystem::path(resolved);
 }
 

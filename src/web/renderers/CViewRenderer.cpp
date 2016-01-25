@@ -7,7 +7,7 @@
 
 #include "web/renderers/CViewRenderer.h"
 #include "base/CException.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include <boost/filesystem.hpp>
 #include <sys/stat.h>
 #include <ctpp2/CTPP2VMFileLoader.hpp>
@@ -68,7 +68,7 @@ string CViewRenderer::renderFile(const IRenderingContext * context, const string
 
 	PROFILE_BEGIN("CViewRenderer::rendering template bytecode of \"" + viewFile + "\"")
 	UINT_32 iIP = 0;
-	VM * vm = Jvibetto::app()->getTemplateEngine()->getVM();
+	VM * vm = Cws::app()->getTemplateEngine()->getVM();
 	const VMMemoryCore * pVMMemoryCore = oLoader->GetCore();
 	vm->Init(pVMMemoryCore, &outputCollector, 0);
 	vm->Run(pVMMemoryCore, &outputCollector, iIP, data, 0);
@@ -77,7 +77,7 @@ string CViewRenderer::renderFile(const IRenderingContext * context, const string
 	if (ret) {
 		return os.str();
 	} else {
-		Jvibetto::app()->getOutputStack().top()->echo(os.str());
+		Cws::app()->getOutputStack().top()->echo(os.str());
 		return "";
 	}
 }

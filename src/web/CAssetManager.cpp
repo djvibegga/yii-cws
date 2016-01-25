@@ -8,7 +8,7 @@
 #include "web/CAssetManager.h"
 #include "web/CWebApplication.h"
 #include "base/CStringUtils.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "utils/CHash.h"
 #include "sys/stat.h"
 
@@ -66,7 +66,7 @@ void CAssetManager::setBasePath(const boost::filesystem::path & path) throw (CEx
 
 boost::filesystem::path CAssetManager::resolveBasePath() const
 {
-	return boost::filesystem::path(Jvibetto::app()->getBasePath().string() + "/" + DEFAULT_BASEPATH);
+	return boost::filesystem::path(Cws::app()->getBasePath().string() + "/" + DEFAULT_BASEPATH);
 }
 
 

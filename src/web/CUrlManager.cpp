@@ -9,7 +9,7 @@
 #include "web/CWebApplication.h"
 #include "web/CHttpRequest.h"
 #include "base/CStringUtils.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "config.h"
 
 #include <boost/regex.hpp>
@@ -78,7 +78,7 @@ CUrlRule::CUrlRule(const string & routeExp, const string & patternExp)
 		routePattern = "^" + CStringUtils::strtr(route, tr2) + "$";
 	}
 
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 	try {
 		boost::smatch matches;
 		boost::regex_match(string("test"), matches, boost::regex(pattern));
@@ -169,7 +169,7 @@ string CUrlRule::createUrl(
 	string url = CStringUtils::strtr(templateStr, tr);
 
 	if (hasHostInfo) {
-		string hostInfo = dynamic_cast<CWebApplication*>(Jvibetto::app())->getRequest()->getHostInfo();
+		string hostInfo = dynamic_cast<CWebApplication*>(Cws::app())->getRequest()->getHostInfo();
 		if (url.find(hostInfo) == 0) {
 			url = url.substr(hostInfo.length());
 		}
@@ -296,7 +296,7 @@ void CUrlManager::init()
 	_scriptName = resolveScriptName();
 	initRules();
 
-	_defaultLanguage = Jvibetto::app()->getLanguage();
+	_defaultLanguage = Cws::app()->getLanguage();
 }
 
 void CUrlManager::applyConfig(const xml_node & config)
@@ -363,7 +363,7 @@ string CUrlManager::createUrl(TRouteStruct &route, const string & ampersand) con
 		return url + "/" + CStringUtils::ltrim(createUrlDefault(route, ampersand), "/");
 	}
 
-	if (language != Jvibetto::app()->getLanguage() || appendLanguageWhenItIsDefault) {
+	if (language != Cws::app()->getLanguage() || appendLanguageWhenItIsDefault) {
 		url += "/" + language;
 	}
 
@@ -420,7 +420,7 @@ string CUrlManager::resolveLanguage(TRequestParams & params) const
 	if (paramFound != params.end()) {
 		language = paramFound->second;
 	} else if (storeLanguageInCookies) {
-		CCookieCollection & cookies = dynamic_cast<CHttpRequest*>((Jvibetto::app()->getComponent("request")))->getCookies();
+		CCookieCollection & cookies = dynamic_cast<CHttpRequest*>((Cws::app()->getComponent("request")))->getCookies();
 		CCookieCollection::const_iterator cookieFound = cookies.find(languageCookieName);
 		if (cookieFound != cookies.end()) {
 			language = cookieFound->second.value;
@@ -442,7 +442,7 @@ string CUrlManager::getScriptName() const
 
 string CUrlManager::resolveScriptName()
 {
-	string ret = Jvibetto::app()->getArguments()[0];
+	string ret = Cws::app()->getArguments()[0];
 	std::string::size_type pos = ret.find_last_of("/");
 	return pos == ::string::npos ? "" : ret.substr(pos + 1);
 }
@@ -450,7 +450,7 @@ string CUrlManager::resolveScriptName()
 string CUrlManager::getScriptUrl()
 {
 	if (_scriptUrl.empty()) {
-		CWebApplication * app = dynamic_cast<CWebApplication *>(Jvibetto::app());
+		CWebApplication * app = dynamic_cast<CWebApplication *>(Cws::app());
 		string documentRoot = app->getRequest()->getEnvVar("DOCUMENT_ROOT");
 		string executable(app->getExecutablePath().c_str());
 		std::string::size_type pos = executable.find(documentRoot);
@@ -480,13 +480,13 @@ string CUrlManager::createPathInfo(const TRequestParams & params, const string &
 string CUrlManager::parseUrl(CHttpRequest * const request) const
 {
 	if (useLangBasedUrls) {
-		CApplication * app = Jvibetto::app();
+		CApplication * app = Cws::app();
 		string rawPathInfo = request->getPathInfo();
 		string language = "";
 		boost::smatch matches;
 		string regexpStr = "(" + CStringUtils::implode("|", app->getLanguages()) + ")/?(.*)";
-#ifdef JV_DEBUG
-		Jvibetto::trace("CUrlManager::parseUrl trying to identify language from query. Regexp: " + regexpStr);
+#ifdef CWS_DEBUG
+		Cws::trace("CUrlManager::parseUrl trying to identify language from query. Regexp: " + regexpStr);
 #endif
 		boost::regex regexp(regexpStr, boost::regex_constants::normal);
 		if (boost::regex_match(rawPathInfo, matches, regexp)) {
@@ -541,7 +541,7 @@ void CUrlManager::parsePathInfo(const string & pathInfo) const
 	vector<string> segs = CStringUtils::explode("/", pathInfo + "/");
 	int n = segs.size();
 	string key;
-	CHttpRequest * request = dynamic_cast<CWebApplication*>(Jvibetto::app())->getRequest();
+	CHttpRequest * request = dynamic_cast<CWebApplication*>(Cws::app())->getRequest();
 	for (int i = 0; i < n - 1; i += 2) {
 		key = segs[i];
 		if (key.empty()) {

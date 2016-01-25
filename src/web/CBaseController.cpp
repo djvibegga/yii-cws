@@ -1,7 +1,7 @@
 #include <web/CBaseController.h>
 #include <web/CHttpResponse.h>
 #include <web/CWebApplication.h>
-#include <base/Jvibetto.h>
+#include <base/Cws.h>
 #include <base/CMemoryOutputBuffer.h>
 #include <base/CStringUtils.h>
 #include "base/CProfiler.h"
@@ -12,7 +12,7 @@
 string CBaseController::renderFile(const string & viewFile, CDT & data, bool ret)
 {
     unsigned int widgetCount = _widgetStack.size();
-    IViewRenderer * renderer = dynamic_cast<IViewRenderer*>(Jvibetto::app()->getComponent("viewRenderer"));
+    IViewRenderer * renderer = dynamic_cast<IViewRenderer*>(Cws::app()->getComponent("viewRenderer"));
     boost::filesystem::path viewPath(viewFile);
     string content = "";
     if (renderer != 0 && renderer->fileExtension == viewPath.extension().string()) {
@@ -38,7 +38,7 @@ string CBaseController::renderInternal(const string & viewFile, CDT & data, bool
 
 string CBaseController::renderInternal(IView & viewInstance, bool ret) const
 {
-	CApplication * app = Jvibetto::app();
+	CApplication * app = Cws::app();
 	if (ret) {
 		app->getOutputStack().push(new CMemoryOutputBuffer());
 	}

@@ -7,7 +7,7 @@
 
 #include "web/CTemplateView.h"
 #include "base/CProfiler.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CStringUtils.h"
 #include "utils/CFile.h"
 
@@ -51,6 +51,6 @@ void CTemplateView::init()
 void CTemplateView::run() throw (CException)
 {
 	PROFILE_BEGIN("CTemplateView::run(). View file: " + _viewFile);
-	Jvibetto::app()->getViewRenderer()->renderFile(0, _viewFile, _data, false);
+	Cws::app()->getViewRenderer()->renderFile(0, _viewFile, _data, false);
 	PROFILE_END();
 }

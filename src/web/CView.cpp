@@ -6,7 +6,7 @@
  */
 
 #include "web/CView.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "web/CTemplateView.h"
 #include <typeinfo>
 
@@ -69,10 +69,10 @@ boost::filesystem::path CView::getViewPath(bool checkTheme) const
 
 string CView::getViewFile(const string & viewName) const throw (CException)
 {
-	IViewRenderer * renderer = Jvibetto::app()->getViewRenderer();
+	IViewRenderer * renderer = Cws::app()->getViewRenderer();
 	string viewFile;
 	if (viewName.find(".") != ::string::npos) {
-		viewFile = Jvibetto::getPathOfAlias(viewName).string() + renderer->fileExtension;
+		viewFile = Cws::getPathOfAlias(viewName).string() + renderer->fileExtension;
 	} else {
 		viewFile = getViewPath(true).string() + "/" + viewName + renderer->fileExtension;
 		if (boost::filesystem::exists(boost::filesystem::path(viewFile))) {

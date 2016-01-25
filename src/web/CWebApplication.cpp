@@ -11,7 +11,7 @@
 #include "base/CHttpException.h"
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "web/CWebRequestPool.h"
 #include <sstream>
 #include <iostream>
@@ -86,12 +86,12 @@ void CWebApplication::run() throw(CException)
 void CWebApplication::renderException(const CException & e)
 {
 	CHttpResponse * response = getResponse();
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 	string message = e.getFullMessage();
 #else
 	string message = e.getMessage();
 #endif
-	Jvibetto::log(message, CLogger::LEVEL_ERROR);
+	Cws::log(message, CLogger::LEVEL_ERROR);
 	response->echo(utf8_to_(message));
 }
 
@@ -106,11 +106,11 @@ void CWebApplication::mainLoop() throw(CException)
 			throw CException("Can\'t initialize FCGX Request.");
 		}
 		while (pool->getIsActive()) {
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 			useconds_t idleTimeout = 0;
 #endif
 			try {
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 				idleTimeout = time(0);
 				acceptCode = FCGX_Accept_r(request);
 				idleTimeout = time(0) - idleTimeout;
@@ -118,7 +118,7 @@ void CWebApplication::mainLoop() throw(CException)
 				acceptCode = FCGX_Accept_r(request);
 #endif
 			} catch (boost::lock_error & e) {
-				Jvibetto::log(
+				Cws::log(
 					string("CWebApplication::mainLoop() unable to accept request, because: ") + e.what(),
 					CLogger::LEVEL_ERROR
 				);
@@ -127,7 +127,7 @@ void CWebApplication::mainLoop() throw(CException)
 				handleRequest();
 				FCGX_Finish_r(request);
 			}
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 			idleTime += idleTimeout;
 			idleMedian = (double)idleTime / 1000000 / (double)(time(0) - startTime);
 #endif

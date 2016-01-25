@@ -8,7 +8,7 @@
 #include "web/CClientScript.h"
 #include "web/CAssetManager.h"
 #include "web/CWebApplication.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
 #include <boost/regex.hpp>
@@ -45,7 +45,7 @@ void CClientScript::init()
 	CApplicationComponent::init();
 	_baseUrl = resolveCoreScriptUrl();
 	loadPackages(
-		boost::filesystem::path(JVIBETTO_PATH + string("/web/js/assets.xml")),
+		boost::filesystem::path(CWS_PATH + string("/web/js/assets.xml")),
 		corePackages
 	);
 }
@@ -69,10 +69,10 @@ string CClientScript::getCoreScriptUrl() const
 
 string CClientScript::resolveCoreScriptUrl() const
 {
-	CAssetManager * am = dynamic_cast<CAssetManager*>(Jvibetto::app()->getComponent("assetManager"));
+	CAssetManager * am = dynamic_cast<CAssetManager*>(Cws::app()->getComponent("assetManager"));
 	boost::filesystem::path srcPath(
 		boost::filesystem::canonical(
-			boost::filesystem::path(boost::filesystem::path(JVIBETTO_PATH))
+			boost::filesystem::path(boost::filesystem::path(CWS_PATH))
 		)
 	);
 	return am->publish(srcPath.string() + "/web/js/source");
@@ -82,7 +82,7 @@ string CClientScript::getPackageBaseUrl(const string & name, const TScriptPackag
 {
 	PROFILE_BEGIN("begin CClientScript::getPackageBaseUrl(" + name + ")");
 	string baseUrl;
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	if (!package.baseUrl.empty()) {
 		baseUrl = package.baseUrl;
 		if (baseUrl.empty() || (baseUrl.find("/") != 0 && baseUrl.find("://") == ::string::npos)) {
@@ -91,7 +91,7 @@ string CClientScript::getPackageBaseUrl(const string & name, const TScriptPackag
 		baseUrl = CStringUtils::rtrim(baseUrl, "/");
 	} else if (!package.basePath.empty()) {
 		baseUrl = app->getAssetManager()->publish(
-			Jvibetto::getPathOfAlias(package.basePath)
+			Cws::getPathOfAlias(package.basePath)
 		);
 	} else {
 		baseUrl = getCoreScriptUrl();

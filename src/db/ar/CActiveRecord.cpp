@@ -7,7 +7,7 @@
 
 #include "db/ar/CActiveRecord.h"
 #include "db/schema/CDbCommandBuilder.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CEvent.h"
 
 void CAttributeCollection::setValue(const string & key, const string & value)
@@ -156,7 +156,7 @@ CActiveRecord::~CActiveRecord()
 void CActiveRecord::init()
 {
 	if (_connection == 0) {
-		setDbConnection(dynamic_cast<CDbConnection*>(Jvibetto::app()->getComponent("db")));
+		setDbConnection(dynamic_cast<CDbConnection*>(Cws::app()->getComponent("db")));
 	}
 }
 
@@ -193,8 +193,8 @@ TActiveRecordList CActiveRecord::findAll() throw (CDbException)
 
 TActiveRecordList CActiveRecord::findAll(const CDbCriteria & criteria) throw (CDbException)
 {
-#ifdef JV_DEBUG
-	Jvibetto::trace(typeid(this).name() + string(".findAll()"), LOG_CATEGORY);
+#ifdef CWS_DEBUG
+	Cws::trace(typeid(this).name() + string(".findAll()"), LOG_CATEGORY);
 #endif
 	return query(criteria, true);
 }
@@ -207,7 +207,7 @@ TActiveRecordPtr CActiveRecord::find(const CDbCriteria & criteria) throw (CDbExc
 
 TActiveRecordPtr CActiveRecord::findByPk(CTablePrimaryKey & pk) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".findByPk()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".findByPk()", "system.db.ar.CActiveRecord");
 	CDbCriteria criteria = getCommandBuilder()->createPkCriteria(getTableAlias(false, false), pk);
 	return find(criteria);
 }
@@ -391,7 +391,7 @@ bool CActiveRecord::insert(const vector<string> & attributes) throw (CDbExceptio
 		throw new CDbException("The active record cannot be inserted to database because it is not new.");
 	}
 	if (beforeSave()) {
-		Jvibetto::trace(getClassName() + ".insert()" , "system.db.ar.CActiveRecord");
+		Cws::trace(getClassName() + ".insert()" , "system.db.ar.CActiveRecord");
 		CDbCommandBuilder * builder = getCommandBuilder();
 		string table = tableName();
 		vector<string> pkAttributes = getTableSchema().getPrimaryKey();
@@ -419,7 +419,7 @@ bool CActiveRecord::update(const vector<string> & attributes) throw (CDbExceptio
 		throw CDbException("The active record cannot be updated because it is new.");
 	}
 	if (beforeSave()) {
-		Jvibetto::trace(getClassName() + ".update()", "system.db.ar.CActiveRecord");
+		Cws::trace(getClassName() + ".update()", "system.db.ar.CActiveRecord");
 		CTablePrimaryKey pk = getPrimaryKey();
 		CAttributeCollection attrValues = getAttributes(attributes);
 		updateByPk(pk, attrValues.convertToCommandParameterMap());
@@ -433,7 +433,7 @@ bool CActiveRecord::update(const vector<string> & attributes) throw (CDbExceptio
 bool CActiveRecord::saveAttributes(const vector<string> & attributes) throw (CDbException)
 {
 	if (!getIsNewRecord()) {
-		Jvibetto::trace(getClassName() + ".saveAttributes()", "system.db.ar.CActiveRecord");
+		Cws::trace(getClassName() + ".saveAttributes()", "system.db.ar.CActiveRecord");
 		CTablePrimaryKey pk = getPrimaryKey();
 		CAttributeCollection attrValues = getAttributes(attributes);
 		updateByPk(pk, attrValues.convertToCommandParameterMap());
@@ -446,7 +446,7 @@ bool CActiveRecord::saveAttributes(const vector<string> & attributes) throw (CDb
 
 bool CActiveRecord::saveCounters(const TUpdateCountersData & counters) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".saveCounters()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".saveCounters()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	string table = tableName();
 	CTablePrimaryKey pk = getPrimaryKey();
@@ -458,7 +458,7 @@ bool CActiveRecord::saveCounters(const TUpdateCountersData & counters) throw (CD
 bool CActiveRecord::remove() throw (CDbException)
 {
 	if (!getIsNewRecord()) {
-		Jvibetto::trace(getClassName() + ".remove()", "system.db.ar.CActiveRecord");
+		Cws::trace(getClassName() + ".remove()", "system.db.ar.CActiveRecord");
 		if (beforeDelete()) {
 			CTablePrimaryKey pk = getPrimaryKey();
 			bool result = removeByPk(pk) > 0;
@@ -473,7 +473,7 @@ bool CActiveRecord::remove() throw (CDbException)
 
 bool CActiveRecord::refresh() throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".refresh()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".refresh()", "system.db.ar.CActiveRecord");
 	CTablePrimaryKey pk = getPrimaryKey();
 	TActiveRecordPtr recordPtr = findByPk(pk);
 	CActiveRecord * record = recordPtr.get();
@@ -491,7 +491,7 @@ unsigned long CActiveRecord::count() throw (CDbException)
 
 unsigned long CActiveRecord::count(const CDbCriteria & criteria) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".count()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".count()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	beforeCount();
 	//applyScopes(criteria);
@@ -512,7 +512,7 @@ bool CActiveRecord::exists() throw (CDbException)
 
 bool CActiveRecord::exists(CDbCriteria & criteria) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".exists()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".exists()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	criteria.select.push_back("1");
 	criteria.limit = 1;
@@ -531,7 +531,7 @@ bool CActiveRecord::exists(CDbCriteria & criteria) throw (CDbException)
 
 bool CActiveRecord::updateByPk(CTablePrimaryKey & pk, const CCommandParameterMap & attributes) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".updateByPk()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".updateByPk()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	string table = tableName();
 	CDbCriteria criteria = builder->createPkCriteria(table, pk);
@@ -541,7 +541,7 @@ bool CActiveRecord::updateByPk(CTablePrimaryKey & pk, const CCommandParameterMap
 
 unsigned long CActiveRecord::updateAll(const CCommandParameterMap & attributes, const CDbCriteria & criteria) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".updateAll()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".updateAll()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	CDbCommand command = builder->createUpdateCommand(tableName(), attributes, criteria);
 	return command.execute();
@@ -549,7 +549,7 @@ unsigned long CActiveRecord::updateAll(const CCommandParameterMap & attributes, 
 
 unsigned long CActiveRecord::updateCounters(const TUpdateCountersData & counters, const CDbCriteria & criteria) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".updateCounters()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".updateCounters()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	CDbCommand command = builder->createUpdateCounterCommand(tableName(), counters, criteria);
 	return command.execute();
@@ -557,7 +557,7 @@ unsigned long CActiveRecord::updateCounters(const TUpdateCountersData & counters
 
 bool CActiveRecord::removeByPk(CTablePrimaryKey & pk) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".deleteByPk()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".deleteByPk()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	string table = tableName();
 	CDbCriteria criteria = builder->createPkCriteria(table, pk);
@@ -567,7 +567,7 @@ bool CActiveRecord::removeByPk(CTablePrimaryKey & pk) throw (CDbException)
 
 unsigned long CActiveRecord::removeAll(const CDbCriteria & criteria) throw (CDbException)
 {
-	Jvibetto::trace(getClassName() + ".deleteAll()", "system.db.ar.CActiveRecord");
+	Cws::trace(getClassName() + ".deleteAll()", "system.db.ar.CActiveRecord");
 	CDbCommandBuilder * builder = getCommandBuilder();
 	CDbCommand command = builder->createDeleteCommand(tableName(), criteria);
 	return command.execute();

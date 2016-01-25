@@ -8,7 +8,7 @@
 #include "web/CHttpResponse.h"
 #include "web/CWebApplication.h"
 #include "base/CStringUtils.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include <fcgi_stdio.h>
 
 
@@ -150,14 +150,14 @@ void CHttpResponse::_putCookieHeaders()
 
 void CHttpResponse::redirect(TRouteStruct & route, bool terminate, unsigned int statusCode)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	redirect(app->getUrlManager()->createUrl(route), terminate, statusCode);
 }
 
 void CHttpResponse::redirect(const string & url, bool terminate, unsigned int statusCode)
 {
 	string redirectUrl = url;
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	if (url.find("/") == 0 && url.find("//") == string::npos) {
 		redirectUrl = app->getRequest()->getHostInfo() + url;
 	} else {

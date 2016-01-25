@@ -6,7 +6,7 @@
  */
 
 #include "base/CApplicationComponent.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include <iostream>
 
 CApplicationComponent::CApplicationComponent(CModule * module)
@@ -42,7 +42,7 @@ void CApplicationComponent::setId(const string & id)
 
 void CApplicationComponent::init()
 {
-	xml_node config = Jvibetto::app()->getConfigByNamePath(resolveNamePath());
+	xml_node config = Cws::app()->getConfigByNamePath(resolveNamePath());
 	applyConfig(config);
 }
 

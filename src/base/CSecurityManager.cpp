@@ -6,7 +6,7 @@
  */
 
 #include "base/CSecurityManager.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CStringUtils.h"
 #include "utils/CHash.h"
 
@@ -52,7 +52,7 @@ void CSecurityManager::init()
 
 string CSecurityManager::resolveValidationKey()
 {
-	CApplication * app = Jvibetto::app();
+	CApplication * app = Cws::app();
 	string key = _to_utf8(app->getGlobalState(STATE_VALIDATION_KEY));
 	if (!key.empty()) {
 		return key;
@@ -71,7 +71,7 @@ string CSecurityManager::resolveValidationKey()
 
 string CSecurityManager::resolveEncryptionKey()
 {
-	CApplication * app = Jvibetto::app();
+	CApplication * app = Cws::app();
 	string key = _to_utf8(app->getGlobalState(STATE_ENCRYPTION_KEY));
 	if (!key.empty()) {
 		return key;

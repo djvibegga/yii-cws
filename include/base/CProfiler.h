@@ -36,7 +36,7 @@ public:
 	void logItems();
 };
 
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 #define PROFILE_BEGIN(msg) \
 	CApplication::getInstance()->getProfiler().begin(msg);
 

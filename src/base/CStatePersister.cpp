@@ -7,7 +7,7 @@
 
 #include "base/CStatePersister.h"
 #include "utils/CFile.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "utils/CArchiver.h"
 
 CStatePersister::CStatePersister()
@@ -24,7 +24,7 @@ string CStatePersister::getClassName() const
 void CStatePersister::init()
 {
 	if (stateFile.empty()) {
-		stateFile = Jvibetto::app()->getRuntimePath().string() + "/state.bin";
+		stateFile = Cws::app()->getRuntimePath().string() + "/state.bin";
 	}
 	boost::filesystem::path dir = boost::filesystem::path(stateFile).parent_path();
 	if (!boost::filesystem::is_directory(dir) || access(dir.string().c_str(), W_OK) == -1) {

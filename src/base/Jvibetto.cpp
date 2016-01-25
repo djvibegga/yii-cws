@@ -5,23 +5,23 @@
  *      Author: djvibegga
  */
 
-#include <base/Jvibetto.h>
+#include <base/Cws.h>
 #include <base/CStringUtils.h>
 #include <stdarg.h>
 
-TPathAliasMap Jvibetto::_aliases;
+TPathAliasMap Cws::_aliases;
 
-CApplication * Jvibetto::app()
+CApplication * Cws::app()
 {
 	return CApplication::getInstance();
 }
 
-CLogger & Jvibetto::getLogger()
+CLogger & Cws::getLogger()
 {
 	return CApplication::getInstance()->getLogger();
 }
 
-void Jvibetto::log(
+void Cws::log(
 	const string & message,
 	const string & level,
 	const string & category)
@@ -29,12 +29,12 @@ void Jvibetto::log(
 	getLogger().log(message, level, category);
 }
 
-void Jvibetto::trace(const string & message, const string & category)
+void Cws::trace(const string & message, const string & category)
 {
 	log(message, CLogger::LEVEL_TRACE, category);
 }
 
-boost::filesystem::path Jvibetto::getPathOfAlias(const string & alias)
+boost::filesystem::path Cws::getPathOfAlias(const string & alias)
 {
     TPathAliasMap::const_iterator iter = _aliases.find(alias);
     if (iter != _aliases.end()) {
@@ -55,7 +55,7 @@ boost::filesystem::path Jvibetto::getPathOfAlias(const string & alias)
     return boost::filesystem::path("");
 }
 
-void Jvibetto::setPathOfAlias(const string & alias, const boost::filesystem::path & path)
+void Cws::setPathOfAlias(const string & alias, const boost::filesystem::path & path)
 {
     if (path.empty()) {
         TPathAliasMap::iterator iter = _aliases.find(alias);
@@ -67,14 +67,14 @@ void Jvibetto::setPathOfAlias(const string & alias, const boost::filesystem::pat
     }
 }
 
-_string Jvibetto::t(const _string & message)
+_string Cws::t(const _string & message)
 {
 	CApplication * app = CApplication::getInstance();
 	const char * category = app->name.c_str();
 	return t(message, category);
 }
 
-_string Jvibetto::t(const _string & message, char const * category)
+_string Cws::t(const _string & message, char const * category)
 {
 	CApplication * app = CApplication::getInstance();
 	std::locale loc = app->getLocaleByLanguage(app->getLanguage());

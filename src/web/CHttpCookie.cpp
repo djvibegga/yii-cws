@@ -9,7 +9,7 @@
 #include "web/CHttpRequest.h"
 #include "web/CHttpResponse.h"
 #include "base/CStringUtils.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 
 CHttpCookie::CHttpCookie()
 : CComponent(),
@@ -99,7 +99,7 @@ void CCookieCollection::add(const string & name, const CHttpCookie & cookie)
 	}
 	//remove(name, cookie);
 	TCookieMap::operator [](name) = cookie;
-	CHttpResponse * response = dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"));
+	CHttpResponse * response = dynamic_cast<CHttpResponse*>(Cws::app()->getComponent("response"));
 	response->addCookie(cookie);
 }
 
@@ -114,7 +114,7 @@ void CCookieCollection::remove(const string & name, const CHttpCookie & cookie)
 		return;
 	}
 	TCookieMap::erase(name);
-	CHttpResponse * response = dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"));
+	CHttpResponse * response = dynamic_cast<CHttpResponse*>(Cws::app()->getComponent("response"));
 	response->removeCookie(cookie);
 }
 

@@ -8,7 +8,7 @@
 #include "db/CDbCommand.h"
 #include "base/CStringUtils.h"
 #include "db/CDbDataReader.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CProfiler.h"
 
 CDbCommandParameterValue::CDbCommandParameterValue()
@@ -221,7 +221,7 @@ CDbCommand & CDbCommand::mergeParametersWith(const CCommandParameterMap & other)
 
 string CDbCommand::_makeParametersDump(const CCommandParameterMap & params)
 {
-#ifdef JV_DB_PARAM_LOGGING
+#ifdef CWS_DB_PARAM_LOGGING
 	string ret;
 	if (!params.empty()) {
 		vector<string> parametersList;
@@ -245,8 +245,8 @@ long unsigned int CDbCommand::execute(const CCommandParameterMap & params) throw
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
-#ifdef JV_DEBUG
-	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
+#ifdef CWS_DEBUG
+	Cws::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
 #endif
 	try {
 		SAConnection * connection = _connection->getConnection();
@@ -264,11 +264,11 @@ long unsigned int CDbCommand::execute(const CCommandParameterMap & params) throw
 	} catch (const SAException & e) {
 
 		string message = e.ErrText().GetMultiByteChars();
-		Jvibetto::log(
+		Cws::log(
 			"CDbCommand::execute() failed: " + message
 			+ ". The SQL statement executed was: " + _text + "."
 		);
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 		message += ". The SQL statement executed was: " + _text + parametersDump;
 #endif
 		throw CDbException(
@@ -283,8 +283,8 @@ CDbDataReader CDbCommand::_queryInternal(const CCommandParameterMap & params) th
 {
 	mergeParametersWith(params);
 	string parametersDump = _makeParametersDump(_params);
-#ifdef JV_DEBUG
-	Jvibetto::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
+#ifdef CWS_DEBUG
+	Cws::trace("Executing SQL: " + _text + parametersDump, "system.db.CDbCommand");
 #endif
 
 	try {
@@ -307,11 +307,11 @@ CDbDataReader CDbCommand::_queryInternal(const CCommandParameterMap & params) th
 		stringstream ss;
 		ss << "CDbCommand::_queryInternal() failed: " << message
 		   << ". Code: " << (int)e.ErrNativeCode();
-		Jvibetto::log(
+		Cws::log(
 			"CDbCommand::_queryInternal() failed: " + ss.str()
 			+ ". The SQL statement executed was: " + _text + "."
 		);
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 		message += ". The SQL statement executed was: " + _text + parametersDump;
 #endif
 		throw CDbException(

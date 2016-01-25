@@ -10,7 +10,7 @@
 #include "base/CEvent.h"
 #include "base/CStringUtils.h"
 #include "base/CProfiler.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CApplicationPool.h"
 #include "web/CUrlManager.h"
 #include "web/renderers/CBaseViewRenderer.h"
@@ -116,7 +116,7 @@ void CApplication::init() throw(CException)
 
 	boost::filesystem::path basePath = resolveBasePath();
 	setBasePath(basePath);
-	Jvibetto::setPathOfAlias("application", basePath);
+	Cws::setPathOfAlias("application", basePath);
 
 	if (_runtimePath.empty()) {
 		setRuntimePath(string(_executablePath.parent_path().c_str()) + "/runtime");
@@ -124,7 +124,7 @@ void CApplication::init() throw(CException)
 
 	_log = createLogRouter();
 
-#ifdef JV_DEBUG
+#ifdef CWS_DEBUG
 	attachEventHandler("onEndRequest", this, EVENT_HANDLER(&CApplication::logProfileItems));
 #endif
 

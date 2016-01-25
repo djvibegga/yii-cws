@@ -8,7 +8,7 @@
 #include "web/CWebUser.h"
 #include "web/CHttpResponse.h"
 #include "web/CWebApplication.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "base/CStringUtils.h"
 #include "utils/CHash.h"
 #include "utils/CArchiver.h"
@@ -64,7 +64,7 @@ void CWebUser::init()
 
 void CWebUser::load()
 {
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	if (session) {
 		session->open();
 	}
@@ -92,7 +92,7 @@ bool CWebUser::getIsGuest() const
 _string CWebUser::getState(const string & key, const _string defaultValue) const
 {
 	string dataKey = getStateKeyPrefix() + key;
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	TSessionDataMap sessionData = session->getData();
 	TSessionDataMap::const_iterator found = sessionData.find(dataKey);
 	return found == sessionData.end() ? defaultValue : found->second;
@@ -102,7 +102,7 @@ TSessionDataMap CWebUser::findStates(const string & key) const
 {
 	string stateKeyPrefix = getStateKeyPrefix();
 	string dataKey = stateKeyPrefix + key;
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	TSessionDataMap sessionData = session->getData();
 	TSessionDataMap ret;
 	string keyBuffer;
@@ -120,7 +120,7 @@ TSessionDataMap CWebUser::findStates(const string & key) const
 void CWebUser::setState(const string & key, const _string & value)
 {
 	string dataKey = getStateKeyPrefix() + key;
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	TSessionDataMap & sessionData = session->getData();
 	TSessionDataMap::iterator item = sessionData.find(dataKey);
 	if (item == sessionData.end()) {
@@ -155,7 +155,7 @@ void CWebUser::setStateKeyPrefix(const string & value)
 
 string CWebUser::resolveStateKeyPrefix()
 {
-	string val = "jv_session_" + Jvibetto::app()->getId();
+	string val = "jv_session_" + Cws::app()->getId();
 	return CHash::md5(val);
 }
 
@@ -182,7 +182,7 @@ void CWebUser::setName(const _string & value)
 
 bool CWebUser::hasState(const string & key) const
 {
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	string sessionKey = getStateKeyPrefix() + key;
 	TSessionDataMap & sessionData = session->getData();
 	TSessionDataMap::const_iterator found = sessionData.find(sessionKey);
@@ -191,7 +191,7 @@ bool CWebUser::hasState(const string & key) const
 
 void CWebUser::clearStates()
 {
-	CHttpSession * session = dynamic_cast<CHttpSession*>(Jvibetto::app()->getComponent("session"));
+	CHttpSession * session = dynamic_cast<CHttpSession*>(Cws::app()->getComponent("session"));
 	string keyPrefix = getStateKeyPrefix();
 	size_t prefixLen = keyPrefix.length();
 	TSessionDataMap & sessionData = session->getData();
@@ -235,7 +235,7 @@ bool CWebUser::login(const IUserIdentity & identity, time_t duration) throw (CEx
 void CWebUser::logout(bool destroySession)
 {
 	if (beforeLogout()) {
-		CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+		CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 		if (allowAutoLogin) {
 			CCookieCollection cookies = app->getRequest()->getCookies();
 			CHttpResponse * response = app->getResponse();
@@ -261,8 +261,8 @@ string CWebUser::getReturnUrl(const string & defaultUrl) const
 {
 	string defaultReturnUrl = "";
     if (defaultUrl.empty()) {
-    	CUrlManager * urlManager = dynamic_cast<CUrlManager*>(Jvibetto::app()->getComponent("urlManager"));
-    	CHttpRequest * request = dynamic_cast<CHttpRequest*>(Jvibetto::app()->getComponent("request"));
+    	CUrlManager * urlManager = dynamic_cast<CUrlManager*>(Cws::app()->getComponent("urlManager"));
+    	CHttpRequest * request = dynamic_cast<CHttpRequest*>(Cws::app()->getComponent("request"));
     	string defaultReturnUrl = urlManager->showScriptName
     		? request->getScriptUrl()
     		: request->getBaseUrl() + "/";
@@ -280,7 +280,7 @@ void CWebUser::setReturnUrl(const string & value)
 
 void CWebUser::loginRequired() throw (CHttpException)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	CHttpRequest * request = app->getRequest();
 	CHttpResponse * response = app->getResponse();
 
@@ -319,7 +319,7 @@ void CWebUser::afterLogout()
 
 void CWebUser::restoreFromCookie()
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	CHttpCookie cookie = app->getRequest()->getCookies()[getStateKeyPrefix()];
 	CWebUserState data = parseStateFromCookie(cookie);
 
@@ -339,7 +339,7 @@ void CWebUser::restoreFromCookie()
 
 void CWebUser::renewCookie()
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	CHttpCookie cookie = app->getRequest()->getCookies()[getStateKeyPrefix()];
 	CWebUserState data = parseStateFromCookie(cookie);
 
@@ -353,7 +353,7 @@ void CWebUser::renewCookie()
 
 CWebUserState CWebUser::parseStateFromCookie(const CHttpCookie & cookie)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	CWebUserState state;
 
 	if (cookie.value.empty()) {
@@ -370,7 +370,7 @@ CWebUserState CWebUser::parseStateFromCookie(const CHttpCookie & cookie)
 
 void CWebUser::saveToCookie(time_t duration)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	CHttpCookie cookie = createIdentityCookie(getStateKeyPrefix());
 	cookie.expire = time(0) + duration;
 
@@ -411,7 +411,7 @@ bool CWebUser::hasFlash(const string & key)
 
 void CWebUser::changeIdentity(const string & id, const _string & name, TPersistentStateMap & states)
 {
-	CWebApplication * app = dynamic_cast<CWebApplication*>(Jvibetto::app());
+	CWebApplication * app = dynamic_cast<CWebApplication*>(Cws::app());
 	app->getSession()->regenerateId(true);
 	setUserId(id);
 	setName(name);

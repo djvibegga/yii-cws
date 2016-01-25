@@ -9,7 +9,7 @@
 #include "base/CStringUtils.h"
 #include "web/CWebModule.h"
 #include "base/CException.h"
-#include "base/Jvibetto.h"
+#include "base/Cws.h"
 #include "web/CTemplateView.h"
 #include "web/CLayoutView.h"
 #include "web/CClientScript.h"
@@ -75,7 +75,7 @@ string CController::getViewFile(const string & viewName) const throw (CException
 {
     /*if (($theme=Yii::app()->getTheme())!==null && ($viewFile=$theme->getViewFile($this,$viewName))!==false)
         return $viewFile;*/
-    boost::filesystem::path basePath = Jvibetto::app()->getViewPath();
+    boost::filesystem::path basePath = Cws::app()->getViewPath();
     boost::filesystem::path moduleViewPath = basePath;
     CModule * module = getModule();
     if (module != 0) {
@@ -88,7 +88,7 @@ boost::filesystem::path CController::resolveViewPath() const
 {
     CModule * module = getModule();
     if (module == 0) {
-        module = Jvibetto::app();
+        module = Cws::app();
     }
     return boost::filesystem::path(module->getViewPath().string() + "/" + getId());
 }
@@ -123,7 +123,7 @@ string CController::resolveViewFile(
     } else {
         modViewPath = moduleViewPath;
     }
-    IViewRenderer * renderer = Jvibetto::app()->getViewRenderer();
+    IViewRenderer * renderer = Cws::app()->getViewRenderer();
     if (renderer == 0) {
         throw CException("Sorry. View renderer component is not attached.");
     }
@@ -135,7 +135,7 @@ string CController::resolveViewFile(
             viewFile = modViewPath.string() + viewName;
         }
     } else if (viewName.find(".") != ::string::npos) {
-        viewFile = Jvibetto::getPathOfAlias(viewName).string();
+        viewFile = Cws::getPathOfAlias(viewName).string();
     } else {
         viewFile = viewPath.string() + "/" + viewName;
     }
@@ -155,7 +155,7 @@ string CController::renderPartial(const string & view, CDT & data, bool ret, boo
             if (ret) {
                 return output;
             } else {
-                CHttpResponse * response = dynamic_cast<CHttpResponse*>(Jvibetto::app()->getComponent("response"));
+                CHttpResponse * response = dynamic_cast<CHttpResponse*>(Cws::app()->getComponent("response"));
                 response->echo(output);
             }
         } catch (CTPPException & e) {
@@ -176,7 +176,7 @@ string CController::renderPartial(IView & viewInstance, bool ret, bool processOu
 	if (ret) {
 		return output;
 	} else {
-		Jvibetto::app()->getOutputStack().top()->echo(output);
+		Cws::app()->getOutputStack().top()->echo(output);
 	}
 	return "";
 }
@@ -202,16 +202,16 @@ string CController::getLayoutFile(const string & layoutName) throw (CException)
 			module = dynamic_cast<CModule*>(module->getParent());
 		}
 		if (module == 0) {
-			module = Jvibetto::app();
+			module = Cws::app();
 		}
 		layout = dynamic_cast<CWebModule*>(module)->layout;
 	} else if ((module = dynamic_cast<CWebModule*>(getModule())) == 0) {
-		module = Jvibetto::app();
+		module = Cws::app();
 	}
 	IHasLayout * moduleWithLayout = dynamic_cast<IHasLayout*>(module);
 	return resolveViewFile(
 		layout, moduleWithLayout->getLayoutPath(),
-		Jvibetto::app()->getViewPath(), module->getViewPath()
+		Cws::app()->getViewPath(), module->getViewPath()
 	);
 }
 
@@ -248,7 +248,7 @@ string CController::render(IView & viewInstance, bool ret) throw (CException)
 		if (ret) {
 			return output;
 		} else {
-			Jvibetto::app()->getOutputStack().top()->echo(output);
+			Cws::app()->getOutputStack().top()->echo(output);
 		}
 	}
 	return "";
@@ -265,7 +265,7 @@ void CController::afterRender(const IView & viewInstance, string &output)
 
 void CController::processOutput(string & output)
 {
-	CClientScript * cs = dynamic_cast<CClientScript*>(Jvibetto::app()->getComponent("clientScript"));
+	CClientScript * cs = dynamic_cast<CClientScript*>(Cws::app()->getComponent("clientScript"));
 	if (cs) {
 		cs->render(output);
 	}
@@ -320,5 +320,5 @@ string CController::createUrl(TRouteStruct & route, const string & ampersand) co
 		route.path = module->getId() + "/" + route.path;
 	}
 	route.path = CStringUtils::trim(route.path, "/");
-	return Jvibetto::app()->createUrl(route, ampersand);
+	return Cws::app()->createUrl(route, ampersand);
 }
