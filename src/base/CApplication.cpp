@@ -445,7 +445,7 @@ _string CApplication::getGlobalState(const string & key, const _string & default
 
 void CApplication::setGlobalState(const string & key, const _string & value, const _string & defaultValue)
 {
-	bool stateChanged = _stateChanged;
+	//bool stateChanged = _stateChanged;
 	if (value == defaultValue) {
 		_globalState.erase(key);
 	} else {

@@ -182,35 +182,35 @@ CActiveRecord * className::instantiate(const TDbRow & attributes) const\
 /**
  * Common attributes conversions
  */
-#define AR_CONVERISION_LONG ->asLong()
-#define AR_CONVERISION_ULONG ->asULong()
-#define AR_CONVERISION_STRING ->asString().GetMultiByteChars()
+#define AR_POPULATE_LONG ->asLong()
+#define AR_POPULATE_ULONG ->asULong()
+#define AR_POPULATE_STRING ->asString().GetMultiByteChars()
 #ifdef _UNICODE
-#define AR_CONVERISION_VSTRING ->asString().GetWideChars()
+#define AR_POPULATE_VSTRING ->asString().GetWideChars()
 #else
-#define AR_CONVERISION_VSTRING ->asString().GetMultiByteChars()
+#define AR_POPULATE_VSTRING ->asString().GetMultiByteChars()
 #endif
-#define AR_CONVERISION_DOUBLE ->asDouble()
+#define AR_POPULATE_DOUBLE ->asDouble()
 
 /**
  * Registering declaration of populateProperty method
  */
-#define DECLARE_ATTRIBUTE_RESOLVER() \
+#define DECLARE_ATTRIBUTE_POPULATE() \
 public:\
-	virtual void populateProperty(const string & name, const SAField * value);\
+	virtual void populateProperty(const string & name, const SAField * value);
 
 /**
  * Registering implementation begin of populateProperty method
  */
-#define BEGIN_ATTRIBUTE_RESOLVER(className) \
+#define BEGIN_ATTRIBUTE_POPULATE(className) \
 	void className::populateProperty(const string & name, const SAField * value)\
-	{\
+	{
 
 /**
  * Registering part of populateProperty method implementation which containts
  * convertion logic of database attribute value to AR property
  */
-#define ATTRIBUTE_RESOLVE(attributeName, property, conversion) \
+#define ATTRIBUTE_POPULATE(property, attributeName, conversion) \
 	if (name == attributeName) {\
 		this->property = value conversion;\
 		return;\
@@ -219,7 +219,7 @@ public:\
 /**
  * Registering implementation end of populateProperty method
  */
-#define END_ATTRIBUTE_RESOLVER() \
+#define END_ATTRIBUTE_POPULATE() \
 	}
 
 /**
@@ -238,17 +238,60 @@ public:\
 #define AR_ATTRIBUTE_VSTRING _string
 #define AR_ATTRIBUTE_DOUBLE double
 
+#define DECLARE_ATTRIBUTES_GETSET()\
+public:\
+	virtual CAttributeCollection getAttributes(const vector<string> & names) const;\
+	virtual void setAttributes(const CAttributeCollection & attributes);
+
+#define BEGIN_ATTRIBUTES_SETTER(className)\
+void className::setAttributes(const CAttributeCollection & attributes)\
+{\
+
+#define ATTRIBUTES_SETTER(property, attribute, type)\
+	if (attributes.has(attribute)) {\
+		this->property = attributes. type (attribute);\
+	}
+
+#define END_ATTRIBUTES_SETTER()\
+}
+
+#define BEGIN_ATTRIBUTES_GETTER(className)\
+CAttributeCollection className::getAttributes(const vector<string> & names) const\
+{\
+	CAttributeCollection ret;
+
+#define ATTRIBUTES_GETTER(attribute, property)\
+	if (this->isAttributeNeeded(attribute, names)) {\
+		ret.setValue(attribute, this->property);\
+	}
+
+#define END_ATTRIBUTES_GETTER()\
+	return ret;\
+}
+/**
+ * Common attributes set-get types
+ */
+#define AR_ATTRIBUTE_GET_LONG getLongValue
+#define AR_ATTRIBUTE_GET_ULONG getULongValue
+#define AR_ATTRIBUTE_GET_STRING getStringValue
+#ifdef _UNICODE
+#define AR_ATTRIBUTE_GET_VSTRING getWStringValue
+#else
+#define AR_ATTRIBUTE_GET_VSTRING getStringValue
+#endif
+#define AR_ATTRIBUTE_GET_DOUBLE getDoubleValue
+
 /**
  * Registering declaration of "fetchPrimaryKey" method
  */
-#define DECLARE_PRIMARY_KEY_RESOLVER() \
+#define DECLARE_PRIMARY_KEY() \
 protected:\
 	CTablePrimaryKey fetchPrimaryKey() const;\
 
 /**
  * Registering implementation begin of "fetchPrimaryKey" method
  */
-#define BEGIN_PRIMARY_KEY_RESOLVER(className) \
+#define BEGIN_PRIMARY_KEY(className) \
 	CTablePrimaryKey className::fetchPrimaryKey() const\
 	{\
 		CTablePrimaryKey key;\
@@ -262,7 +305,7 @@ protected:\
 /**
  * Registering implementation end of "fetchPrimaryKey" method
  */
-#define END_PRIMARY_KEY_RESOLVER() \
+#define END_PRIMARY_KEY() \
 		return key;\
 	}
 
